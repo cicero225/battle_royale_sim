@@ -1,0 +1,20 @@
+Indenting:
+
+Python is a bitch about indenting. Right now I'm using 4-space indenting, so we may as well stick with that... (If you use more than one type, python's interpreter will error)
+
+
+General argument philosophy:
+
+For anything where there may be an uncertain argument (i.e., stats being passed into a Contestan constructor where we dont know yet what exact stats we want), we should remember to pass this uncertainty in the form of a dict, so that we can always change what it contains without needing to change function arguments, etc. Python is designed to make this easy, so we may as well use it.
+
+Random python tidbit:
+If you define a function signature as:
+def myfunc(**kwargs):
+
+In python, this makes it so that kwargs is a dictionary with keys corresponding to the name of the argument and values corresponding to the value. So if you called myfunc(fish=78, fire="meguca"), then inside myfunc you could do:
+
+def myfunc(**kwargs):
+    print kwargs[fish] #Gives 78
+    print kwargs[fire] #Gives meguca
+
+This will give us unlimited power to change the input arguments without changing the function signature. I couldn't think of a use for this, but I suspect it may be useful at some point...
