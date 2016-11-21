@@ -1,0 +1,14 @@
+{
+
+"Ultimate Madoka": {
+  "type": "divine",
+  "purity": true
+},
+
+"Akuma Homura": {
+  "type": "devil",
+  "purity": false
+}
+
+}
+
