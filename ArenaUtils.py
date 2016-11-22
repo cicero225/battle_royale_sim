@@ -3,7 +3,7 @@ import json
 
 def LoadJSONIntoDictOfObjects(path,settings,objectType):
 #####
-# Args: path is the path to the json.
+# Args: path is the path or file handle to the json
 #       settings is the settings dict, itself loaded from JSON (but not by this)
 #       objectType is the class of the object (can be passed in Python)
 #
@@ -13,8 +13,11 @@ def LoadJSONIntoDictOfObjects(path,settings,objectType):
 # Notes: Path is typically something like os.path.join('Contestants', 'Constestant.json') but let's not assume that.
 #
 #####
-    with open(path) as file:
-        fromFile = json.load(file)
+    try:
+        with open(path) as file:
+            fromFile = json.load(file)
+    except TypeError:
+        fromFile = json.load(path)
 
     objectDict = {}
     for name in fromFile:
