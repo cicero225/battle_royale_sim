@@ -50,3 +50,18 @@ items = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Items', 'Item.json'),
 #Initialize World - Maybe it should have its own settings?
 arena = World(settings) #Maybe other arguments in future, i.e. maybe in an extended world items can be found on the ground, but leaving this as-is for now.
 
+# Run simulation
+# If we're going to have a cornucopia, we should remember to set up some way to have a special turn: maybe as a separate object?
+# In any case a special turn would have unique base event weights.
+
+# General pseudocode idea
+# Sample contestants randomly
+# Go through contestants
+# For each contestant, go through event list and poll their weights + contestant weight modifiers (base weights + object and relationship modifiers)
+# (Remember that base event weights may change based on turn)
+# (For multi-contestant events, there should also be a weight stored for a) being a "participant" on the side of whoever started the event and b) being a "victim"
+# These should affect the final weight used (I should figure out a formula for this) and also be used to pick secondary participants/victims.
+# Using these weights, pick an event and call its method. If multi-contestant, also make sure not to let them roll another event.
+# Check that this turn has not killed everyone. If it has, redo the _entire_ turn (it's the only fair way).
+# Then print results into HTML (?) or whatever makes sense
+# Repeat.
