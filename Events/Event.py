@@ -14,7 +14,22 @@ class Event(object): #Python 2.x compatibility
     
     def __init__(self, name, inDict, settings):
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
-        # Should be: float mainWeight, float optional participantWeight, float optional victimWeight, int numParticipants, int numVictims, bool unique
+        # Could also use setattr, but...
+        # Should be: float mainWeight, float optional participantWeight, float optional victimWeight,
+        # int numParticipants, int numVictims, list[(string,float)] mainModifiers,
+        # list[(string,float)] optional participantModifiers, list[(string,float)] optional victimModifiers,
+        # bool unique, list[string] optional uniqueUsers
+        
+        # mainWeight = sets relative probability of rolling event for given character, participantWeight
+        # sets probability of any given other contestant getting involved, victimWeight sets probability
+        # of any given contestant being the victim
+        
+        # modifier values list the contestant stats that affect the probabilities of these and by how relatively much (though
+        # usually just 1 or -1). If there is a good way to make the json thing give dict(string)->float instead that'd be
+        # preferred
+        
+        # unique signals the event processor that only the characters listed in uniqueUsers may trigger this event
+        
         # Randomize baseWeight a little
         self.name = name
         self.eventRandomize('mainWeight',settings)
