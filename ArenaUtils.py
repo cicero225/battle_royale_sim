@@ -1,5 +1,22 @@
 import json
+import sys
 
+def StrToClass(str):
+    return getattr(sys.modules[__name__], str)
+
+def LoadJSONIntoDictOfEventObjects(path,settings): # This is unfortunately going to be pretty specific. It could be generalized
+    # more, but that'd take more work
+    try:
+        with open(path) as file:
+            fromFile = json.load(file)
+    except TypeError:
+        fromFile = json.load(path)
+        
+    for name in fromFile:
+        thisClass = StrToClass(name)
+        objectDict[name] = thisClass(name, fromFile[name], settings) # Constructor should \
+                                                                  # take in name, dict and settings (also a dict)
+    return objectDict                                                              
 
 def LoadJSONIntoDictOfObjects(path,settings,objectType):
 #####
@@ -21,6 +38,6 @@ def LoadJSONIntoDictOfObjects(path,settings,objectType):
 
     objectDict = {}
     for name in fromFile:
-        objectDict[name] = objectType(fromFile[name], settings) # Constructor should \
+        objectDict[name] = objectType(name, fromFile[name], settings) # Constructor should \
                                                                   # take in dict and settings (also a dict)
     return objectDict                                                              

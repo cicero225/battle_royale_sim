@@ -3,8 +3,9 @@ import ArenaUtils
 import io
 
 class Dummy: # This might have to be more elaborate for some of the other tests
-    def __init__(self, inDict, settings):
+    def __init__(self, name, inDict, settings):
         self.echoDict = inDict
+        self.name = name
 
 class ArenaUtilsTest:
     
@@ -19,8 +20,10 @@ class ArenaUtilsTest:
         dummyDict = ArenaUtils.LoadJSONIntoDictOfObjects(this_file, self.settings, Dummy)
         assert "Ultimate Madoka" in dummyDict, "LoadJSONIntoDictOfObjectsTest failed, top-level key missing"
         assert "Akuma Homura" in dummyDict, "LoadJSONIntoDictOfObjectsTest failed, top-level key missing"
+        assert dummyDict["Ultimate Madoka"].name == "Ultimate Madoka", "LoadJSONIntoDictOfObjectsTest failed, object data incorrect"
         assert dummyDict["Ultimate Madoka"].echoDict["type"] == "divine", "LoadJSONIntoDictOfObjectsTest failed, object data incorrect"
         assert dummyDict["Ultimate Madoka"].echoDict["purity"], "LoadJSONIntoDictOfObjectsTest failed, object data incorrect"
+        assert dummyDict["Akuma Homura"].name == "Akuma Homura", "LoadJSONIntoDictOfObjectsTest failed, object data incorrect"
         assert dummyDict["Akuma Homura"].echoDict["type"] == "devil", "LoadJSONIntoDictOfObjectsTest failed, object data incorrect"
         assert not dummyDict["Akuma Homura"].echoDict["purity"], "LoadJSONIntoDictOfObjectsTest failed, object data incorrect"
         print("LoadJSONIntoDictOfObjectsTest passes")

@@ -3,11 +3,12 @@ import os
 import random #A not very good random library, but probably fine for our purposes
 
 from Contestants.Contestant import Contestant
-from Events.Event import Event
 from Items.Item import Item
 from Sponsors.Sponsor import Sponsor
 from World.World import World
 import ArenaUtils
+import Events
+
 
 # Initial Setup:
 
@@ -18,12 +19,13 @@ with open('Settings.json') as settings_file:
 # List of settings as I come up with them. It can stay as a dict.
 # traitRandomness = 3
 # numContestants = 24 # Program should pad or randomly remove contestants as necessary
-# sponsorProbability = pass #This is the weight that the "sponsor gives resources" event has relative to other events\
-# Note that this is independent of the number of sponsors, in defiance of logic (but makes for clearer design). Once the
-# event is chosen, a sponsor is chosen randomly.
+# eventRandomness = 0.5 # Percent range over which the base weights of events varies from json settings
 
 
 # Initialize Arena State
+
+# Initialize Events
+events = ArenaUtils.LoadJSONIntoDictOfEventObjects(os.path.join('Contestants', 'Contestant.json'),settings)
 
 # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
 contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestant.json'),settings,Contestant)
