@@ -19,6 +19,7 @@ class Event(object): #Python 2.x compatibility
         # int numParticipants, int numVictims, list[(string,float)] mainModifiers,
         # list[(string,float)] optional participantModifiers, list[(string,float)] optional victimModifiers,
         # bool unique, list[string] optional uniqueUsers
+        # bool itemRequired, string optional requiredItem
         
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
@@ -33,15 +34,17 @@ class Event(object): #Python 2.x compatibility
         # Randomize baseWeight a little
         self.name = name
         self.eventRandomize('mainWeight',settings)
+        self.settings = settings #screw it, everyone gets a copy of what they need. Python stores by reference anyway.
         if 'participantWeight' in self.baseProps:
-            self.eventRandomize('participantWeight',settings)
+            self.eventRandomize('participantWeight')
         if 'victimWeight' in self.baseProps:
-            self.eventRandomize('victimWeight',settings)
+            self.eventRandomize('victimWeight')
         
     def doEvent(self,*args,**kwargs): # args allows passing of arbitrary number of contestants (or other arguments), kwargs allows passing of specific args
         # like settings. The default doEvent expects one contestant
         desc = args[0].name+' did absolutely nothing.'
         return desc
     
-    def eventRandomize(propName, settings):
-        self.baseProps[propName] = self.baseProps[propName]*(1+random.uniform(-1*settings['eventRandomness'],settings['eventRandomness']))
+    def eventRandomize(propName):
+        self.baseProps[propName] = (self.baseProps[propName]
+            *(1+random.uniform(-1*self.settings['eventRandomness'],self.settings['eventRandomness'])))

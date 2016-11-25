@@ -20,6 +20,9 @@ with open('Settings.json') as settings_file:
 # traitRandomness = 3
 # numContestants = 24 # Program should pad or randomly remove contestants as necessary
 # eventRandomness = 0.5 # Percent range over which the base weights of events varies from json settings
+# statInfluence = 0.3 # How much stats influence event weightings, calculated as (1+influence)^(stat-5)
+# objectInfluence = 1 # How much objects in inventory affect events. The default 1 uses the base stats.
+# Note that objects that fully disable a event should still do so!
 
 
 # Initialize Arena State
@@ -37,7 +40,7 @@ if settings['numContestants'] < len(contestantNames):
         del contestants[remove]
 # If number of contestants in settings more than those found in the json, add Rando Calrissians
 for i in range(len(contestantNames),settings['numContestants']):
-    constestants['Rando Calrissian ' + i] =  Constestant('Rando Calrissian ' + i, pass, settings) # Constructor should \
+    contestants['Rando Calrissian ' + i] =  Contestant('Rando Calrissian ' + i, pass, settings) # Constructor should \
      # also take in string, image, settings and make full random stats (need Rando image to put here)
 
 # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
