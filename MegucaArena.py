@@ -1,6 +1,7 @@
 import json
 import os
-import random #A not very good random library, but probably fine for our purposes
+import random # A not very good random library, but probably fine for our purposes
+import itertools # Kind of lame
 
 from Contestants.Contestant import Contestant
 from Items.Item import Item
@@ -42,6 +43,12 @@ if settings['numContestants'] < len(contestantNames):
 for i in range(len(contestantNames),settings['numContestants']):
     contestants['Rando Calrissian ' + i] =  Contestant('Rando Calrissian ' + i, pass, settings) # Constructor should \
      # also take in string, image, settings and make full random stats (need Rando image to put here)
+
+# for now relationship levels (arbitrarily, -10 to 10, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
+relationships = {} #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
+for contestant1, contestant2 in itertools.combinations(contestants, 2):
+    relationships{(contestant1, contestant2)} = 0 # Unfortunately, if ever looked up backwards, will error, so best to try: relationships[(A,B)] except KeyError: relationships[(B,A]
+    # could write a function for that, but then would probably have to imported everywhere. A specialty class would make this a bit easier...
 
 # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
 # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \

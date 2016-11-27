@@ -44,10 +44,16 @@ class Contestant(object):
         self.eventAdditions = {}
         self.eventDisabled = {} 
         for event in self.events:
-            self.statEventMultipliers[event] = 1
-            for modifier, multiplier in event.baseProps['mainModifiers']: #I really should look up how python json loading works...
-                self.statEventMultipliers *= (1+self.settings['statInfluence'])**((self.stats['modifier']-5)*multiplier)
-            self.fullEventMultipliers[event] = self.statEventMultipliers[event]
+            self.statEventMultipliers[event] = {}
+            
+            #This is kind of a dumb way to do it, but being more general is a pain
+            for multiplierType = ['main','participant','victim']
+                if multiplierType+'Modifiers' in event.baseProps:
+                    self.statEventMultipliers[event][multiplierType] = 1
+                    for modifier, multiplier in event.baseProps[multiplierType+'Modifiers']: #I really should look up how python json loading works...
+                        self.statEventMultipliers *= (1+self.settings['statInfluence'])**((self.stats[modifier]-5)*multiplier)
+                    self.fullEventMultipliers[event] = self.statEventMultipliers[event]
+            
             self.eventAdditions[event] = 0
             self.eventDisabled[event] = event.baseProps['unique']
             if event.baseProps['unique']:

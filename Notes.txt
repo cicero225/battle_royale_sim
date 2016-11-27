@@ -1,3 +1,6 @@
+Why so many dicts?:
+Well dicts are faster at lookup than lists and have much faster removal/insertion. They waste memory, relatively speaking, but that's not a huge concern here. We could really do better if we assigned objects arbitrary indices and always passed those around, but that is a tremendous pain and makes the maintenance hard.
+
 List comprehensions:
 
 A lot of stuff here would be faster with list comprehensions, but for clarity doing normal for loops for now.

@@ -33,12 +33,11 @@ class Event(object): #Python 2.x compatibility
         
         # Randomize baseWeight a little
         self.name = name
-        self.eventRandomize('mainWeight',settings)
         self.settings = settings #screw it, everyone gets a copy of what they need. Python stores by reference anyway.
-        if 'participantWeight' in self.baseProps:
-            self.eventRandomize('participantWeight')
-        if 'victimWeight' in self.baseProps:
-            self.eventRandomize('victimWeight')
+        #This is kind of a dumb way to do it, but being more general is a pain
+        for multiplierType = ['main','participant','victim']:
+            if multiplierType+'Weight' in self.baseProps:
+                self.eventRandomize(multiplierType+'Weight')
         
     def doEvent(self,*args,**kwargs): # args allows passing of arbitrary number of contestants (or other arguments), kwargs allows passing of specific args
         # like settings. The default doEvent expects one contestant
