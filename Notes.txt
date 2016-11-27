@@ -1,3 +1,7 @@
+List comprehensions:
+
+A lot of stuff here would be faster with list comprehensions, but for clarity doing normal for loops for now.
+
 Indenting:
 
 Python is a bitch about indenting. Right now I'm using 4-space indenting, so we may as well stick with that... (If you use more than one type, python's interpreter will error)

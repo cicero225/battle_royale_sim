@@ -38,13 +38,21 @@ class Contestant(object):
         
     def InitializeEventModifiers(self, events): # Note that each event carries information about which stats affect them
         # This mixing of classes is regrettable but probably necessary
-        # This is also the time to check whether this contestant can trigger a unique event (if no, set eventDisabled to True for that event)
         self.events = events
-        pass
-        
-    def updateStatEventMultipliers(self): # Useful to have as its own thing in case stats can change.
-        # Otherwise called by InitializeEventMultipliers. Remember it should update fullEventMultipliers too!
-        pass
+        self.statEventMultipliers = {}
+        self.fullEventMultipliers = {}
+        self.eventAdditions = {}
+        self.eventDisabled = {} 
+        for event in self.events:
+            self.statEventMultipliers[event] = 1
+            for modifier, multiplier in event.baseProps['mainModifiers']: #I really should look up how python json loading works...
+                self.statEventMultipliers *= (1+self.settings['statInfluence'])**((self.stats['modifier']-5)*multiplier)
+            self.fullEventMultipliers[event] = self.statEventMultipliers[event]
+            self.eventAdditions[event] = 0
+            self.eventDisabled[event] = event.baseProps['unique']
+            if event.baseProps['unique']:
+                if self.name in event.baseProps['uniqueUsers']:
+                    self.eventDisabled[event] = False
     
     # Later on, items will be responsible for manipulating the contestant event modifiers, both on
     # addition to inventory and removal. In case of ambiguity (e.g. if an item that disables an event
