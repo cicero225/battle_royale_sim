@@ -1,3 +1,24 @@
+Contestant-specific events, weapon-specific events and other mixed information:
+These kinds of things are fun, but introduce a problem by degrading the separation between classes. 
+I considered some possibilities:
+1) storing such mixed information in its own special object whose pointer/reference gets passed to every class at initialization.
+2) storing such information in the class its most relevant to, and accepting the loss of pure separation.
+
+While 1) might seem most aesthetically pleasing, it creates an object which is directly dependent on the exact list of contestants, etc. to make sense .
+In the end, it's probably best to place this information wherever it minimizes json editing confusion (and in only one place):
+
+At the moment:
+Information about which stats affect any given event's probability is stored with the event (since the list of events will change frequently, but the list of stats will not, and the number of stats is expected to be much lower than the number of events).
+    - at initialization, contestant objects parse the list of events and generate a list of associated numerical stat-based effects for the contestant, since this will stay relatively fixed, and can be used for look-up.
+Information about which events are unique to specific contestants is stored with the event.
+    - Because unique events are roughly 1 to 1, it doesn't matter much where the information is placed. Events is done primarily because that's where most other things are
+    - At initialization, this information is duplicated by contestant objects in the form of an "Event Disabled" field (which also incorporates other information)
+Information about which events *require* items is placed with the event, since this information will be needed without referencing the item itself (or else it would be necessary to parse the list of all objects)
+    - At initialization, this information is duplicated by contestant objects in the form of an "Event Disabled" field (which also incorporates other information)
+Information about how items manipulation event probabilities or *disable* events is stored with the Item, for application when items are acquired by contestants, since this information is irrelevant before then.
+    - Event disabling is incorporated into the Event Disabled field of the Contestant
+    
+    
 Why so many dicts?:
 Well dicts are faster at lookup than lists and have much faster removal/insertion. They waste memory, relatively speaking, but that's not a huge concern here. We could really do better if we assigned objects arbitrary indices and always passed those around, but that is a tremendous pain and makes the maintenance hard.
 

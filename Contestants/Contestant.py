@@ -51,33 +51,55 @@ class Contestant(object):
                 if multiplierType+'Modifiers' in event.baseProps:
                     self.statEventMultipliers[event][multiplierType] = 1
                     for modifier, multiplier in event.baseProps[multiplierType+'Modifiers']: #I really should look up how python json loading works...
-                        self.statEventMultipliers *= (1+self.settings['statInfluence'])**((self.stats[modifier]-5)*multiplier)
-                    self.fullEventMultipliers[event] = self.statEventMultipliers[event]
+                        self.statEventMultipliers[event][multiplierType] *= (1+self.settings['statInfluence'])**((self.stats[modifier]-5)*multiplier)
+                    self.fullEventMultipliers[event][multiplierType] = self.statEventMultipliers[event][multiplierType]
             
             self.eventAdditions[event] = 0
-            self.eventDisabled[event] = event.baseProps['unique']
+            self.eventDisabled[event] = event.baseProps['unique'] or event.baseProps['itemRequired']
             if event.baseProps['unique']:
                 if self.name in event.baseProps['uniqueUsers']:
-                    self.eventDisabled[event] = False
+                    if event.baseProps['itemRequired']:
+                        if event.baseProps['necessaryItem'] in [x.name for x in self.inventory]:
+                            self.eventDisabled[event] = False
+                    else:
+                        self.eventDisabled[event] = False
+            else:
+                if event.baseProps['itemRequired']:
+                    if event.baseProps['necessaryItem'] in [x.name for x in self.inventory]:
+                        self.eventDisabled[event] = False
+                        
+            
+    # Later on, items will be responsible for manipulating the contestant event modifiers on
+    # addition to inventory. This gives an item to perform arbitrary manipulations. For example, this could
+    # be done by extending the item class for a particular item and making sure to include the new item class in the list.
     
-    # Later on, items will be responsible for manipulating the contestant event modifiers, both on
-    # addition to inventory and removal. In case of ambiguity (e.g. if an item that disables an event
-    # is removed, but there might be two items that both disable that event), a full refresh is
-    # performed. This allows flexibility for an item to perform arbitrary manipulations, if desired.
+    # Note that at the moment a full refresh of the contestant is done each time an item is added or removed. This
+    # prevents items from having permanent effects after they are lost (outside of edge cases like directly manipulating
+    # self.originalStats, etc. In the future, this could be done by adding a
+    # persistent effects field, but this is left out for now. An item.onRemoval(self) is called on removal, but this will be
+    # pass most of the time.
     
     # Note that for now there is only ever one instance of a given item. In the future if we want items with
     # changeable properties per contestant, we can add another class specifically to store that and have it include
     # a reference to the base object class.
     
     def addItem(self, item):
+        if item in self.inventory: # at the moment no support is given for multiple copies of an item
+            return False
         self.inventory.append(item)
-        item.onAcquisition(self)
+        self.refreshEventState()
+        return True
         
-    def removeItem(self, item):
+    def removeItem(self, item): 
+        if item not in self.inventory:
+            return False
         self.inventory.remove(item)
+        self.refreshEventState()
         item.onRemoval(self)
+        return True
         
-    def refreshEventState(self): #Called by item.onRemoval sometimes
+    def refreshEventState(self):
+        self.stats = self.originalStats.copy()
         self.InitializeEventModifiers(self.events)
         for item in self.inventory:
             item.onAcquisition(self)
