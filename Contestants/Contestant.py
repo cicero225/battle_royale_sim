@@ -102,5 +102,7 @@ class Contestant(object):
         self.stats = self.originalStats.copy()
         self.InitializeEventModifiers(self.events)
         for item in self.inventory:
+            item.applyObjectStatChanges(self)
+        for item in self.inventory:
             item.onAcquisition(self)
         

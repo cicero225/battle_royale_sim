@@ -24,9 +24,11 @@ class Item(object):
         for key in inDict:
             inDict[key] *= self.objectInfluence
     
-    def onAcquisition(self, contestant):
+    def applyObjectStatChanges(self,contestant): # this has to be processed before anything else...
         for changedStat in self.statChanges:
             contestant.stats[changedStat] += self.statChanges[changedStat]
+    
+    def onAcquisition(self, contestant):
         for changedStat in self.eventMultipliers:
             contestant.fullEventMultipliers *= self.eventMultipliers[changedStat]
         for changedStat in self.eventAdditions:
