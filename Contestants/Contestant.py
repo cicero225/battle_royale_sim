@@ -35,7 +35,14 @@ class Contestant(object):
             self.stats[statName] = min(max(self.stats[statName]+
               random.randint(-1*self.settings['traitRandomness'],self.settings['traitRandomness']),0),10)
     
-        
+    @classmethod
+    def makeRandomContestant(cls, name, imageFile, statstemplate, settings)
+        inDict['imageFile'] = imageFile
+        inDict['stats'] = {}
+        for key in statstemplate:
+            inDict['stats'][key] = random.randint(0, 10)
+        return cls(name, inDict, settings)
+    
     def InitializeEventModifiers(self, events): # Note that each event carries information about which stats affect them
         # This mixing of classes is regrettable but probably necessary
         self.events = events

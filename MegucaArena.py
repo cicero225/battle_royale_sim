@@ -41,8 +41,8 @@ if settings['numContestants'] < len(contestantNames):
         del contestants[remove]
 # If number of contestants in settings more than those found in the json, add Rando Calrissians
 for i in range(len(contestantNames),settings['numContestants']):
-    contestants['Rando Calrissian ' + i] =  Contestant('Rando Calrissian ' + i, pass, settings) # Constructor should \
-     # also take in string, image, settings and make full random stats (need Rando image to put here)
+    # Here contestants[0].stats is used as a template for making random stats
+    contestants['Rando Calrissian ' + i] =  Contestant.makeRandomContestant('Rando Calrissian ' + i, DUMMY_IMAGE, contestants[0].stats , settings) # need Rando image to put here
 
 # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
 # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
