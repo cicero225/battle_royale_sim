@@ -11,7 +11,7 @@
 import random
 
 class Event(object): #Python 2.x compatibility
-    
+
     def __init__(self, name, inDict, settings):
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
         # Could also use setattr, but...
@@ -20,30 +20,30 @@ class Event(object): #Python 2.x compatibility
         # dict (string: float) optional participantModifiers, dict (string: float) optional victimModifiers,
         # bool unique, list[string] optional uniqueUsers #at the moment only supports unique contestants performing the event, rather than being the victim etc. This is bad for, say, Mami getting her head eaten.
         # bool itemRequired, string optional necessaryItem
-        
+
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
         # of any given contestant being the victim
-        
+
         # modifier values list the contestant stats that affect the probabilities of these and by how relatively much (though
         # usually just 1 or -1). If there is a good way to make the json thing give dict(string)->float instead that'd be
         # preferred
-        
+
         # unique signals the event processor that only the characters listed in uniqueUsers may trigger this event
-        
+
         # Randomize baseWeight a little
         self.name = name
         self.settings = settings #screw it, everyone gets a copy of what they need. Python stores by reference anyway.
         #This is kind of a dumb way to do it, but being more general is a pain
-        for multiplierType = ['main','participant','victim']:
+        for multiplierType in ['main', 'participant', 'victim']:
             if multiplierType+'Weight' in self.baseProps:
                 self.eventRandomize(multiplierType+'Weight')
-        
-    def doEvent(self,*args,**kwargs): # args allows passing of arbitrary number of contestants (or other arguments), kwargs allows passing of specific args
+
+    def doEvent(self, *args, **kwargs): # args allows passing of arbitrary number of contestants (or other arguments), kwargs allows passing of specific args
         # like settings. The default doEvent expects one contestant
         desc = args[0].name+' did absolutely nothing.'
         return desc
-    
-    def eventRandomize(propName):
+
+    def eventRandomize(self, propName):
         self.baseProps[propName] = (self.baseProps[propName]
-            *(1+random.uniform(-1*self.settings['eventRandomness'],self.settings['eventRandomness'])))
+                                    *(1+random.uniform(-1*self.settings['eventRandomness'], self.settings['eventRandomness'])))
