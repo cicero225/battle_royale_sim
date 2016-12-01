@@ -47,6 +47,8 @@ def main():
     for i in range(len(contestantNames), settings['numContestants']):
         # Here contestants[0].stats is used as a template for making random stats
         contestants['Rando Calrissian ' + i] = Contestant.makeRandomContestant('Rando Calrissian ' + i, "DUMMY_IMAGE", contestants[0].stats, settings) # need Rando image to put here
+        
+    assert(len(contestants)==settings['numContestants'])
 
     # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
     # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
@@ -85,6 +87,15 @@ def main():
     # Check that this turn has not killed everyone. If it has, redo the _entire_ turn (it's the only fair way).
     # Then print results into HTML (?) or whatever makes sense
     # Repeat.
+    
+    # Main loop of DEATH - I'm going to list comprehension the hell out of this
+    while [x.alive for x in contestants].count()>1:
+        # Sample contestants randomly
+        randOrderContestants = random.sample(contestants, len(contestants))
+        # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
+        baseEventActorWeights = []
+        baseEventParticipantWeights = []
+        baseEventVictimWeights = []
 
 if __name__ == "__main__":
     main()

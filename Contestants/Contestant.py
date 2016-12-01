@@ -20,7 +20,7 @@ class Contestant(object):
         self.contestantStatRandomize()
         self.originalStats = self.stats.copy() # NOT a reference, but an actual copy. Probably useful for some events.
         # Note that this is not a deepcopy.
-        self.alive = True # Might be a useful flag, might not
+        self.alive = True
         self.events = None
         self.statEventMultipliers = None # For efficiency, each contestant stores information about how their
         # event probabilities differ from the base. This cannot be fully initialized until the Events are known,
@@ -31,7 +31,7 @@ class Contestant(object):
         self.eventDisabled = None # These events cannot happen to this contestant
 
     def contestantStatRandomize(self):
-        for statName in self.stats: #this heavily depends on the type self.stats turns out to have... I need to look at what json supports
+        for statName in self.stats:
             self.stats[statName] = min(max(self.stats[statName]+
                                            random.randint(-1*self.settings['traitRandomness'], self.settings['traitRandomness']), 0), 10)
 
