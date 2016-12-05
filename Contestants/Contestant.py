@@ -52,31 +52,32 @@ class Contestant(object):
         self.fullEventMultipliers = {}
         self.eventAdditions = {}
         self.eventDisabled = {}
-        for event in self.events:
-            self.statEventMultipliers[event] = {}
+        for eventName, event in self.events.items():
+            self.statEventMultipliers[eventName] = {}
 
             #This is kind of a dumb way to do it, but being more general is a pain
             for multiplierType in ['main', 'participant', 'victim']:
                 if multiplierType+'Modifiers' in event.baseProps:
-                    self.statEventMultipliers[event][multiplierType] = 1
-                    for modifier, multiplier in event.baseProps[multiplierType+'Modifiers']: #I really should look up how python json loading works...
-                        self.statEventMultipliers[event][multiplierType] *= (1+self.settings['statInfluence'])**((self.stats[modifier]-5)*multiplier)
-                    self.fullEventMultipliers[event][multiplierType] = self.statEventMultipliers[event][multiplierType]
+                    self.statEventMultipliers[eventName][multiplierType] = 1
+                    for modifier, multiplier in event.baseProps[multiplierType+'Modifiers'].items():
+                        self.statEventMultipliers[eventName][multiplierType] *= (1+self.settings['statInfluence'])**((self.stats[modifier]-5)*multiplier)
+                    self.fullEventMultipliers[eventName][multiplierType] = self.statEventMultipliers[eventName][multiplierType]
 
-            self.eventAdditions[event] = 0
-            self.eventDisabled[event] = event.baseProps['unique'] or event.baseProps['itemRequired']
+            self.eventAdditions[eventName] = 0
+            # NOTE: at the moment, the unique and itemrequired fields can only affect events for which the contestant is the main actor. This may need expansion in the future.
+            self.eventDisabled[eventName]['main'] = event.baseProps['unique'] or event.baseProps['itemRequired']
             if event.baseProps['unique']:
                 if self.name in event.baseProps['uniqueUsers']:
                     if event.baseProps['itemRequired']:
                         if event.baseProps['necessaryItem'] in [x.name for x in self.inventory]:
-                            self.eventDisabled[event] = False
+                            self.eventDisabled[eventName]['main'] = False
                     else:
-                        self.eventDisabled[event] = False
+                        self.eventDisabled[eventName]['main'] = False
             else:
                 if event.baseProps['itemRequired']:
                     if event.baseProps['necessaryItem'] in [x.name for x in self.inventory]:
-                        self.eventDisabled[event] = False
-
+                        self.eventDisabled[eventName]['main'] = False
+            
     # Later on, items will be responsible for manipulating the contestant event modifiers on
     # addition to inventory. This gives an item to perform arbitrary manipulations. For example, this could
     # be done by extending the item class for a particular item and making sure to include the new item class in the list.

@@ -9,11 +9,11 @@ class Item(object):
         self.settings = settings
         # This dict (string:int) stores any direct additions/subtractions in stats given by the Item
         self.statChanges = inDict["statChanges"]
-        # This dict (string:float) stores any event multiplier effects given by the object
+        # This dict (string: dict(string: float) stores any event multiplier effects given by the object. Keys are events, followed by main/participant/victim
         self.eventMultipliers = inDict["eventMultipliers"]
-        # This dict (string:float) stores any event additive effects given by the object
-        self.eventAdditions = inDict["eventAdditions"]
-        # This list (string) stores any events actively disabled by this object
+        # This dict (string: dict(string: float)) stores any event additive effects given by the object. Keys are events, followed by main/participant/victim
+        self.eventAdditions = inDict["eventAdditions"] 
+        # This list (string) stores any events actively disabled by this object. Keys are events, followed by main/participant/victim. If you don't want a subcategory disabled, you can not include a listing, or explicitly have a boolean
         self.eventsDisabled = inDict["eventsDisabled"]
         if settings.objectInfluence != 1:
             self.applyObjectInfluence(self.statChanges)
@@ -29,12 +29,15 @@ class Item(object):
             contestant.stats[changedStat] += self.statChanges[changedStat]
 
     def onAcquisition(self, contestant):
-        for changedStat in self.eventMultipliers:
-            contestant.fullEventMultipliers *= self.eventMultipliers[changedStat]
-        for changedStat in self.eventAdditions:
-            contestant.fullEventMultipliers += self.eventAdditions[changedStat]
-        for changedStat in self.eventsDisabled:
-            contestant.eventDisabled[changedStat] = True
-
+        for eventName, eventModifier in self.eventMultipliers.items():
+            for actorType, modifier in eventModifier.items():
+                contestant.fullEventMultipliers[eventName][actorType] *= modifier
+        for eventName, eventModifier in self.eventAdditions.items():
+            for actorType, modifier in eventModifier.items():
+                contestant.eventAdditions[eventName][actorType] += modifier
+        for changedStat, eventModifier  in self.eventsDisabled.items():
+            for actorType, modifier  in eventModifier.item():
+                contestant.eventDisabled[changedStat][actorType] = modifier
+                
     def onRemoval(self, contestant):
         pass

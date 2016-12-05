@@ -39,9 +39,8 @@ class Event(object): #Python 2.x compatibility
             if multiplierType+'Weight' in self.baseProps:
                 self.eventRandomize(multiplierType+'Weight')
 
-    def doEvent(self, *args, **kwargs): # args allows passing of arbitrary number of contestants (or other arguments), kwargs allows passing of specific args
-        # like settings. The default doEvent expects one contestant
-        desc = args[0].name+' did absolutely nothing.'
+    def doEvent(self, mainActor, state=None, participants=None, victims=None): # State, participants and victims here for this particular function are clearly unused and could be _ , but this provides max clarity for copying into other events
+        desc = mainActor.name+' did absolutely nothing.'
         return desc
 
     def eventRandomize(self, propName):

@@ -5,6 +5,8 @@ import os
 import random # A not very good random library, but probably fine for our purposes
 import itertools # Kind of lame
 
+from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
+
 from Contestants.Contestant import Contestant
 from Items.Item import Item
 from Sponsors.Sponsor import Sponsor
@@ -34,6 +36,7 @@ def main():
 
     # Initialize Events
     events = ArenaUtils.LoadJSONIntoDictOfEventObjects(os.path.join('Contestants', 'Contestant.json'), settings)
+    eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
 
     # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
     contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestant.json'), settings, Contestant)
@@ -88,14 +91,83 @@ def main():
     # Then print results into HTML (?) or whatever makes sense
     # Repeat.
     
-    # Main loop of DEATH - I'm going to list comprehension the hell out of this
-    while [x.alive for x in contestants].count()>1:
+    state = {
+    "contestants": contestants,
+    "sponsors": sponsors,
+    "events": events,
+    "eventsActive": eventsActive,
+    "items": items,
+    "arena": arena,
+    "friendships": friendships,
+    "loveships": loveships,
+    } # Allows for convenient passing of the entire game state to anything that needs it (usually events)
+    
+    # Main loop of DEATH - I'm going to list comprehension the hell out of this because it actually makes it clearer (I think) and a little speed is nice
+    while [contestants[x].alive for x in contestants].count()>1:
+        liveContestants = {x: y for x, y in contestants.items() if y.alive}
         # Sample contestants randomly
-        randOrderContestants = random.sample(contestants, len(contestants))
+        randOrderContestantKeys = random.sample(liveContestants.keys(), len(liveContestants))
         # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
-        baseEventActorWeights = []
-        baseEventParticipantWeights = []
-        baseEventVictimWeights = []
+        baseEventActorWeights = {x: y.baseProps["mainWeight"] if eventsActive[x] else 0 for x, y in events.items()} # Oh my god dictionary comprehensions exist, I have discovered a new world
+        baseEventParticipantWeights = {x: y.baseProps["participantWeight"] for x, y in events.items() if "participantWeight" in y.baseProps}
+        baseEventVictimWeights = {x: y.baseProps["victimWeight"] for x, y in events.items() if "victimWeight" in y.baseProps}
+        # Now go through the contestants and trigger events based on their individualized probabilities
+        alreadyUsed = set()
+        for contestantKey in randOrderContestantKeys: #This is not statistically uniform because these multi-person events are hard and probably not worth figuring out in exact detail...
+            if contestantKey in alreadyUsed:
+                continue
+            actor = liveContestants[contestantKey]
+            alreadyUsed.add(contestantKey)
+            # Calculate individualized/multi-contestant corrected event probabilities
+            indivProb = {}
+            eventParticipantWeights = {} # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+            eventVictimWeights = {} # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+            for eventName, event in events.items():
+                if actor.eventDisabled[eventName]["main"]:
+                    indivProb[eventName] = 0
+                    continue
+                # Base single event probability
+                origSingleWeight = baseEventActorWeights[event]*actor.fullEventMultipliers[eventName]["main"]+actor.eventAdditions[eventName]["main"]
+                indivProb[eventName] = origSingleWeight
+                # Probability correction for multi-contestant events, if necessary
+                if eventName in baseEventParticipantWeights:
+                    # A bit of set magic
+                    validParticipants = set(liveContestants) - alreadyUsed
+                    validParticipants.difference_update([x.eventDisabled[eventName]["participant"] for x in validParticipants)
+                    if len(validParticipants) < event.baseProps["numParticipants"]:
+                        indivProb[eventName] = 0 # This event cannot happen
+                        continue
+                    eventParticipantWeights[eventName]= {}
+                    for participant in validParticipants:
+                        eventParticipantWeights[eventName][participant] = (baseEventParticipantWeights[eventName]*liveContestants[participant].fullEventMultipliers[eventName]["participant"]
+                                                                           +liveContestants[participant].eventAdditions[eventName]["participant"])
+                    # Sorting theory, yay. Anyway, here the number of elements we are searching for ranges wildly from close to the size of the whole list to only a small part,
+                    # making heapsort based lookups anything from much slower to much faster than a full sort.
+                    # Because of the way Python is, the built-ins are often substantially faster than trying to code something like quickselect by hand
+                    # Python's docs even say that for large lists (>1000, though not relevant here), you should just use sorted.
+                    # Thus, the best choices are probably just sorted (sort everything, even if that's obviously wasting effort) or the heapq library.
+                    # Since the latter requires adding a library specifically to do this, let's just feel dumb and use sorted.
+                    correctionParticipantWeights = sorted(eventParticipantWeights[eventName].itervalues(),reverse=True) # The probabilities here are sketchy, but probably okay for outside appearance
+                    correctionParticipantWeights = correctionParticipantWeights(:event.baseProps["numParticipants"])
+                    indivProb[eventName] *= reduce(lambda x, y: x * y, correctionParticipantWeights)/(origSingleWeight**len(:event.baseProps["numParticipants"]))
+                if eventName in baseEventVictimWeights:
+                    # A bit of set magic
+                    validVictims = set(liveContestants) - alreadyUsed
+                    validVictims.difference_update([x.eventDisabled[eventName]["victim"] for x in validVictims)
+                    if len(validVictims) < event.baseProps["numVictims"]:
+                        indivProb[eventName] = 0 # This event cannot happen
+                        continue
+                    eventVictimWeights[eventName] = {}
+                    for victim in validVictims:
+                        eventVictimWeights[eventName][victim] = (baseEventVictimWeights[eventName]*liveContestants[victim].fullEventMultipliers[eventName]["victim"]
+                                                                +liveContestants[victim].eventAdditions[eventName]["victim"] )   
+                    correctionVictimWeights = sorted(victimWeights.itervalues(),reverse=True)
+                    correctionVictimWeights = correctionVictimWeights(:event.baseProps["numVictims"])
+                    correctionVictimWeights = reduce(lambda x, y: x * y, correctionVictimWeights)
+                    indivProb[eventName] *= correctionVictimWeights/(origSingleWeight**len(:event.baseProps["numVictims"]))
+            
+            #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
+                
 
 if __name__ == "__main__":
     main()
