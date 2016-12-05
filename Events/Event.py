@@ -20,14 +20,18 @@ class Event(object): #Python 2.x compatibility
         # dict (string: float) optional participantModifiers, dict (string: float) optional victimModifiers,
         # bool unique, list[string] optional uniqueUsers #at the moment only supports unique contestants performing the event, rather than being the victim etc. This is bad for, say, Mami getting her head eaten.
         # bool itemRequired, string optional necessaryItem
+        # (The event is more (or less) likely if actor has ANY relationship that meets the criterion >mainFriendLevel. Set bool to false if you want < instead.
+        # float mainFriendEffect (set 0 for none), (relation: bool, value: int) mainNeededFriendLevel  
+        # float mainLoveEffect (set 0 for none), (relation: bool, value:int) mainNeededLoveLevel
         # float friendEffect (set 0 for none) [FROM ACTOR to PARTICIPANT (except for >2 people, in which case all are checked)]
         # float loveEffect (set 0 for none)
         # float friendEffectVictim
         # float loveEffectVictim
-        # bool friendRequired, int optional neededFriendLevel 
-        # bool loveRequired, int optional, neededLoveLevel
-        # bool friendRequiredVictim, int optional neededFriendLevelVictim
-        # bool loveRequiredVictim, int optional, neededLoveLevelVictim
+        # If first bool is true, then you need friendship level > (or if bool false, <) the specified needed level
+        # bool friendRequired, (relation: bool, value:int) optional neededFriendLevel 
+        # bool loveRequired, (relation: bool, value:int) optional, neededLoveLevel
+        # bool friendRequiredVictim, (relation: bool, value:int) optional neededFriendLevelVictim
+        # bool loveRequiredVictim, (relation: bool, value:int) optional, neededLoveLevelVictim
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
