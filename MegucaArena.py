@@ -27,8 +27,9 @@ def main():
     # traitRandomness = 3
     # numContestants = 24 # Program should pad or randomly remove contestants as necessary
     # eventRandomness = 0.5 # Percent range over which the base weights of events varies from json settings
-    # statInfluence = 0.3 # How much stats influence event weightings, calculated as (1+influence)^(stat-5)
+    # statInfluence = 0.3 # How much stats influence event weightings, calculated as (1+influence)^((stat-5)*eventInfluenceLevel)
     # objectInfluence = 1 # How much objects in inventory affect events. The default 1 uses the base stats.
+    # relationInfluence = 0.3 # How much relationships affect event chance, calculated as (1+influence)^(relationship level*eventInfluenceLevel)
     # Note that objects that fully disable a event should still do so!
 
 
@@ -139,8 +140,18 @@ def main():
                         continue
                     eventParticipantWeights[eventName]= {}
                     for participant in validParticipants:
-                        eventParticipantWeights[eventName][participant] = (baseEventParticipantWeights[eventName]*liveContestants[participant].fullEventMultipliers[eventName]["participant"]
-                                                                           +liveContestants[participant].eventAdditions[eventName]["participant"])
+                        if event.friendRequired: #This will need an additional check later in case of multi-friend events
+                            if friendships[(actor.name,liveContestants[participant].name)]<event.neededFriendLevel:
+                                eventParticipantWeights[eventName][participant] = 0
+                                continue
+                        if event.loveRequired: #This will need an additional check later in case of multi-friend events
+                            if loveships[(actor.name,liveContestants[participant].name)]<event.neededLoveLevel:
+                                eventParticipantWeights[eventName][participant] = 0
+                                continue      
+                        eventParticipantWeights[eventName][participant] = ((baseEventParticipantWeights[eventName]*liveContestants[participant].fullEventMultipliers[eventName]["participant"]
+                                                                           +liveContestants[participant].eventAdditions[eventName]["participant"])*
+                                                                           (1+settings["relationInfluence"])**(friendships[(actor.name,liveContestants[participant].name)]*event.friendEffect)*
+                                                                           (1+settings["relationInfluence"])**(loveships[(actor.name,liveContestants[participant].name)]*event.loveEffect))
                     # Sorting theory, yay. Anyway, here the number of elements we are searching for ranges wildly from close to the size of the whole list to only a small part,
                     # making heapsort based lookups anything from much slower to much faster than a full sort.
                     # Because of the way Python is, the built-ins are often substantially faster than trying to code something like quickselect by hand
@@ -159,8 +170,18 @@ def main():
                         continue
                     eventVictimWeights[eventName] = {}
                     for victim in validVictims:
-                        eventVictimWeights[eventName][victim] = (baseEventVictimWeights[eventName]*liveContestants[victim].fullEventMultipliers[eventName]["victim"]
-                                                                +liveContestants[victim].eventAdditions[eventName]["victim"] )   
+                        if event.friendRequiredVictim: #This will need an additional check later in case of multi-lover events
+                            if friendships[(actor.name,liveContestants[victim].name)]<event.neededFriendLevelVictim:
+                                eventVictimWeights[eventName][victim] = 0
+                                continue
+                        if event.loveRequiredVictim: #This will need an additional check later in case of multi-lover events
+                            if loveships[(actor.name,liveContestants[victim].name)]<event.neededLoveLevelVictim:
+                                eventVictimWeights[eventName][victim] = 0
+                                continue 
+                        eventVictimWeights[eventName][victim] = ((baseEventVictimWeights[eventName]*liveContestants[victim].fullEventMultipliers[eventName]["victim"]
+                                                                +liveContestants[victim].eventAdditions[eventName]["victim"])*
+                                                                (1+settings["relationInfluence"])**(friendships[(actor.name,liveContestants[victim].name)]*event.friendEffectVictim)*
+                                                                (1+settings["relationInfluence"])**(loveships[(actor.name,liveContestants[victim].name)]*event.loveEffectVictim))   
                     correctionVictimWeights = sorted(victimWeights.itervalues(),reverse=True)
                     correctionVictimWeights = correctionVictimWeights(:event.baseProps["numVictims"])
                     correctionVictimWeights = reduce(lambda x, y: x * y, correctionVictimWeights)

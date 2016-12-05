@@ -20,6 +20,14 @@ class Event(object): #Python 2.x compatibility
         # dict (string: float) optional participantModifiers, dict (string: float) optional victimModifiers,
         # bool unique, list[string] optional uniqueUsers #at the moment only supports unique contestants performing the event, rather than being the victim etc. This is bad for, say, Mami getting her head eaten.
         # bool itemRequired, string optional necessaryItem
+        # float friendEffect (set 0 for none) [FROM ACTOR to PARTICIPANT (except for >2 people, in which case all are checked)]
+        # float loveEffect (set 0 for none)
+        # float friendEffectVictim
+        # float loveEffectVictim
+        # bool friendRequired, int optional neededFriendLevel 
+        # bool loveRequired, int optional, neededLoveLevel
+        # bool friendRequiredVictim, int optional neededFriendLevelVictim
+        # bool loveRequiredVictim, int optional, neededLoveLevelVictim
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
