@@ -8,6 +8,19 @@
 
 import random
 
+def contestantIndivActorCallback(actor, baseEventActorWeight, event):
+    if actor.eventDisabled[event.name]["main"]:
+        return (0, False)
+    # Base single event probability
+    return (baseEventActorWeight*actor.fullEventMultipliers[event.name]["main"]+actor.eventAdditions[event.name]["main"], True)
+    
+def contestantIndivActorWithParticipantsCallback(actor, participant, baseEventParticipantWeight, event):
+    return (baseEventParticipantWeight*participant.fullEventMultipliers[event.name]["participant"]
+                                                                           +participant.eventAdditions[event.name]["participant"], True)
+
+def contestantIndivActorWithVictimsCallback(actor, victim, baseEventVictimWeight, event):
+    return (baseEventVictimWeight*victim.fullEventMultipliers[event.name]["victim"]
+                                                                           +victim.eventAdditions[event.name]["victim"], True)                                                                           
 
 class Contestant(object):
 
