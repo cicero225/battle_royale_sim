@@ -1,25 +1,37 @@
 """Utility functions for battle royale sim"""
 import json
 import sys
+import random
+import bisect
 
-def StrToClass(string):
-    return getattr(sys.modules[__name__], string)
-
-def LoadJSONIntoDictOfEventObjects(path, settings): # This is unfortunately going to be pretty specific. It could be generalized
-    # more, but that'd take more work
-    try:
-        with open(path) as file:
-            fromFile = json.load(file)
-    except TypeError:
-        fromFile = json.load(path)
     
-    objectDict = {}
-    for name in fromFile:
-        thisClass = StrToClass(name)
-        objectDict[name] = thisClass(name, fromFile[name], settings) # Constructor should \
-                                                                  # take in name, dict and settings (also a dict)
-    return objectDict                                                              
-
+def weightedDictRandom(inDict, num_sel=1):
+    """Given an input dictionary with weights as values, picks num_sel uniformly weighted random selection from the keys"""
+    if num_sel > len(inDict):
+        raise IndexError
+    def getKeysDirect(inDict, num_direct):
+        if not num_direct:
+            return []
+        keys = []
+        allkeys = list(inDict.keys())
+        allvalues = list(inDict.values())
+        cumsum = [0]
+        for weight in allvalues:  # itervalues is better practice in python 2.x, but doesn't exist in 3...
+            cumsum.append(cumsum[-1]+weight)
+        for dummy in range(num_direct):
+            thisrand = random.uniform(1e-100,cumsum[-1]-1e-100) #The 1e-100 is important for numerical reasons
+            selected = bisect.bisect_left(cumsum,thisrand)-1
+            keys.append(allkeys.pop(selected))
+            if dummy != num_direct-1:
+                remWeight = allvalues.pop(selected)
+                for x in range(selected+1,len(cumsum)):
+                    cumsum[x] -= remWeights
+        return keys
+    if num_sel < len(inDict)/2:
+        return tuple(getKeysDirect(inDict, num_sel))
+    else
+        return tuple(set(inDict.keys()).difference(getKeysDirect(inDict,len(inDict)-num_sel)))
+            
 def LoadJSONIntoDictOfObjects(path, settings, objectType):
     """
     # Args: path is the path or file handle to the json
@@ -44,6 +56,7 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
                                                                   # take in dict and settings (also a dict)
     return objectDict    
 
+    
 # May eventually factor relationship stuff into own object, but for now this is fine
 def relationsMainWeightCallback(friendships, loveships, settings, actor, baseEventActorWeight, event):
     if event.mainFriendEffect:
@@ -59,6 +72,7 @@ def relationsMainWeightCallback(friendships, loveships, settings, actor, baseEve
                 baseEventActorWeight *= (1+settings["relationInfluence"])**event.mainLoveEffect
                 break
     return (baseEventActorWeight, True)
+
     
 def relationsParticipantWeightCallback(friendships, loveships, settings, actor, participant, baseEventParticipantWeight, event):
     if event.friendRequired: #This will need an additional check later in case of multi-friend events
@@ -73,7 +87,8 @@ def relationsParticipantWeightCallback(friendships, loveships, settings, actor, 
           (1+settings["relationInfluence"])**(friendships[actor.name][participant.name]*event.friendEffect)*
           (1+settings["relationInfluence"])**(loveships[actor.name][participant.name]*event.loveEffect),
           True)
-          
+ 
+ 
 def relationsVictimWeightCallback(friendships, loveships, settings, actor, victim, baseEventVictimWeight, event):
     if event.friendRequired: #This will need an additional check later in case of multi-friend events
         negOrPos = 1 if event.neededFriendLevel["relation"] else -1

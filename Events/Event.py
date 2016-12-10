@@ -1,9 +1,6 @@
-# Unlike the other main classes, the Event object is mostly not directly used, since events can have arbitrary effects.
-# Instead, Event serves as the parent class for all other types of events, providing most of the structure but leaving
-# the key method(s) for those event subtypes to determine. On its own, Event serves a default "does nothing" event.
-
-# Yes, I know the trend nowadays is composition >> inheritance but _in this case_ it's extremely logical inheritance,
-# and we'll probably never need to replace the parent class of any event. (Murphy's law: yes we will)
+# The Event class provides the generic framework for in-game events, providing the main structure common to all events.
+# Because Events can have arbitrary effects, each event defined must have a .py file that extends this class, registering
+# a callback for the delegator doEvent with the convenience function registerEvent, provided below.
 
 # Note that it is very likely feasible to define some helper methods (like kill_player) here that events can call for common
 # shared events.
@@ -11,6 +8,8 @@
 import random
 
 class Event(object): #Python 2.x compatibility
+
+    event_callbacks = {}  # It is important that this is a class attribute, which can be modified in Python
 
     def __init__(self, name, inDict, settings):
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
@@ -50,10 +49,18 @@ class Event(object): #Python 2.x compatibility
         for multiplierType in ['main', 'participant', 'victim']:
             if multiplierType+'Weight' in self.baseProps:
                 self.eventRandomize(multiplierType+'Weight')
-
-    def doEvent(self, mainActor, state=None, participants=None, victims=None): # State, participants and victims here for this particular function are clearly unused and could be _ , but this provides max clarity for copying into other events
-        desc = mainActor.name+' did absolutely nothing.'
-        return desc
+    
+    @classmethod
+    def registerEvent(cls, eventName, callback):
+        cls.event_callbacks[eventName] = callback
+    
+    def doEvent(self, mainActor, state=None, participants=None, victims=None):
+        if self.name in self.event_callbacks:
+            callback = self.event_callbacks[self.name]
+            callback(mainActor, state, participants, victims)
+        else:
+            desc = mainActor.name+' did absolutely nothing.'
+            return (desc, [mainActor], []) # Second entry is the contestants named in desc, in order. Third is anyone who died.
 
     def eventRandomize(self, propName):
         self.baseProps[propName] = (self.baseProps[propName]

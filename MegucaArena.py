@@ -34,7 +34,7 @@ def main():
     # Note that objects that fully disable a event should still do so!
 
     # Initialize Events
-    events = ArenaUtils.LoadJSONIntoDictOfEventObjects(os.path.join('Contestants', 'Contestant.json'), settings)
+    events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestant.json'), settings)
     eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
 
     # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
@@ -113,11 +113,15 @@ def main():
     contestantIndivActorWithVictimsCallback,
     partial(relationsVictimWeightCallback, friendships, loveships, settings),
     ]
+    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantName, eventName, state. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
+    # Note that if *any* of these returns false, then normal event processing is overridden
+    overrideContestantEvent = []  
     
     callbacks = {"modifyBaseWeights": modifyBaseWeights,
                  "modifyIndivActorWeights": modifyIndivActorWeights,
                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
+                 "overrideContestantEvent": overrideContestantEvent,
     }
     state["callbacks"] = callbacks # I define state before callbacks so it can be bound to a callback if necessary
     
@@ -217,6 +221,23 @@ def main():
                     indivProb[eventName] *= correctionVictimWeights/(origIndivWeight**event.baseProps["numVictims"])
             
             #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
+            eventName = weightedDictRandom(indivProb)
+            # Handle event overrides, if any
+            proceedAsUsual = True
+            for override in callbacks["overrideContestantEvent"]:
+                proceedAsUsual = override(contestantKey, eventName, state) and proceedAsUsual # Because of short-circuit processing, the order here is important
+            if proceedAsUsual:
+                #Determine participants, victims, if any.
+                thisevent = events[eventName]
+                participants = list(weightedDictRandom(eventParticipantWeights[eventName], thisevent.numParticipants))
+                victims = list(weightedDictRandom(eventVictimWeights[eventName], thisevent.numVictims))
+                desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims)
+                
+            # TO DO: output description (with pictures and html?)
+            # Remove theDead from liveContestants
+            # If everyone is dead, reset and rerun whole turn...
+            # Callbacks for ending the game
+                
                 
 
 if __name__ == "__main__":
