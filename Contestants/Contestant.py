@@ -14,11 +14,11 @@ def contestantIndivActorCallback(actor, baseEventActorWeight, event):
     # Base single event probability
     return (baseEventActorWeight*actor.fullEventMultipliers[event.name]["main"]+actor.eventAdditions[event.name]["main"], True)
     
-def contestantIndivActorWithParticipantsCallback(actor, participant, baseEventParticipantWeight, event):
+def contestantIndivActorWithParticipantsCallback(_, participant, baseEventParticipantWeight, event):
     return (baseEventParticipantWeight*participant.fullEventMultipliers[event.name]["participant"]
                                                                            +participant.eventAdditions[event.name]["participant"], True)
 
-def contestantIndivActorWithVictimsCallback(actor, victim, baseEventVictimWeight, event):
+def contestantIndivActorWithVictimsCallback(_, victim, baseEventVictimWeight, event):
     return (baseEventVictimWeight*victim.fullEventMultipliers[event.name]["victim"]
                                                                            +victim.eventAdditions[event.name]["victim"], True)                                                                           
 

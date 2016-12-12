@@ -1,6 +1,5 @@
 """Utility functions for battle royale sim"""
 import json
-import sys
 import random
 import bisect
 
@@ -25,11 +24,11 @@ def weightedDictRandom(inDict, num_sel=1):
             if dummy != num_direct-1:
                 remWeight = allvalues.pop(selected)
                 for x in range(selected+1,len(cumsum)):
-                    cumsum[x] -= remWeights
+                    cumsum[x] -= remWeight
         return keys
     if num_sel < len(inDict)/2:
         return tuple(getKeysDirect(inDict, num_sel))
-    else
+    else:
         return tuple(set(inDict.keys()).difference(getKeysDirect(inDict,len(inDict)-num_sel)))
             
 def LoadJSONIntoDictOfObjects(path, settings, objectType):

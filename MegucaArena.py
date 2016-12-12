@@ -1,5 +1,8 @@
 """The main for the battle royale sim"""
 
+from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
+
+
 import copy
 import json
 import os
@@ -7,9 +10,7 @@ import random # A not very good random library, but probably fine for our purpos
 import itertools
 from functools import partial
 
-from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
-
-from Contestants.Contestant import *
+from Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
 from Items.Item import Item
 from Sponsors.Sponsor import Sponsor
 from World.World import World
@@ -35,7 +36,7 @@ def main():
     # Note that objects that fully disable a event should still do so!
 
     # Initialize Events
-    events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestant.json'), settings)
+    events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestant.json'), settings, Events.Event)
     eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
 
     # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
@@ -67,7 +68,7 @@ def main():
         loveships[contestant]={}
     for contestant1, contestant2 in itertools.combinations(contestants.keys() + sponsors.keys(), 2):
         friendships[contestant1.name][contestant2.name] = 0  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
-        friendships[contestant2.name][contestant1.name)] = 0
+        friendships[contestant2.name][contestant1.name] = 0
         loveships[contestant1.name][contestant2.name] = 0
         loveships[contestant2.name][contestant1.name] = 0
 
@@ -102,24 +103,24 @@ def main():
     # modifyIndivActorWeights: Expected args: actor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeights = [
     contestantIndivActorCallback,
-    partial(relationsMainWeightCallback, friendships, loveships, settings),
+    partial(ArenaUtils.relationsMainWeightCallback, friendships, loveships, settings),
     ]
     # modifyIndivActorWeightsWithParticipants: Expected args: actor, participant, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeightsWithParticipants = [
     contestantIndivActorWithParticipantsCallback,
-    partial(relationsParticipantWeightCallback, friendships, loveships, settings),
+    partial(ArenaUtils.relationsParticipantWeightCallback, friendships, loveships, settings),
     ]
     # modifyIndivActorWeightsWithVictims: Expected args: actor, victim, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeightsWithVictims = [
     contestantIndivActorWithVictimsCallback,
-    partial(relationsVictimWeightCallback, friendships, loveships, settings),
+    partial(ArenaUtils.relationsVictimWeightCallback, friendships, loveships, settings),
     ]
     # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantName, eventName, state. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
     # Note that if *any* of these returns false, then normal event processing is overridden
     overrideContestantEvent = []  
     # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)
     endGameConditions = [
-    onlyOneLeft
+    ArenaUtils.onlyOneLeft
     ]
     
     callbacks = {"modifyBaseWeights": modifyBaseWeights,
@@ -185,7 +186,7 @@ def main():
                 if eventName in baseEventParticipantWeights:
                     # A bit of set magic
                     validParticipants = set(liveContestants) - alreadyUsed
-                    validParticipants.difference_update([x.eventDisabled[eventName]["participant"] for x in validParticipants)
+                    validParticipants.difference_update([x.eventDisabled[eventName]["participant"] for x in validParticipants])
                     eventParticipantWeights[eventName]= {}
                     if len(validParticipants) < event.baseProps["numParticipants"]:
                         indivProb[eventName] = 0 # This event cannot happen
@@ -201,13 +202,16 @@ def main():
                                 break
                         if not eventMayProceed:
                             continue
-                    correctionParticipantWeights = sorted(eventParticipantWeights[eventName].itervalues(),reverse=True) # The probabilities here are sketchy, but probably okay for outside appearance
-                    correctionParticipantWeights = correctionParticipantWeights(:event.baseProps["numParticipants"])
-                    indivProb[eventName] *= reduce(lambda x, y: x * y, correctionParticipantWeights)/(origIndivWeight**event.baseProps["numParticipants"])
+                    correctionParticipantWeights = sorted(eventParticipantWeights[eventName].values(),reverse=True) # The probabilities here are sketchy, but probably okay for outside appearance
+                    correctionParticipantWeights = correctionParticipantWeights[:event.baseProps["numParticipants"]]
+                    correctionParticipantWeight = 1
+                    for weight in correctionParticipantWeights:
+                        correctionParticipantWeight *= weight
+                    indivProb[eventName] *= correctionParticipantWeight/(origIndivWeight**event.baseProps["numParticipants"])
                 if eventName in baseEventVictimWeights:
                     # A bit of set magic
                     validVictims = set(liveContestants) - alreadyUsed
-                    validVictims.difference_update([x.eventDisabled[eventName]["victim"] for x in validVictims)
+                    validVictims.difference_update([x.eventDisabled[eventName]["victim"] for x in validVictims])
                     if len(validVictims) < event.baseProps["numVictims"]:
                         indivProb[eventName] = 0 # This event cannot happen
                         continue
@@ -223,13 +227,15 @@ def main():
                                 break
                         if not eventMayProceed:
                             continue   
-                    correctionVictimWeights = sorted(victimWeights.itervalues(),reverse=True)
-                    correctionVictimWeights = correctionVictimWeights(:event.baseProps["numVictims"])
-                    correctionVictimWeights = reduce(lambda x, y: x * y, correctionVictimWeights)
-                    indivProb[eventName] *= correctionVictimWeights/(origIndivWeight**event.baseProps["numVictims"])
+                    correctionVictimWeights = sorted(eventVictimWeights.values(),reverse=True)
+                    correctionVictimWeights = correctionVictimWeights[:event.baseProps["numVictims"]]
+                    correctionVictimWeight = 1
+                    for weight in correctionVictimWeights:
+                        correctionVictimWeight *= weight
+                    indivProb[eventName] *= correctionVictimWeight/(origIndivWeight**event.baseProps["numVictims"])
             
             #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
-            eventName = weightedDictRandom(indivProb)
+            eventName = ArenaUtils.weightedDictRandom(indivProb)
             # Handle event overrides, if any
             proceedAsUsual = True
             for override in callbacks["overrideContestantEvent"]:
@@ -237,8 +243,8 @@ def main():
             if proceedAsUsual:
                 #Determine participants, victims, if any.
                 thisevent = events[eventName]
-                participants = list(weightedDictRandom(eventParticipantWeights[eventName], thisevent.numParticipants))
-                victims = list(weightedDictRandom(eventVictimWeights[eventName], thisevent.numVictims))
+                participants = list(ArenaUtils.weightedDictRandom(eventParticipantWeights[eventName], thisevent.numParticipants))
+                victims = list(ArenaUtils.weightedDictRandom(eventVictimWeights[eventName], thisevent.numVictims))
                 desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims)
                 
             # TODO: Placeholder. Probably want object or specialist function for this later.
@@ -259,11 +265,10 @@ def main():
             alreadyUsed.update(descContestants) 
         
         if not restartTurn:    
-            endGame = False
             for callback in callbacks["endGameConditions"]: # conditions for ending the game
                 if callback(liveContestants, state):
                     # TODO: Placeholder under I decide what to do with this later
-                    print([x.name for name in liveContestants])
+                    print([x.name for x in liveContestants])
                     print("Have won the game and are victorious!")
                     # TODO: Do any additional end of simulation stuff here
                     return
