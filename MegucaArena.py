@@ -1,5 +1,6 @@
 """The main for the battle royale sim"""
 
+import copy
 import json
 import os
 import random # A not very good random library, but probably fine for our purposes
@@ -116,18 +117,23 @@ def main():
     # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantName, eventName, state. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
     # Note that if *any* of these returns false, then normal event processing is overridden
     overrideContestantEvent = []  
+    # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)
+    endGameConditions = [
+    onlyOneLeft
+    ]
     
     callbacks = {"modifyBaseWeights": modifyBaseWeights,
                  "modifyIndivActorWeights": modifyIndivActorWeights,
                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
                  "overrideContestantEvent": overrideContestantEvent,
+                 "endGameConditions": endGameConditions,
     }
     state["callbacks"] = callbacks # I define state before callbacks so it can be bound to a callback if necessary
     
     # Run simulation
 
-    # General pseudocode idea
+    # General idea:
     # Sample contestants randomly
     # Go through contestants
     # For each contestant, go through event list and poll their weights + contestant weight modifiers (base weights + object and relationship modifiers)
@@ -140,7 +146,9 @@ def main():
     # Repeat.
     
     # Main loop of DEATH
-    while [contestants[x].alive for x in contestants].count()>1:
+    while True:
+        restartTurn = False # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
+        initialState = copy.deepcopy(state) #Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
         turnNumber[0] += 1
         liveContestants = {x: y for x, y in contestants.items() if y.alive}
         # Sample contestants randomly
@@ -157,8 +165,8 @@ def main():
         for contestantKey in randOrderContestantKeys: #This is not statistically uniform because these multi-person events are hard and probably not worth figuring out in exact detail...
             if contestantKey in alreadyUsed:
                 continue
-            actor = liveContestants[contestantKey]
-            alreadyUsed.add(contestantKey)
+            actor = liveContestants[contestantKey] # Some contestants may die in events, they get removed at the end of the for loop
+            alreadyUsed.add(contestantKey) 
             # Calculate individualized/multi-contestant corrected event probabilities
             indivProb = {}
             eventParticipantWeights = {} # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
@@ -186,7 +194,7 @@ def main():
                         eventParticipantWeights[eventName][participant] = baseEventParticipantWeights[eventName]
                         eventMayProceed = True
                         for callback in callbacks["modifyIndivActorWeightsWithParticipants"]:
-                            eventParticipantWeights[eventName][participant], eventMayProceed = callback(actor, liveContestants[participant],
+                            eventParticipantWeights[eventName][participant], eventMayProceed = callback(actor, validParticipants[participant],
                                                                                                         eventParticipantWeights[eventName][participant],
                                                                                                         event)
                             if not eventMayProceed:
@@ -208,7 +216,7 @@ def main():
                         eventVictimWeights[eventName][victim] = baseEventParticipantWeights[eventName]
                         eventMayProceed = True
                         for callback in callbacks["modifyIndivActorWeightsWithVictims"]:
-                            eventVictimWeights[eventName][victim], eventMayProceed = callback(actor, liveContestants[victim],
+                            eventVictimWeights[eventName][victim], eventMayProceed = callback(actor, validVictims[victim],
                                                                                                         eventVictimWeights[eventName][victim],
                                                                                                         event)
                             if not eventMayProceed:
@@ -233,12 +241,32 @@ def main():
                 victims = list(weightedDictRandom(eventVictimWeights[eventName], thisevent.numVictims))
                 desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims)
                 
-            # TO DO: output description (with pictures and html?)
-            # Remove theDead from liveContestants
-            # If everyone is dead, reset and rerun whole turn...
-            # Callbacks for ending the game
-                
-                
-
+            # TODO: Placeholder. Probably want object or specialist function for this later.
+            print(desc)
+            
+            #Check if everyone is now dead...
+            if all(not x.alive for x in liveContestants):
+                # This turn needs to be rerun
+                for key, element in initialState: # This is careful use of how python passing works. The values of state now point to the memory references of those in initialState.
+                # On the next loop, initialState will be overwritten by copy.deepcopy(state), but the references in state will still point to the right places and won't be released. 
+                    state[key] = element
+                restartTurn = True
+                break
+            
+            # Remove the dead contestants from the live list. Add the contestants involved to alreadyUsed.
+            for dead in theDead:
+                del liveContestants[dead]
+            alreadyUsed.update(descContestants) 
+        
+        if not restartTurn:    
+            endGame = False
+            for callback in callbacks["endGameConditions"]: # conditions for ending the game
+                if callback(liveContestants, state):
+                    # TODO: Placeholder under I decide what to do with this later
+                    print([x.name for name in liveContestants])
+                    print("Have won the game and are victorious!")
+                    # TODO: Do any additional end of simulation stuff here
+                    return
+            
 if __name__ == "__main__":
     main()

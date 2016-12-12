@@ -1,3 +1,6 @@
+On the use of deepcopy:
+Deepcopy is always kind of a shady thing to use, but in our case it's a workable solution for copying the state at the beginning of a turn for resets. It is important that Python's deepcopy has mitigation for recursive/duplicate references (though we have none of the former). For maximum efficiency, it would be ideal to define for each class a __deepcopy__, which would enable us to skip deepcopying stuff that doesn't need it (name, event baseProps, etc.) but this can be deferred until later/maybe even only if it seems like the deepcopy time is really a problem.
+
 Contestant-specific events, weapon-specific events and other mixed information:
 These kinds of things are fun, but introduce a problem by degrading the separation between classes. 
 I considered some possibilities:

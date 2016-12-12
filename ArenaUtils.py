@@ -102,3 +102,8 @@ def relationsVictimWeightCallback(friendships, loveships, settings, actor, victi
           (1+settings["relationInfluence"])**(friendships[actor.name][victim.name]*event.friendEffect)*
           (1+settings["relationInfluence"])**(loveships[actor.name][victim.name]*event.loveEffect),
           True)
+          
+def onlyOneLeft(liveContestants, _):
+    if len(liveContestants) == 1:
+        return True
+    return False
