@@ -5,12 +5,12 @@ from __future__ import division # In case of Python 2+. The Python 3 implementat
 import ArenaUtils
 import io
 
-class Dummy: # This might have to be more elaborate for some of the other tests
+class Dummy(object): # This might have to be more elaborate for some of the other tests
     def __init__(self, name, inDict, settings):
         self.echoDict = inDict
         self.name = name
 
-class ArenaUtilsTest:
+class ArenaUtilsTest(object):
     
     settings = {}; # This might have to be more elaborate for some of the other tests
     
@@ -61,6 +61,8 @@ class ArenaUtilsTest:
         assert abs(resultDict["saya"][2]/400 - 38/60) < 0.075
         assert abs(resultDict["koko"][2]/400 - 38/60) < 0.075
         print("WeightedDictRandom test passes")
+    
+    # TODO: Callback testss
         
 if __name__ == "__main__":
     # execute only if run as a script

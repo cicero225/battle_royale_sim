@@ -60,13 +60,13 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
 def relationsMainWeightCallback(friendships, loveships, settings, actor, baseEventActorWeight, event):
     if event.mainFriendEffect:
         negOrPos = 1 if event.mainNeededFriendLevel["relation"] else -1
-        for friendLevel in friendships[actor.name].itervalues():
+        for friendLevel in friendships[actor.name].values():
             if negOrPos*friendLevel >= event.mainNeededFriendLevel["value"]:
                 baseEventActorWeight *= (1+settings["relationInfluence"])**event.mainFriendEffect
                 break
     if event.mainLoveEffect:
         negOrPos = 1 if event.mainNeededLoveLevel["relation"] else -1
-        for loveLevel in loveships[actor.name].itervalues():
+        for loveLevel in loveships[actor.name].values():
             if negOrPos*loveLevel >= event.mainNeededLoveLevel["value"]:
                 baseEventActorWeight *= (1+settings["relationInfluence"])**event.mainLoveEffect
                 break

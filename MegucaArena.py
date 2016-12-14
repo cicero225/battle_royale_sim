@@ -15,17 +15,17 @@ from Items.Item import Item
 from Sponsors.Sponsor import Sponsor
 from World.World import World
 import ArenaUtils
-import Events
+from Events import *
 
 def main():
     """The main for the battle royale sim"""
     
     # Initial Setup:
 
-    # Import Settings from JSON -> going to make it a dictionary
+    # Import Settings from JSON -> going to make it a dictionarys
     with open('Settings.json') as settings_file:
         settings = json.load(settings_file)
-
+ 
     # List of settings as I come up with them. It can stay as a dict.
     # traitRandomness = 3
     # numContestants = 24 # Program should pad or randomly remove contestants as necessary
@@ -34,13 +34,13 @@ def main():
     # objectInfluence = 1 # How much objects in inventory affect events. The default 1 uses the base stats.
     # relationInfluence = 0.3 # How much relationships affect event chance, calculated as (1+influence)^(relationship level*eventInfluenceLevel)
     # Note that objects that fully disable a event should still do so!
-
+    
     # Initialize Events
-    events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestant.json'), settings, Events.Event)
+    events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Events', 'Events.json'), settings, Event.Event)
     eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
 
     # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
-    contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestant.json'), settings, Contestant)
+    contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestants.json'), settings, Contestant)
     # If number of contestants in settings less than those found in the json, randomly remove some
     contestantNames = contestants.keys()
     if settings['numContestants'] < len(contestantNames):
@@ -58,7 +58,7 @@ def main():
     # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
     # from any type of object gift, otherwise 1, Anything else we think of)
     # No placeholder sponsors because of the way it is handled.
-    sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Sponsors', 'Sponsor.json'), settings, Sponsor)
+    sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Sponsors', 'Sponsors.json'), settings, Sponsor)
 
     # for now relationship levels (arbitrarily, -10 to 10, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
     friendships = {} #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
@@ -74,7 +74,7 @@ def main():
 
 
     # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
-    items = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Items', 'Item.json'), settings, Item)
+    items = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Items', 'Items.json'), settings, Item)
 
     # Initialize World - Maybe it should have its own settings?
     # a list of one, so it's passed by refernece. Yes this is dumb.

@@ -1,0 +1,8 @@
+{
+ "traitRandomness": 3,
+ "numContestants": 24,
+ "eventRandomness": 0.5,
+ "statInfluence": 0.3,
+ "objectInfluence": 1,
+ "relationInfluence": 0.3 
+}
