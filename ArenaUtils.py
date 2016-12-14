@@ -1,36 +1,36 @@
 """Utility functions for battle royale sim"""
+from __future__ import division 
+
 import json
 import random
 import bisect
-
     
 def weightedDictRandom(inDict, num_sel=1):
     """Given an input dictionary with weights as values, picks num_sel uniformly weighted random selection from the keys"""
+    # Selection is without replacement (important for use when picking participants etc.)
     if num_sel > len(inDict):
         raise IndexError
-    def getKeysDirect(inDict, num_direct):
-        if not num_direct:
-            return []
-        keys = []
-        allkeys = list(inDict.keys())
-        allvalues = list(inDict.values())
-        cumsum = [0]
-        for weight in allvalues:  # itervalues is better practice in python 2.x, but doesn't exist in 3...
-            cumsum.append(cumsum[-1]+weight)
-        for dummy in range(num_direct):
-            thisrand = random.uniform(1e-100,cumsum[-1]-1e-100) #The 1e-100 is important for numerical reasons
-            selected = bisect.bisect_left(cumsum,thisrand)-1
-            keys.append(allkeys.pop(selected))
-            if dummy != num_direct-1:
-                remWeight = allvalues.pop(selected)
-                for x in range(selected+1,len(cumsum)):
-                    cumsum[x] -= remWeight
-        return keys
-    if num_sel < len(inDict)/2:
-        return tuple(getKeysDirect(inDict, num_sel))
-    else:
-        return tuple(set(inDict.keys()).difference(getKeysDirect(inDict,len(inDict)-num_sel)))
-            
+    if not num_sel:
+        return ()
+    if num_sel == len(inDict):
+        return tuple(inDict.keys())
+    keys = []
+    allkeys = list(inDict.keys())
+    allvalues = list(inDict.values())
+    cumsum = [0]
+    for weight in allvalues: 
+        cumsum.append(cumsum[-1]+weight)
+    for dummy in range(num_sel):
+        thisrand = random.uniform(1e-100,cumsum[-1]-1e-100) #The 1e-100 is important for numerical reasons
+        selected = bisect.bisect_left(cumsum,thisrand)-1
+        keys.append(allkeys.pop(selected))
+        if dummy != num_sel-1:
+            remWeight = allvalues.pop(selected)
+            for x in range(selected+1,len(cumsum)):
+                cumsum[x] -= remWeight
+            cumsum.pop(selected+1)
+    return tuple(keys)
+
 def LoadJSONIntoDictOfObjects(path, settings, objectType):
     """
     # Args: path is the path or file handle to the json
