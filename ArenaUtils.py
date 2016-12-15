@@ -89,17 +89,17 @@ def relationsParticipantWeightCallback(friendships, loveships, settings, actor, 
  
  
 def relationsVictimWeightCallback(friendships, loveships, settings, actor, victim, baseEventVictimWeight, event):
-    if event.friendRequired: #This will need an additional check later in case of multi-friend events
-        negOrPos = 1 if event.neededFriendLevel["relation"] else -1
-        if negOrPos*friendships[actor.name][victim.name]<negOrPos*event.neededFriendLevel["value"]:
+    if event.friendRequiredVictim: #This will need an additional check later in case of multi-friend events
+        negOrPos = 1 if event.neededFriendLevelVictim["relation"] else -1
+        if negOrPos*friendships[actor.name][victim.name]<negOrPos*event.neededFriendLevelVictim["value"]:
             return (0, False)
-    if event.loveRequired: #This will need an additional check later in case of multi-friend events
-        negOrPos = 1 if event.neededLoveLevel["relation"] else -1
-        if negOrPos*loveships[actor.name][victim.name]<negOrPos*event.neededLoveLevel["value"]:
+    if event.loveRequiredVictim: #This will need an additional check later in case of multi-friend events
+        negOrPos = 1 if event.neededLoveLevelVictim["relation"] else -1
+        if negOrPos*loveships[actor.name][victim.name]<negOrPos*event.neededLoveLevelVictim["value"]:
             return (0, False)
     return(baseEventVictimWeight*
-          (1+settings["relationInfluence"])**(friendships[actor.name][victim.name]*event.friendEffect)*
-          (1+settings["relationInfluence"])**(loveships[actor.name][victim.name]*event.loveEffect),
+          (1+settings["relationInfluence"])**(friendships[actor.name][victim.name]*event.friendEffectVictim)*
+          (1+settings["relationInfluence"])**(loveships[actor.name][victim.name]*event.loveEffectVictim),
           True)
           
 def onlyOneLeft(liveContestants, _):

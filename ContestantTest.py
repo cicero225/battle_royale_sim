@@ -20,10 +20,21 @@ class ContestantTest(object):
         self.name = "FakeContestant"
         self.inDict = {}
         self.inDict["imageFile"] = "dummy.jpg"
-        self.inDict["stats"] = {"wideness": 6, "suffering": 4}
+        self.inDict["stats"] = {"wideness": 6, "suffering": 4, "potential": 10, "english": 0}
         self.contestant = Contestant(self.name, self.inDict, self.settings)
+        
+    def testStatRandomizer(self):
+        #Not super-stringent, but doesn't have to be.
+        for key, value in self.contestant.stats.items():
+            assert value>=0 and value<=10
+            assert abs(value - self.contestant.originalStats[key])<=self.settings["traitRandomness"]
+           
+    def testRandomContestant(self):
+        Contestant.makeRandomContestant("Rando", "dummy.jpg", self.contestant.stats, self.settings)
         
 
 if __name__ == "__main__":
     # execute only if run as a script
     thisTest = ContestantTest()
+    thisTest.testStatRandomizer()
+    thisTest.testRandomContestant()

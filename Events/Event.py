@@ -27,10 +27,10 @@ class Event(object): #Python 2.x compatibility
         # float friendEffectVictim
         # float loveEffectVictim
         # If first bool is true, then you need friendship level > (or if bool false, <) the specified needed level
-        # bool friendRequired, (relation: bool, value:int) optional neededFriendLevel 
-        # bool loveRequired, (relation: bool, value:int) optional, neededLoveLevel
-        # bool friendRequiredVictim, (relation: bool, value:int) optional neededFriendLevelVictim
-        # bool loveRequiredVictim, (relation: bool, value:int) optional, neededLoveLevelVictim
+        # bool optional friendRequired, (relation: bool, value:int) optional neededFriendLevel 
+        # bool optional loveRequired, (relation: bool, value:int) optional, neededLoveLevel
+        # bool optional friendRequiredVictim, (relation: bool, value:int) optional neededFriendLevelVictim
+        # bool optional loveRequiredVictim, (relation: bool, value:int) optional, neededLoveLevelVictim
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
