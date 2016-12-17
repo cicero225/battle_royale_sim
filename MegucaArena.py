@@ -50,7 +50,7 @@ def main():
     # If number of contestants in settings more than those found in the json, add Rando Calrissians
     for i in range(len(contestantNames), settings['numContestants']):
         # Here contestants[0].stats is used as a template for making random stats
-        contestants['Rando Calrissian ' + i] = Contestant.makeRandomContestant('Rando Calrissian ' + i, "DUMMY_IMAGE", contestants[0].stats, settings) # need Rando image to put here
+        contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "DUMMY_IMAGE", list(contestants.values())[0].stats, settings) # need Rando image to put here
         
     assert(len(contestants)==settings['numContestants'])
 
@@ -63,14 +63,15 @@ def main():
     # for now relationship levels (arbitrarily, -10 to 10, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
     friendships = {} #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
     loveships = {}
-    for contestant in contestants:
+    mergedpeople = list(contestants.keys()) + list(sponsors.keys()) #Or I could write a generator to combine the iterators, but I'll just spend the memory for now
+    for contestant in  mergedpeople:
         friendships[contestant]={}
         loveships[contestant]={}
-    for contestant1, contestant2 in itertools.combinations(contestants.keys() + sponsors.keys(), 2):
-        friendships[contestant1.name][contestant2.name] = 0  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
-        friendships[contestant2.name][contestant1.name] = 0
-        loveships[contestant1.name][contestant2.name] = 0
-        loveships[contestant2.name][contestant1.name] = 0
+    for contestant1, contestant2 in itertools.combinations(mergedpeople, 2):
+        friendships[contestant1][contestant2] = 0  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
+        friendships[contestant2][contestant1] = 0
+        loveships[contestant1][contestant2] = 0
+        loveships[contestant2][contestant1] = 0
 
 
     # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
