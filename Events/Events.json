@@ -8,5 +8,17 @@
      "friendEffect": 0.0,
      "loveEffect": 0.0,
      "friendEffectVictim": 0.0,
+     "loveEffectVictim": 0.0},
+"TestOneKill": 
+    {"mainWeight": 1.0,
+     "victimWeight": 1.0,
+     "numVictims": 1,
+     "unique": false,
+     "itemRequired": false,
+     "mainFriendEffect": 0.0,
+     "mainLoveEffect": 0.0,
+     "friendEffect": 0.0,
+     "loveEffect": 0.0,
+     "friendEffectVictim": 0.0,
      "loveEffectVictim": 0.0}
 }

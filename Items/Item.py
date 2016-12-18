@@ -13,16 +13,16 @@ class Item(object):
         self.eventMultipliers = inDict["eventMultipliers"]
         # This dict (string: dict(string: float)) stores any event additive effects given by the object. Keys are events, followed by main/participant/victim
         self.eventAdditions = inDict["eventAdditions"] 
-        # This list (string) stores any events actively disabled by this object. Keys are events, followed by main/participant/victim. If you don't want a subcategory disabled, you can not include a listing, or explicitly have a boolean
+        # This dict (string: bool) stores any events actively disabled by this object. Keys are events, followed by main/participant/victim. If you don't want a subcategory disabled, you can not include a listing, or explicitly have a boolean
         self.eventsDisabled = inDict["eventsDisabled"]
-        if settings.objectInfluence != 1:
+        if settings["objectInfluence"] != 1:
             self.applyObjectInfluence(self.statChanges)
             self.applyObjectInfluence(self.eventMultipliers)
             self.applyObjectInfluence(self.eventAdditions)
 
     def applyObjectInfluence(self, inDict):
         for key in inDict:
-            inDict[key] *= self.settings.objectInfluence
+            inDict[key] *= self.settings["objectInfluence"]
 
     def applyObjectStatChanges(self, contestant): # this has to be processed before anything else...
         for changedStat in self.statChanges:

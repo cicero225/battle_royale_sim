@@ -146,12 +146,14 @@ def main():
     # Check that this turn has not killed everyone. If it has, redo the _entire_ turn (it's the only fair way).
     # Then print results into HTML (?) or whatever makes sense
     # Repeat.
-    
+    restartTurn = False
     # Main loop of DEATH
     while True:
+        if not restartTurn:
+            turnNumber[0] += 1
+            print("Day "+str(turnNumber[0]))
         restartTurn = False # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
         initialState = copy.deepcopy(state) #Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
-        turnNumber[0] += 1
         liveContestants = {x: y for x, y in contestants.items() if y.alive}
         # Sample contestants randomly
         randOrderContestantKeys = random.sample(liveContestants.keys(), len(liveContestants))
@@ -174,7 +176,7 @@ def main():
             eventParticipantWeights = {} # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
             eventVictimWeights = {} # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
             for eventName, event in events.items():
-                indivProb[eventName] = baseEventActorWeights[event]
+                indivProb[eventName] = baseEventActorWeights[eventName]
                 eventMayProceed = True
                 for callback in callbacks["modifyIndivActorWeights"]:
                     indivProb[eventName], eventMayProceed = callback(actor, indivProb[eventName], event)
@@ -187,16 +189,22 @@ def main():
                 if eventName in baseEventParticipantWeights:
                     # A bit of set magic
                     validParticipants = set(liveContestants) - alreadyUsed
-                    validParticipants.difference_update([x.eventDisabled[eventName]["participant"] for x in validParticipants])
+                    for x in validParticipants:
+                        try:
+                            validParticipants.difference_update(contestants[x].eventDisabled[eventName]["participant"])
+                        except:
+                            pass
                     eventParticipantWeights[eventName]= {}
                     if len(validParticipants) < event.baseProps["numParticipants"]:
                         indivProb[eventName] = 0 # This event cannot happen
                         continue
                     for participant in validParticipants:
+                        if eventName not in eventParticipantWeights:
+                            eventParticipantWeights[eventName] = {}
                         eventParticipantWeights[eventName][participant] = baseEventParticipantWeights[eventName]
                         eventMayProceed = True
                         for callback in callbacks["modifyIndivActorWeightsWithParticipants"]:
-                            eventParticipantWeights[eventName][participant], eventMayProceed = callback(actor, validParticipants[participant],
+                            eventParticipantWeights[eventName][participant], eventMayProceed = callback(actor, contestants[participant],
                                                                                                         eventParticipantWeights[eventName][participant],
                                                                                                         event)
                             if not eventMayProceed:
@@ -212,23 +220,29 @@ def main():
                 if eventName in baseEventVictimWeights:
                     # A bit of set magic
                     validVictims = set(liveContestants) - alreadyUsed
-                    validVictims.difference_update([x.eventDisabled[eventName]["victim"] for x in validVictims])
+                    for x in validVictims:
+                        try:
+                            validVictims.difference_update(contestants[x].eventDisabled[eventName]["victim"])
+                        except:
+                            pass
                     if len(validVictims) < event.baseProps["numVictims"]:
                         indivProb[eventName] = 0 # This event cannot happen
                         continue
                     eventVictimWeights[eventName] = {}
                     for victim in validVictims:
-                        eventVictimWeights[eventName][victim] = baseEventParticipantWeights[eventName]
+                        if eventName not in eventVictimWeights:
+                            eventVictimWeights[eventName] = {}
+                        eventVictimWeights[eventName][victim] = baseEventVictimWeights[eventName]
                         eventMayProceed = True
                         for callback in callbacks["modifyIndivActorWeightsWithVictims"]:
-                            eventVictimWeights[eventName][victim], eventMayProceed = callback(actor, validVictims[victim],
+                            eventVictimWeights[eventName][victim], eventMayProceed = callback(actor, contestants[victim],
                                                                                                         eventVictimWeights[eventName][victim],
                                                                                                         event)
                             if not eventMayProceed:
                                 break
                         if not eventMayProceed:
                             continue   
-                    correctionVictimWeights = sorted(eventVictimWeights.values(),reverse=True)
+                    correctionVictimWeights = sorted(eventVictimWeights[eventName].values(),reverse=True)
                     correctionVictimWeights = correctionVictimWeights[:event.baseProps["numVictims"]]
                     correctionVictimWeight = 1
                     for weight in correctionVictimWeights:
@@ -244,15 +258,29 @@ def main():
             if proceedAsUsual:
                 #Determine participants, victims, if any.
                 thisevent = events[eventName]
-                participants = list(ArenaUtils.weightedDictRandom(eventParticipantWeights[eventName], thisevent.numParticipants))
-                victims = list(ArenaUtils.weightedDictRandom(eventVictimWeights[eventName], thisevent.numVictims))
+                if eventName in baseEventParticipantWeights:
+                    participantkeys = ArenaUtils.weightedDictRandom(eventParticipantWeights[eventName], thisevent.baseProps["numParticipants"])
+                    try:
+                        participants = [contestants[key] for key in participantkeys]
+                    except KeyError:
+                        participants = [contestants[participantkeys]]
+                else:
+                    participants = []
+                if eventName in baseEventVictimWeights:
+                    victimkeys = ArenaUtils.weightedDictRandom(eventVictimWeights[eventName], thisevent.baseProps["numVictims"])
+                    try:
+                        victims = [contestants[key] for key in victimkeys]
+                    except KeyError:
+                        victims = [contestants[victimkeys]]
+                else:
+                    victims = []
                 desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims)
                 
             # TODO: Placeholder. Probably want object or specialist function for this later.
             print(desc)
             
             #Check if everyone is now dead...
-            if all(not x.alive for x in liveContestants):
+            if all(not x.alive for x in liveContestants.values()):
                 # This turn needs to be rerun
                 for key, element in initialState: # This is careful use of how python passing works. The values of state now point to the memory references of those in initialState.
                 # On the next loop, initialState will be overwritten by copy.deepcopy(state), but the references in state will still point to the right places and won't be released. 
@@ -269,8 +297,7 @@ def main():
             for callback in callbacks["endGameConditions"]: # conditions for ending the game
                 if callback(liveContestants, state):
                     # TODO: Placeholder under I decide what to do with this later
-                    print([x.name for x in liveContestants])
-                    print("Have won the game and are victorious!")
+                    print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
                     # TODO: Do any additional end of simulation stuff here
                     return
             

@@ -15,7 +15,7 @@ class Event(object): #Python 2.x compatibility
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
         # Could also use setattr, but...
         # Should be: float mainWeight, float optional participantWeight, float optional victimWeight,
-        # int numParticipants, int numVictims, dict (string: float) mainModifiers,
+        # int optional numParticipants, int optional numVictims, dict (string: float) mainModifiers,
         # dict (string: float) optional participantModifiers, dict (string: float) optional victimModifiers,
         # bool unique, list[string] optional uniqueUsers #at the moment only supports unique contestants performing the event, rather than being the victim etc. This is bad for, say, Mami getting her head eaten.
         # bool itemRequired, string optional necessaryItem
@@ -57,7 +57,7 @@ class Event(object): #Python 2.x compatibility
     def doEvent(self, mainActor, state=None, participants=None, victims=None):
         if self.name in self.event_callbacks:
             callback = self.event_callbacks[self.name]
-            callback(mainActor, state, participants, victims)
+            return callback(mainActor, state, participants, victims)
         else:
             desc = mainActor.name+' did absolutely nothing.'
             return (desc, [mainActor], []) # Second entry is the contestants named in desc, in order. Third is anyone who died.

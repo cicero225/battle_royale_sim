@@ -7,7 +7,9 @@
          "forgiveness": 3,
          "loyalty": 8,
          "meanness": 2,
-         "aggression": 5
+         "aggression": 5,
+         "endurance": 7,
+         "survivalism": 3
          }
     }
 }

@@ -1,0 +1,18 @@
+ 
+{"Clean Water":
+    {"statChanges": 
+        {"endurance": 1,
+         "survivalism": 1
+         },
+    "eventMultipliers":
+        {"blank": 0.0
+        },
+    "eventAdditions":
+        {"blank": 0.0
+        },
+    "eventsDisabled": {
+        "dysentary": true,
+        "giftwater": true
+        }
+    }
+}

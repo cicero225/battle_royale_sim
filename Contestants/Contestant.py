@@ -9,18 +9,47 @@
 import random
 
 def contestantIndivActorCallback(actor, baseEventActorWeight, event):
-    if actor.eventDisabled[event.name]["main"]:
-        return (0, False)
+    try:  # Pythonic, etc. Really, it's preferred this way...
+        if actor.eventDisabled[event.name]["main"]:
+            return (0, False)
+    except KeyError:
+        pass
+    
+    try:
+        addition = actor.eventAdditions[event.name]["main"]
+    except KeyError:
+        addition = 0
+
+    try:
+        multiplier = actor.fullEventMultipliers[event.name]["main"]
+    except KeyError:
+        multiplier = 1
     # Base single event probability
-    return (baseEventActorWeight*actor.fullEventMultipliers[event.name]["main"]+actor.eventAdditions[event.name]["main"], True)
+    return (baseEventActorWeight*multiplier+addition, True)
     
 def contestantIndivActorWithParticipantsCallback(_, participant, baseEventParticipantWeight, event):
-    return (baseEventParticipantWeight*participant.fullEventMultipliers[event.name]["participant"]
-                                                                           +participant.eventAdditions[event.name]["participant"], True)
+    try:
+        addition = participant.eventAdditions[event.name]["participant"]
+    except KeyError:
+        addition = 0
+    
+    try:
+        multiplier = participant.fullEventMultipliers[event.name]["participant"]
+    except KeyError:
+        multiplier = 1
+    return (baseEventParticipantWeight*multiplier+addition, True)
 
 def contestantIndivActorWithVictimsCallback(_, victim, baseEventVictimWeight, event):
-    return (baseEventVictimWeight*victim.fullEventMultipliers[event.name]["victim"]
-                                                                           +victim.eventAdditions[event.name]["victim"], True)                                                                           
+    try:
+        addition = victim.eventAdditions[event.name]["victim"]
+    except KeyError:
+        addition = 0
+
+    try:
+        multiplier = victim.fullEventMultipliers[event.name]["victim"]
+    except KeyError:
+        multiplier = 1
+    return (baseEventVictimWeight*multiplier+addition, True)                                                                           
 
 class Contestant(object):
 
@@ -35,13 +64,13 @@ class Contestant(object):
         # Note that this is not a deepcopy.
         self.alive = True
         self.events = None
-        self.statEventMultipliers = None # For efficiency, each contestant stores information about how their
+        self.statEventMultipliers = {} # For efficiency, each contestant stores information about how their
         # event probabilities differ from the base. This cannot be fully initialized until the Events are known,
         # and I choose to defer it to its own step in main. statEventMultipliers are calculated off of base stats
         # The rest come from items and perhaps other sources.
-        self.fullEventMultipliers = None
-        self.eventAdditions = None
-        self.eventDisabled = None # These events cannot happen to this contestant
+        self.fullEventMultipliers = {}
+        self.eventAdditions = {}
+        self.eventDisabled = {} # These events cannot happen to this contestant
 
     def contestantStatRandomize(self):
         for statName in self.stats:
