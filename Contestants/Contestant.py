@@ -96,17 +96,19 @@ class Contestant(object):
         self.eventDisabled = {}
         for eventName, event in self.events.items():
             self.statEventMultipliers[eventName] = {}
-
+            self.eventAdditions[eventName] = {}
+            self.fullEventMultipliers[eventName] = {}
             #This is kind of a dumb way to do it, but being more general is a pain
             for multiplierType in ['main', 'participant', 'victim']:
+                self.eventAdditions[eventName][multiplierType] = 0
                 if multiplierType+'Modifiers' in event.baseProps:
                     self.statEventMultipliers[eventName][multiplierType] = 1
                     for modifier, multiplier in event.baseProps[multiplierType+'Modifiers'].items():
                         self.statEventMultipliers[eventName][multiplierType] *= (1+self.settings['statInfluence'])**((self.stats[modifier]-5)*multiplier)
                     self.fullEventMultipliers[eventName][multiplierType] = self.statEventMultipliers[eventName][multiplierType]
 
-            self.eventAdditions[eventName] = 0
             # NOTE: at the moment, the unique and itemrequired fields can only affect events for which the contestant is the main actor. This may need expansion in the future.
+            self.eventDisabled[eventName] = {}
             self.eventDisabled[eventName]['main'] = event.baseProps['unique'] or event.baseProps['itemRequired']
             if event.baseProps['unique']:
                 if self.name in event.baseProps['uniqueUsers']:

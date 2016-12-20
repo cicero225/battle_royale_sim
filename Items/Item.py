@@ -30,14 +30,20 @@ class Item(object):
 
     def onAcquisition(self, contestant):
         for eventName, eventModifier in self.eventMultipliers.items():
+            if eventName not in contestant.fullEventMultipliers:
+                contestant.fullEventMultipliers[eventName] = {}  # Not strictly necessary if events are all defined, but this gives freedom to pre-write missing evenets into items
             for actorType, modifier in eventModifier.items():
                 contestant.fullEventMultipliers[eventName][actorType] *= modifier
         for eventName, eventModifier in self.eventAdditions.items():
+            if eventName not in contestant.eventAdditionss:
+                    contestant.eventAdditions[eventName] = {}  # Not strictly necessary if events are all defined, but this gives freedom to pre-write missing evenets into items
             for actorType, modifier in eventModifier.items():
                 contestant.eventAdditions[eventName][actorType] += modifier
-        for changedStat, eventModifier  in self.eventsDisabled.items():
-            for actorType, modifier  in eventModifier.item():
-                contestant.eventDisabled[changedStat][actorType] = modifier
+        for eventName, eventModifier  in self.eventsDisabled.items():
+            if eventName not in contestant.eventDisabled:
+                contestant.eventDisabled[eventName] = {}  # Not strictly necessary if events are all defined, but this gives freedom to pre-write missing evenets into items
+            for actorType, modifier  in eventModifier.items():
+                contestant.eventDisabled[eventName][actorType] = modifier
                 
     def onRemoval(self, contestant):
         pass

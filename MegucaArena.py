@@ -53,6 +53,9 @@ def main():
         contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "DUMMY_IMAGE", list(contestants.values())[0].stats, settings) # need Rando image to put here
         
     assert(len(contestants)==settings['numContestants'])
+    
+    for contestant in contestants.values():
+        contestant.InitializeEventModifiers(events)
 
     # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
     # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
