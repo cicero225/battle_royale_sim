@@ -95,8 +95,11 @@ def main():
     } # Allows for convenient passing of the entire game state to anything that needs it (usually events)
     
     # CALLBACKS
-    # This would be better done in a more object-oriented manner, but meh for now. Also, for now, relationship callbacks are in ArenaUtils
-    # As much as possible influence event processing from here. Note that these callbacks happen IN ORDER
+    # As much as possible influence event processing from here. Note that these callbacks happen IN ORDER. It would be possible to do this in a more
+    # modular manner by defining a callback object, defining a registering function, using decorators... but that provides effectively no control on
+    # the order of operation. For now, it is better to just have it like this.
+    
+    # Also, for now, relationship callbacks are in ArenaUtils
     
     # modifyBaseWeights: Expected args: baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, turnNumber. Modify in place.
         # Also a good time to do any beginning of turn stuff

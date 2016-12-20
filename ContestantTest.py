@@ -3,6 +3,8 @@
 from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
 
 from Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
+from Events import *  # necessary for some tests. This kind of mixing in tests is bad, but otherwise it's a huge amount of work to fake these classes.
+from Items.Item import Item
 
 import ArenaUtils
 
@@ -22,7 +24,14 @@ class ContestantTest(object):
         self.inDict["imageFile"] = "dummy.jpg"
         self.inDict["stats"] = {"wideness": 6, "suffering": 4, "potential": 10, "english": 0}
         self.contestant = Contestant(self.name, self.inDict, self.settings)
-        
+        # TODO: Make a dummy event set so you can test InitializeEventModifiers
+        self.contestant.events = {}
+        self.contestant.callFlags = {}
+    
+    def refreshTest(self):
+        self.contestant = Contestant(self.name, self.inDict, self.settings)
+        self.callFlags = {}
+    
     def testStatRandomizer(self):
         #Not super-stringent, but doesn't have to be.
         for key, value in self.contestant.stats.items():
@@ -32,9 +41,46 @@ class ContestantTest(object):
     def testRandomContestant(self):
         Contestant.makeRandomContestant("Rando", "dummy.jpg", self.contestant.stats, self.settings)
         
+    def testItemHandling(self):
+        dummyItemDict = {"statChanges": 
+                            {"endurance": 1,
+                             "survivalism": 1
+                             },
+                        "eventMultipliers":
+                            {"blank": 0.0
+                            },
+                        "eventAdditions":
+                            {"blank": 0.0
+                            },
+                        "eventsDisabled": {
+                            "dysentary": True,
+                            "giftwater": True
+                            }
+                        }
+        dummyItem = Item("dummyItem", dummyItemDict, self.settings)
+        def func1(x):
+            x.callFlags["applyObjectStatChanges"]=1
+        dummyItem.applyObjectStatChanges = func1
+        def func2(x):
+            x.callFlags["onAcquisition"]=1
+        dummyItem.onAcquisition = func2
+        def func3(x):
+            x.callFlags["onRemoval"]=1
+        dummyItem.onRemoval = func3
+        self.contestant.addItem(dummyItem)  # This is simple enough that for now I'm okay not testing the less likely to fail bits
+        assert self.contestant.callFlags["applyObjectStatChanges"]==1
+        assert self.contestant.callFlags["onAcquisition"]==1
+        assert not self.contestant.addItem(dummyItem)  # will fail on adding twice
+        # TODO: when dummy event set is made, test that EventModifiers are correct
+        self.contestant.removeItem(dummyItem)
+        assert self.contestant.callFlags["onRemoval"]==1
+        assert not self.contestant.removeItem(dummyItem)  # Cannot remove twice...
+        # TODO: when dummy event set is made, test that EventModifiers are correct
+        self.refreshTest()
 
 if __name__ == "__main__":
     # execute only if run as a script
     thisTest = ContestantTest()
     thisTest.testStatRandomizer()
     thisTest.testRandomContestant()
+    thisTest.testItemHandling()
