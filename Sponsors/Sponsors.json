@@ -1,4 +1,22 @@
 
 {"Akuma Homura":
-    {"unused": 1}
+    {"imageFile": "Akuma.jpg",
+    "stats": 
+        {"gregariousness": 1,
+         "forgiveness": 2,
+         "loyalty": 5,
+         "loneliness": 3,
+         "friendliness": 1
+         }
+    },
+"Ultimate Madoka":
+    {"imageFile": "Akuma.jpg",
+    "stats": 
+        {"gregariousness": 9,
+         "forgiveness": 10,
+         "loyalty": 10,
+         "loneliness": 7,
+         "friendliness": 10
+         }
+    }
 }

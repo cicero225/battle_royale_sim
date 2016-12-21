@@ -1,6 +1,6 @@
         
 {"EventTemplate": 
-    {"mainWeight": 1.0,
+    {"mainWeight": 0.0,
      "unique": false,
      "itemRequired": false,
      "mainFriendEffect": 0.0,
@@ -55,5 +55,41 @@
      "friendEffect": 0.0,
      "loveEffect": 0.0,
      "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0}
+     "loveEffectVictim": 0.0},
+"MamiDecap":
+    {"mainWeight": 0.05,
+     "unique": true,
+     "uniqueUsers": ["Tomoe Mami"],
+     "itemRequired": false,
+     "mainFriendEffect": 0.0,
+     "mainLoveEffect": 0.0,
+     "friendEffect": 0.0,
+     "loveEffect": 0.0,
+     "friendEffectVictim": 0.0,
+     "loveEffectVictim": 0.0,
+     "friendRequired": true,
+     "neededFriendLevel": {"relation": true, "value": 3}
+     },
+"ShareStoryofLife":
+    {"mainWeight": 0.5,
+     "mainModifiers": {"gregariousness": 1.0,
+                       "loneliness": 1.0,
+                       "friendliness": 1.0},
+     "participantWeight": 1,
+     "numParticipants": 1,
+     "participantModifiers": {"gregariousness": 1.0,
+                       "loneliness": 1.0,
+                       "friendliness": 1.0},
+     "unique": false,
+     "itemRequired": false,
+     "mutual": true,
+     "mainFriendEffect": 0.0,
+     "mainLoveEffect": 0.0,
+     "friendEffect": 0.5,
+     "loveEffect": 1.0,
+     "friendEffectVictim": 0.0,
+     "loveEffectVictim": 0.0,
+     "friendRequired": true,
+     "neededFriendLevel": {"relation": true, "value": -2}
+     }
 }

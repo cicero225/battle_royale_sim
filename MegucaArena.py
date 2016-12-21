@@ -32,7 +32,8 @@ def main():
     # eventRandomness = 0.5 # Percent range over which the base weights of events varies from json settings
     # statInfluence = 0.3 # How much stats influence event weightings, calculated as (1+influence)^((stat-5)*eventInfluenceLevel)
     # objectInfluence = 1 # How much objects in inventory affect events. The default 1 uses the base stats.
-    # relationInfluence = 0.3 # How much relationships affect event chance, calculated as (1+influence)^(relationship level*eventInfluenceLevel)
+    # relationInfluence = 0.1 # How much relationships affect event chance, calculated as (1+influence)^(relationship level*eventInfluenceLevel)
+    # maxParticipantEffect = 3 # Maximum participants/victims can affect event probability. Arbitrary; there's no good way to estimate this.
     # Note that objects that fully disable a event should still do so!
     
     # Initialize Events
@@ -63,7 +64,7 @@ def main():
     # No placeholder sponsors because of the way it is handled.
     sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Sponsors', 'Sponsors.json'), settings, Sponsor)
 
-    # for now relationship levels (arbitrarily, -10 to 10, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
+    # for now relationship levels (arbitrarily, -5 to 5, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
     friendships = {} #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
     loveships = {}
     mergedpeople = list(contestants.keys()) + list(sponsors.keys()) #Or I could write a generator to combine the iterators, but I'll just spend the memory for now
@@ -215,14 +216,8 @@ def main():
                                                                                                         event)
                             if not eventMayProceed:
                                 break
-                        if not eventMayProceed:
-                            continue
-                    correctionParticipantWeights = sorted(eventParticipantWeights[eventName].values(),reverse=True) # The probabilities here are sketchy, but probably okay for outside appearance
-                    correctionParticipantWeights = correctionParticipantWeights[:event.baseProps["numParticipants"]]
-                    correctionParticipantWeight = 1
-                    for weight in correctionParticipantWeights:
-                        correctionParticipantWeight *= weight
-                    indivProb[eventName] *= correctionParticipantWeight/(origIndivWeight**event.baseProps["numParticipants"])
+                    correctionParticipantWeight = sum(eventParticipantWeights[eventName].values())/len(eventParticipantWeights)
+                    indivProb[eventName] *= min(correctionParticipantWeight/origIndivWeight, settings["maxParticipantEffect"])
                 if eventName in baseEventVictimWeights:
                     # A bit of set magic
                     validVictims = set(liveContestants) - alreadyUsed
@@ -246,14 +241,8 @@ def main():
                                                                                                         event)
                             if not eventMayProceed:
                                 break
-                        if not eventMayProceed:
-                            continue   
-                    correctionVictimWeights = sorted(eventVictimWeights[eventName].values(),reverse=True)
-                    correctionVictimWeights = correctionVictimWeights[:event.baseProps["numVictims"]]
-                    correctionVictimWeight = 1
-                    for weight in correctionVictimWeights:
-                        correctionVictimWeight *= weight
-                    indivProb[eventName] *= correctionVictimWeight/(origIndivWeight**event.baseProps["numVictims"])
+                    correctionVictimWeight = sum(eventVictimWeights[eventName].values())/len(eventVictimWeights)
+                    indivProb[eventName] *= min(correctionVictimWeight/origIndivWeight, settings["maxParticipantEffect"])
             
             #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
             eventName = ArenaUtils.weightedDictRandom(indivProb)

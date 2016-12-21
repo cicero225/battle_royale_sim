@@ -7,9 +7,32 @@
          "forgiveness": 3,
          "loyalty": 8,
          "meanness": 2,
+         "ruthlessness": 2,
          "aggression": 5,
          "endurance": 7,
-         "survivalism": 3
+         "survivalism": 3,
+         "loneliness": 2,
+         "friendliness": 1,
+         "cleverness": 8,
+         "combat ability": 5
+         }
+    },
+"Tomoe Mami":
+    {"imageFile": "Mami.jpg",
+    "stats": 
+        {"gregariousness": 6,
+         "stability": 6,
+         "forgiveness": 5,
+         "loyalty": 10,
+         "meanness": 5,
+         "ruthlessness": 3,
+         "aggression": 5,
+         "endurance": 8,
+         "survivalism": 4,
+         "loneliness": 10,
+         "friendliness": 8,
+         "cleverness": 9,
+         "combat ability": 7
          }
     }
 }

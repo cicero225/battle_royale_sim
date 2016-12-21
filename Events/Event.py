@@ -22,7 +22,9 @@ class Event(object): #Python 2.x compatibility
         # (The event is more (or less) likely if actor has ANY relationship that meets the criterion >mainFriendLevel. Set bool to false if you want < instead.
         # float mainFriendEffect (set 0 for none), (relation: bool, value: int) mainNeededFriendLevel  
         # float mainLoveEffect (set 0 for none), (relation: bool, value:int) mainNeededLoveLevel
-        # float friendEffect (set 0 for none) [FROM ACTOR to PARTICIPANT (except for >2 people, in which case all are checked)]
+        # These cause events to be more likely ONLY if ACTOR and PARTICIPANT (OR VICTIM) share relationship. By default it only checks ACTOR -> PARTICIPANT
+        # bool optional mutual # This causes relationship checking to act both ways (the usual use case)
+        # float friendEffect (set 0 for none)
         # float loveEffect (set 0 for none)
         # float friendEffectVictim
         # float loveEffectVictim

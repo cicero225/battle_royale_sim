@@ -4,5 +4,6 @@
  "eventRandomness": 0.5,
  "statInfluence": 0.3,
  "objectInfluence": 1,
- "relationInfluence": 0.3 
+ "relationInfluence": 0.1,
+ "maxParticipantEffect": 3
 }
