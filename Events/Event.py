@@ -67,3 +67,23 @@ class Event(object): #Python 2.x compatibility
     def eventRandomize(self, propName):
         self.baseProps[propName] = (self.baseProps[propName]
                                     *(1+random.uniform(-1*self.settings['eventRandomness'], self.settings['eventRandomness'])))
+                                    
+    @staticmethod                                
+    def parseGenderSubject(contestantObj):
+        genString = contestantObj.gender
+        if genString == "F":
+            return "she"
+        elif genString == "M":
+            return "he"
+        else:
+            return "it"
+
+    @staticmethod                                
+    def parseGenderPossessive(contestantObj):
+        genString = contestantObj.gender
+        if genString == "F":
+            return "her"
+        elif genString == "M":
+            return "his"
+        else:
+            return "it's"

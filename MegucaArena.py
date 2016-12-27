@@ -14,7 +14,7 @@ from Items.Item import Item
 from Sponsors.Sponsor import Sponsor
 from World.World import World
 from Relationships.Relationship import Relationship
-import ArenaUtils
+import Utilities.ArenaUtils
 from Events import *
 
 def main():
@@ -36,6 +36,8 @@ def main():
     # maxParticipantEffect = 3 # Maximum participants/victims can affect event probability. Arbitrary; there's no good way to estimate this.
     # Note that objects that fully disable a event should still do so!
     
+    # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
+    
     # Initialize Events
     events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Events', 'Events.json'), settings, Event.Event)
     eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
@@ -51,7 +53,7 @@ def main():
     # If number of contestants in settings more than those found in the json, add Rando Calrissians
     for i in range(len(contestantNames), settings['numContestants']):
         # Here contestants[0].stats is used as a template for making random stats
-        contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "DUMMY_IMAGE", list(contestants.values())[0].stats, settings) # need Rando image to put here
+        contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "M", "DUMMY_IMAGE", list(contestants.values())[0].stats, settings) # need Rando image to put here
         
     assert(len(contestants)==settings['numContestants'])
     

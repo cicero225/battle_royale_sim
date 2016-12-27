@@ -55,6 +55,7 @@ class Contestant(object):
 
     def __init__(self, name, inDict, settings): # In this case, best to bake the stats as its own thing in the json...
         self.name = name
+        self.gender = inDict['gender']
         self.imageFile = inDict['imageFile']
         self.stats = inDict['stats']
         self.inventory = []
@@ -78,10 +79,11 @@ class Contestant(object):
                                            random.randint(-1*self.settings['traitRandomness'], self.settings['traitRandomness']), 0), 10)
 
     @classmethod
-    def makeRandomContestant(cls, name, imageFile, statstemplate, settings):
+    def makeRandomContestant(cls, name, gender, imageFile, statstemplate, settings):
         inDict = {
             'imageFile': imageFile,
-            'stats': {}
+            'stats': {},
+            'gender': gender,
             }
         for key in statstemplate:
             inDict['stats'][key] = random.randint(0, 10)
@@ -158,4 +160,10 @@ class Contestant(object):
             item.applyObjectStatChanges(self)
         for item in self.inventory:
             item.onAcquisition(self)
+        
+    def permStatChange(self, dictOfChanges): # NOT to be called by items!
+        """dictOfChanges is statName -> change"""
+        for statName, change in dictOfChanges.items():
+            self.originalStats[statName] += change
+        self.refreshEventState()
         

@@ -1,6 +1,7 @@
 
 {"Shizuki Ryouko":
     {"imageFile": "Ryouko.jpg",
+    "gender": "F",
     "stats": 
         {"gregariousness": 2,
          "stability": 8,
@@ -19,6 +20,7 @@
     },
 "Tomoe Mami":
     {"imageFile": "Mami.jpg",
+    "gender": "F",
     "stats": 
         {"gregariousness": 6,
          "stability": 6,
