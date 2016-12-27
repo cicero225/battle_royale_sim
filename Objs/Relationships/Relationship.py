@@ -50,7 +50,7 @@ class Relationship(object):
                     return (0, False)
         if "loveRequired" in event.baseProps and event.baseProps["loveRequired"]:
             negOrPos = 1 if event.baseProps["neededLoveLevel"]["relation"] else -1
-            if negOrPos*self.loveships[actor.name][participant.name]<negOrPos*event.baseProps["NeededLoveLevel"]["value"]:
+            if negOrPos*self.loveships[actor.name][participant.name]<negOrPos*event.baseProps["neededLoveLevel"]["value"]:
                 return (0, False)
             if "mutual" in event.baseProps and event.baseProps["mutual"]:
                 if negOrPos*self.loveships[participant.name][actor.name]<negOrPos*event.baseProps["neededLoveLevel"]["value"]:

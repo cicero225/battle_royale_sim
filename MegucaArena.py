@@ -9,13 +9,13 @@ import os
 import random # A not very good random library, but probably fine for our purposes
 # from functools import partial # Might be useful later
 
-from Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
-from Items.Item import Item
-from Sponsors.Sponsor import Sponsor
-from World.World import World
-from Relationships.Relationship import Relationship
-import Utilities.ArenaUtils
-from Events import *
+from Objs.Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
+from Objs.Items.Item import Item
+from Objs.Sponsors.Sponsor import Sponsor
+from Objs.World.World import World
+from Objs.Relationships.Relationship import Relationship
+import Objs.Utilities.ArenaUtils as ArenaUtils
+from Objs.Events import *
 
 def main():
     """The main for the battle royale sim"""
@@ -39,11 +39,11 @@ def main():
     # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
     
     # Initialize Events
-    events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Events', 'Events.json'), settings, Event.Event)
+    events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Events', 'Events.json'), settings, Event.Event)
     eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
 
     # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
-    contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Contestants', 'Contestants.json'), settings, Contestant)
+    contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Contestants', 'Contestants.json'), settings, Contestant)
     # If number of contestants in settings less than those found in the json, randomly remove some
     contestantNames = contestants.keys()
     if settings['numContestants'] < len(contestantNames):
@@ -64,14 +64,14 @@ def main():
     # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
     # from any type of object gift, otherwise 1, Anything else we think of)
     # No placeholder sponsors because of the way it is handled.
-    sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Sponsors', 'Sponsors.json'), settings, Sponsor)
+    sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Sponsors', 'Sponsors.json'), settings, Sponsor)
 
     # for now relationship levels (arbitrarily, -5 to 5, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
     allRelationships = Relationship(contestants, sponsors, settings)
 
 
     # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
-    items = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Items', 'Items.json'), settings, Item)
+    items = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Items', 'Items.json'), settings, Item)
 
     # Initialize World - Maybe it should have its own settings?
     arena = World(settings) #Maybe other arguments in future, i.e. maybe in an extended world items can be found on the ground, but leaving this as-is for now.
@@ -145,6 +145,7 @@ def main():
     # Repeat.
     restartTurn = False
     # Main loop of DEATH
+    lastEvents = {}
     while True:
         if not restartTurn:
             turnNumber[0] += 1
@@ -174,6 +175,9 @@ def main():
             eventVictimWeights = {} # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
             for eventName, event in events.items():
                 indivProb[eventName] = baseEventActorWeights[eventName]
+                if contestantKey in lastEvents and lastEvents[contestantKey] == eventName: # Rig it so the same event never happens twice to the same person (makes game feel better)
+                    indivProb[eventName] = 0
+                    continue
                 eventMayProceed = True
                 for callback in callbacks["modifyIndivActorWeights"]:
                     indivProb[eventName], eventMayProceed = callback(actor, indivProb[eventName], event)
@@ -235,7 +239,7 @@ def main():
                     indivProb[eventName] *= min(correctionVictimWeight/origIndivWeight, settings["maxParticipantEffect"])
             
             #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
-            eventName = ArenaUtils.weightedDictRandom(indivProb)
+            eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
             # Handle event overrides, if any
             proceedAsUsual = True
             for override in callbacks["overrideContestantEvent"]:
@@ -259,6 +263,7 @@ def main():
                         victims = [contestants[victimkeys]]
                 else:
                     victims = []
+                lastEvents[contestantKey] = eventName
                 desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims)
                 
             # TODO: Placeholder. Probably want object or specialist function for this later.
@@ -267,7 +272,7 @@ def main():
             #Check if everyone is now dead...
             if all(not x.alive for x in liveContestants.values()):
                 # This turn needs to be rerun
-                for key, element in initialState: # This is careful use of how python passing works. The values of state now point to the memory references of those in initialState.
+                for key, element in initialState.items(): # This is careful use of how python passing works. The values of state now point to the memory references of those in initialState.
                 # On the next loop, initialState will be overwritten by copy.deepcopy(state), but the references in state will still point to the right places and won't be released. 
                     state[key] = element
                 restartTurn = True

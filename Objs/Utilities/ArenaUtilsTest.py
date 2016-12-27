@@ -38,7 +38,10 @@ class ArenaUtilsTest(object):
             raise AssertionError("weightedDictRandom did not properly raise IndexError when given too large an integer!")
         except IndexError:
             pass
-        assert not ArenaUtils.weightedDictRandom(inDict,0)
+        for x in range(0,5):
+            if x==1:
+                continue
+            assert(len(ArenaUtils.weightedDictRandom(inDict,x)) == x)
         test4 = ArenaUtils.weightedDictRandom(inDict,4)
         for x in inDict:
             assert x in test4

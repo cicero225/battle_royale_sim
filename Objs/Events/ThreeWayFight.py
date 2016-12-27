@@ -1,6 +1,7 @@
 
-from Events.Event import Event
+from Objs.Events.Event import Event
 from ..Utilities.ArenaUtils import weightedDictRandom
+import random
 
 def func(Event, mainActor, state=None, participants=None, victims=None):
     numDead = random.randint(0,3)
@@ -29,10 +30,10 @@ def func(Event, mainActor, state=None, participants=None, victims=None):
         desc += deadList[0]+' was killed!'
         descList.append(deadList[0])
     elif len(deadList) == 2:
-        desc += deadList[0]+' and '+deadList[1]+'were killed!'
-        descList.append(deadList[0], deadList[1])
+        desc += deadList[0]+' and '+deadList[1]+' were killed!'
+        descList.extend([deadList[0], deadList[1]])
     elif len(deadList) == 3:
-        desc += ' all three died in the fighting!'
+        desc += 'all three died in the fighting!'
     return (desc, descList, deadList) # Second entry is the contestants named in desc, in order. Third is anyone who died. This is in strings.
 
 Event.doEventThreeWayFight = classmethod(func)

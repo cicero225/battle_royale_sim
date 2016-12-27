@@ -29,7 +29,7 @@ def weightedDictRandom(inDict, num_sel=1):
             for x in range(selected+1,len(cumsum)):
                 cumsum[x] -= remWeight
             cumsum.pop(selected+1)
-    return (keys if num_sel > 1 else keys[0])
+    return keys
 
 def LoadJSONIntoDictOfObjects(path, settings, objectType):
     """

@@ -1,4 +1,4 @@
-from Events.Event import Event
+from Objs.Events.Event import Event
 
 def func(Event, mainActor, state=None, participants=None, victims=None):
     mainActor.addItem(state["items"]["Clean Water"])
