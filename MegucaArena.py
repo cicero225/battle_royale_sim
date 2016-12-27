@@ -7,13 +7,13 @@ import copy
 import json
 import os
 import random # A not very good random library, but probably fine for our purposes
-import itertools
-from functools import partial
+# from functools import partial # Might be useful later
 
 from Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
 from Items.Item import Item
 from Sponsors.Sponsor import Sponsor
 from World.World import World
+from Relationships.Relationship import Relationship
 import ArenaUtils
 from Events import *
 
@@ -65,25 +65,14 @@ def main():
     sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Sponsors', 'Sponsors.json'), settings, Sponsor)
 
     # for now relationship levels (arbitrarily, -5 to 5, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
-    friendships = {} #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
-    loveships = {}
-    mergedpeople = list(contestants.keys()) + list(sponsors.keys()) #Or I could write a generator to combine the iterators, but I'll just spend the memory for now
-    for contestant in  mergedpeople:
-        friendships[contestant]={}
-        loveships[contestant]={}
-    for contestant1, contestant2 in itertools.combinations(mergedpeople, 2):
-        friendships[contestant1][contestant2] = 0  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
-        friendships[contestant2][contestant1] = 0
-        loveships[contestant1][contestant2] = 0
-        loveships[contestant2][contestant1] = 0
+    allRelationships = Relationship(contestants, sponsors, settings)
 
 
     # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
     items = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Items', 'Items.json'), settings, Item)
 
     # Initialize World - Maybe it should have its own settings?
-    # a list of one, so it's passed by refernece. Yes this is dumb.
-    arena = [World(settings)] #Maybe other arguments in future, i.e. maybe in an extended world items can be found on the ground, but leaving this as-is for now.
+    arena = World(settings) #Maybe other arguments in future, i.e. maybe in an extended world items can be found on the ground, but leaving this as-is for now.
     
     turnNumber = [0] # Deliberately a list of 1, so it's passed by reference
     state = {
@@ -93,8 +82,7 @@ def main():
     "eventsActive": eventsActive,
     "items": items,
     "arena": arena,
-    "friendships": friendships,
-    "loveships": loveships,
+    "allRelationships": allRelationships,
     "turnNumber": turnNumber,
     } # Allows for convenient passing of the entire game state to anything that needs it (usually events)
     
@@ -111,17 +99,17 @@ def main():
     # modifyIndivActorWeights: Expected args: actor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeights = [
     contestantIndivActorCallback,
-    partial(ArenaUtils.relationsMainWeightCallback, friendships, loveships, settings),
+    allRelationships.relationsMainWeightCallback
     ]
     # modifyIndivActorWeightsWithParticipants: Expected args: actor, participant, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeightsWithParticipants = [
     contestantIndivActorWithParticipantsCallback,
-    partial(ArenaUtils.relationsParticipantWeightCallback, friendships, loveships, settings),
+    allRelationships.relationsParticipantWeightCallback
     ]
     # modifyIndivActorWeightsWithVictims: Expected args: actor, victim, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeightsWithVictims = [
     contestantIndivActorWithVictimsCallback,
-    partial(ArenaUtils.relationsVictimWeightCallback, friendships, loveships, settings),
+    allRelationships.relationsVictimWeightCallback
     ]
     # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantName, eventName, state. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
     # Note that if *any* of these returns false, then normal event processing is overridden
