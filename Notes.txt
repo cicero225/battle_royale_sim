@@ -25,6 +25,17 @@ Information about how items manipulation event probabilities or *disable* events
 Why so many dicts?:
 Well dicts are faster at lookup than lists and have much faster removal/insertion. They waste memory, relatively speaking, but that's not a huge concern here. We could really do better if we assigned objects arbitrary indices and always passed those around, but that is a tremendous pain and makes the maintenance hard.
 
+Regarding defaultdicts:
+These are great objects, if:
+a) Every value in the dict has a natural default value
+b) You don't run much risk of trying to read/write from/to keys that shouldn't be there. (a big problem when a lot of the dicts/keys come from json, where typos can easily slip in)
+
+In an ideal world b) wouldn't be a problem, but programming wise I'd prefer bad reads/writes to fail, not silently operate on a default value. Thus, in this project there is one clear use case for defaultdict: when b) isn't a problem. The ruling is:
+
+As long as the dictionary is not definied directly by json and the keys do not come from json either, default dict is preferred. Otherwise, use normal dict so typos will cause exceptions.
+
+There is some wiggle room (in the case of FullEventMultipliers, etc. in contestants.py, Item.py does in fact manipulate the dictionary using a top level eventname from json, but I want some ability to use events that don't exist yet, so this is a deliberate sacrifice of error-proofing for convenience).
+
 List comprehensions:
 
 A lot of stuff here would be faster with list comprehensions, but for clarity doing normal for loops for now.

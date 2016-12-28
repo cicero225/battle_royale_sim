@@ -1,13 +1,15 @@
 """Useful object for arranging relationship-related helper functions, etc."""
 
 import itertools
+import collections
+from functools import partial
 
 class Relationship(object):
 
     def __init__(self, contestants, sponsors, settings):
         self.settings = settings
-        self.friendships = {} #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
-        self.loveships = {}
+        self.friendships = collections.defaultdict(partial(collections.defaultdict,int)) #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
+        self.loveships = collections.defaultdict(partial(collections.defaultdict,int)) # In this case, the use of these dictionaries is very immunzied from json typos
         mergedpeople = list(contestants.keys()) + list(sponsors.keys()) #Or I could write a generator to combine the iterators, but I'll just spend the memory for now
         for contestant in  mergedpeople:
             self.friendships[contestant]={}

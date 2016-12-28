@@ -7,6 +7,7 @@
 # stats should vary from 0-10. 5 is average and will not affect any events."""
 
 import random
+import collections
 
 def contestantIndivActorCallback(actor, baseEventActorWeight, event):
     try:  # Pythonic, etc. Really, it's preferred this way...
@@ -65,13 +66,15 @@ class Contestant(object):
         # Note that this is not a deepcopy.
         self.alive = True
         self.events = None
-        self.statEventMultipliers = {} # For efficiency, each contestant stores information about how their
+        self.statEventMultipliers = collections.defaultdict(dict) # For efficiency, each contestant stores information about how their
         # event probabilities differ from the base. This cannot be fully initialized until the Events are known,
         # and I choose to defer it to its own step in main. statEventMultipliers are calculated off of base stats
         # The rest come from items and perhaps other sources.
-        self.fullEventMultipliers = {}
-        self.eventAdditions = {}
-        self.eventDisabled = {} # These events cannot happen to this contestant
+        self.fullEventMultipliers = collections.defaultdict(dict) # Note that I _could_ pass in another default dict to give default values,
+        # but this isn't actually a good idea (I actually want access attempts to the bottom layer to fail if unavailable). However, every
+        # event should have its own dict in here regardless of anything else that is going on, so that's safe.
+        self.eventAdditions = collections.defaultdict(dict)
+        self.eventDisabled = collections.defaultdict(dict) # These events cannot happen to this contestant. Default False
 
     def contestantStatRandomize(self):
         for statName in self.stats:
@@ -92,14 +95,7 @@ class Contestant(object):
     def InitializeEventModifiers(self, events): # Note that each event carries information about which stats affect them
         # This mixing of classes is regrettable but probably necessary
         self.events = events
-        self.statEventMultipliers = {}
-        self.fullEventMultipliers = {}
-        self.eventAdditions = {}
-        self.eventDisabled = {}
         for eventName, event in self.events.items():
-            self.statEventMultipliers[eventName] = {}
-            self.eventAdditions[eventName] = {}
-            self.fullEventMultipliers[eventName] = {}
             #This is kind of a dumb way to do it, but being more general is a pain
             for multiplierType in ['main', 'participant', 'victim']:
                 self.eventAdditions[eventName][multiplierType] = 0

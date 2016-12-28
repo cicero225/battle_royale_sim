@@ -7,6 +7,7 @@ import copy
 import json
 import os
 import random # A not very good random library, but probably fine for our purposes
+import collections
 # from functools import partial # Might be useful later
 
 from Objs.Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
@@ -175,8 +176,8 @@ def main():
             alreadyUsed.add(contestantKey) 
             # Calculate individualized/multi-contestant corrected event probabilities
             indivProb = {}
-            eventParticipantWeights = {} # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-            eventVictimWeights = {} # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+            eventParticipantWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+            eventVictimWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
             for eventName, event in events.items():
                 indivProb[eventName] = baseEventActorWeights[eventName]
                 if contestantKey in lastEvents and lastEvents[contestantKey] == eventName: # Rig it so the same event never happens twice to the same person (makes game feel better)
@@ -199,13 +200,10 @@ def main():
                             validParticipants.difference_update(contestants[x].eventDisabled[eventName]["participant"])
                         except:
                             pass
-                    eventParticipantWeights[eventName]= {}
                     if len(validParticipants) < event.baseProps["numParticipants"]:
                         indivProb[eventName] = 0 # This event cannot happen
                         continue
                     for participant in validParticipants:
-                        if eventName not in eventParticipantWeights:
-                            eventParticipantWeights[eventName] = {}
                         eventParticipantWeights[eventName][participant] = baseEventParticipantWeights[eventName]
                         eventMayProceed = True
                         for callback in callbacks["modifyIndivActorWeightsWithParticipants"]:
@@ -227,10 +225,7 @@ def main():
                     if len(validVictims) < event.baseProps["numVictims"]:
                         indivProb[eventName] = 0 # This event cannot happen
                         continue
-                    eventVictimWeights[eventName] = {}
                     for victim in validVictims:
-                        if eventName not in eventVictimWeights:
-                            eventVictimWeights[eventName] = {}
                         eventVictimWeights[eventName][victim] = baseEventVictimWeights[eventName]
                         eventMayProceed = True
                         for callback in callbacks["modifyIndivActorWeightsWithVictims"]:
