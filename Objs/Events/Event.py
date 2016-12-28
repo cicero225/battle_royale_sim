@@ -87,3 +87,14 @@ class Event(object): #Python 2.x compatibility
             return "his"
         else:
             return "it's"
+    
+    @staticmethod
+    def activateEventNextTurnForContestant(eventName, contestantName, state, weight):
+        def func(actor, origWeight, event):
+            if event.name == eventName and actor.name == contestantName:
+                return (weight, True)
+            else:
+                return (origWeight, True)
+        anonfunc = lambda actor, origWeight, event: func(actor, origWeight, event) # this anonymizes func, giving a new reference each this is called
+        state["callbacks"]["modifyIndivActorWeights"].insert(0, anonfunc) # This needs to be at beginning for proper processing
+        return anonfunc # If you ever intend to remove this callback, it's a good idea to keep track of this.

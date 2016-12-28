@@ -173,5 +173,44 @@
      "neededFriendLevel": {"relation": false, "value": 5},
      "loveRequired": true,
      "neededLoveLevel": {"relation": false, "value": 4}
+     },
+ "SickWithFever":
+    {"mainWeight": 0.5,
+     "mainModifiers": {"survivalism": -1.0,
+                       "endurance": -1.0},
+     "unique": false,
+     "itemRequired": false,
+     "mainFriendEffect": 0.0,
+     "mainLoveEffect": 0.0,
+     "friendEffect": 0.0,
+     "loveEffect": 0.0,
+     "friendEffectVictim": 0.0,
+     "loveEffectVictim": 0.0
+     },
+ "RecoversFromFever":
+    {"mainWeight": 0,
+     "mainModifiers": {"survivalism": 1.0,
+                       "endurance": 1.0},
+     "unique": false,
+     "itemRequired": false,
+     "mainFriendEffect": 0.0,
+     "mainLoveEffect": 0.0,
+     "friendEffect": 0.0,
+     "loveEffect": 0.0,
+     "friendEffectVictim": 0.0,
+     "loveEffectVictim": 0.0
+     },
+ "DiesFromFever":
+    {"mainWeight": 0,
+     "mainModifiers": {"survivalism": -1.0,
+                       "endurance": -1.0},
+     "unique": false,
+     "itemRequired": false,
+     "mainFriendEffect": 0.0,
+     "mainLoveEffect": 0.0,
+     "friendEffect": 0.0,
+     "loveEffect": 0.0,
+     "friendEffectVictim": 0.0,
+     "loveEffectVictim": 0.0
      }
  }

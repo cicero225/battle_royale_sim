@@ -14,5 +14,19 @@
         "GiftWater": {"main": true},
         "FindRiverCleanWater": {"main": true}
         }
+    },
+"Fruit":
+    {"statChanges": 
+        {"endurance": 1
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        "GetsFruitFromTree": {"main": true}
+        }
     }
 }

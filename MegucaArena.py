@@ -77,6 +77,9 @@ def main():
     arena = World(settings) #Maybe other arguments in future, i.e. maybe in an extended world items can be found on the ground, but leaving this as-is for now.
     
     turnNumber = [0] # Deliberately a list of 1, so it's passed by reference
+    
+    callbackStore = {} #Arbitrary storage specifically for non-main objects/callbacks to use. Make sure to use a unique key (ideally involving the name of the function)
+    
     state = {
     "contestants": contestants,
     "sponsors": sponsors,
@@ -86,6 +89,7 @@ def main():
     "arena": arena,
     "allRelationships": allRelationships,
     "turnNumber": turnNumber,
+    "callbackStore": callbackStore,
     } # Allows for convenient passing of the entire game state to anything that needs it (usually events)
     
     # CALLBACKS
@@ -121,15 +125,12 @@ def main():
     ArenaUtils.onlyOneLeft
     ]
     
-    callbackStore = {} #Arbitrary storage specifically for non-main objects/callbacks to use. Make sure to use a unique key (ideally involving the name of the function)
-    
     callbacks = {"modifyBaseWeights": modifyBaseWeights,
                  "modifyIndivActorWeights": modifyIndivActorWeights,
                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
                  "overrideContestantEvent": overrideContestantEvent,
                  "endGameConditions": endGameConditions,
-                 "callbackStore": callbackStore,
     }
     state["callbacks"] = callbacks # I define state before callbacks so it can be bound to a callback if necessary
     
