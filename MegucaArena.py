@@ -121,12 +121,15 @@ def main():
     ArenaUtils.onlyOneLeft
     ]
     
+    callbackStore = {} #Arbitrary storage specifically for non-main objects/callbacks to use. Make sure to use a unique key (ideally involving the name of the function)
+    
     callbacks = {"modifyBaseWeights": modifyBaseWeights,
                  "modifyIndivActorWeights": modifyIndivActorWeights,
                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
                  "overrideContestantEvent": overrideContestantEvent,
                  "endGameConditions": endGameConditions,
+                 "callbackStore": callbackStore,
     }
     state["callbacks"] = callbacks # I define state before callbacks so it can be bound to a callback if necessary
     
