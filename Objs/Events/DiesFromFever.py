@@ -1,6 +1,6 @@
 from Objs.Events.Event import Event
 
-def func(Event, mainActor, state=None, participants=None, victims=None):
+def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
     desc = mainActor.name + " dies from "+Event.parseGenderPossessive(mainActor)+" fever!"
     mainActor.alive = False
     state["callbacks"]["modifyIndivActorWeights"].remove(state["callbackStore"]["SickWithFeverStore"][mainActor.name][0])

@@ -8,11 +8,11 @@ import json
 import os
 import random # A not very good random library, but probably fine for our purposes
 import collections
-# from functools import partial # Might be useful later
+from functools import partial # Might be useful later
 
 from Objs.Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
 from Objs.Items.Item import Item
-from Objs.Sponsors.Sponsor import Sponsor
+from Objs.Sponsors.Sponsor import Sponsor, contestantIndivActorWithSponsorsCallback
 from Objs.World.World import World
 from Objs.Relationships.Relationship import Relationship
 import Objs.Utilities.ArenaUtils as ArenaUtils
@@ -100,40 +100,96 @@ def main():
     
     # Also, for now, relationship callbacks are in ArenaUtils
     
-    # modifyBaseWeights: Expected args: baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, turnNumber. Modify in place.
+    # Run once before the start of the game. Expected args: state. Modify in place.
+    startup = [ArenaUtils.logLastEventStartup]
+    
+    # modifyBaseWeights: Expected args: baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber. Modify in place.
         # Also a good time to do any beginning of turn stuff
-    modifyBaseWeights = []    
+    modifyBaseWeights = []
+    
     # modifyIndivActorWeights: Expected args: actor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeights = [
+    partial(ArenaUtils.eventMayNotRepeat,state=state),
     contestantIndivActorCallback,
     allRelationships.relationsMainWeightCallback
     ]
     # modifyIndivActorWeightsWithParticipants: Expected args: actor, participant, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeightsWithParticipants = [
     contestantIndivActorWithParticipantsCallback,
-    allRelationships.relationsParticipantWeightCallback
+    partial(allRelationships.relationsRoleWeightCallback, "Participant")
     ]
     # modifyIndivActorWeightsWithVictims: Expected args: actor, victim, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeightsWithVictims = [
     contestantIndivActorWithVictimsCallback,
-    allRelationships.relationsVictimWeightCallback
+    partial(allRelationships.relationsRoleWeightCallback, "Victim")
     ]
-    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantName, eventName, state. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
+    
+    # modifyIndivActorWeightsWithSponsors: Expected args: actor, sponsor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
+    modifyIndivActorWeightsWithSponsors = [
+    contestantIndivActorWithSponsorsCallback,
+    partial(allRelationships.relationsRoleWeightCallback, "Sponsor")
+    ]
+    
+    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantName, eventName, state, proceedAsUsual. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
     # Note that if *any* of these returns false, then normal event processing is overridden
-    overrideContestantEvent = []  
+    overrideContestantEvent = [
+    ArenaUtils.logLastEventByContestant  # This should always be last.
+    ]  
     # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)
     endGameConditions = [
     ArenaUtils.onlyOneLeft
     ]
     
-    callbacks = {"modifyBaseWeights": modifyBaseWeights,
+    callbacks = {"startup": startup,
+                 "modifyBaseWeights": modifyBaseWeights,
                  "modifyIndivActorWeights": modifyIndivActorWeights,
                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
+                 "modifyIndivActorWeightsWithSponsors": modifyIndivActorWeightsWithSponsors,
                  "overrideContestantEvent": overrideContestantEvent,
                  "endGameConditions": endGameConditions,
     }
     state["callbacks"] = callbacks # I define state before callbacks so it can be bound to a callback if necessary
+    
+    # Nested functions that need access to variables in main
+    
+    def modifyWeightForMultipleActors(baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
+        if eventName in baseWeights:
+            # A bit of set magic
+            if forSponsors:
+                validRoles = people.keys()
+            else:
+                validRoles = set(liveContestants) - alreadyUsed
+                for x in validRoles:
+                    try:
+                        validRoles.difference_update(people[x].eventDisabled[eventName][roleName])
+                    except:
+                        pass
+                if len(validRoles) < event.baseProps[numRoles]:
+                    indivProb[eventName] = 0 # This event cannot happen
+                    return
+            for role in validRoles:
+                weights[eventName][role] = baseWeights[eventName]
+                eventMayProceed = True
+                for callback in callbacks[callbackName]:
+                    weights[eventName][role], eventMayProceed = callback(actor, people[role],
+                                                                                                weights[eventName][role],
+                                                                                                event)
+                    if not eventMayProceed:
+                        break
+            correctionRoleWeight = sum(weights[eventName].values())/len(weights)
+            indivProb[eventName] *= min(correctionRoleWeight/origIndivWeight, settings["maxParticipantEffect"])
+            
+    def selectRoles(baseWeights, weights, numRoles, people=contestants):
+        if eventName in baseWeights:
+            rolekeys = ArenaUtils.weightedDictRandom(weights[eventName], thisevent.baseProps[numRoles])
+            try:
+                roles = [people[key] for key in rolekeys]
+            except KeyError:
+                roles = [people[rolekeys]]
+        else:
+            roles = []
+        return roles
     
     # Run simulation
 
@@ -149,6 +205,11 @@ def main():
     # Then print results into HTML (?) or whatever makes sense
     # Repeat.
     restartTurn = False
+    
+    #Startup callbacks
+    for callback in callbacks["startup"]:
+        callback(state)
+        
     # Main loop of DEATH
     lastEvents = {}
     while True:
@@ -164,9 +225,10 @@ def main():
         baseEventActorWeights = {x: y.baseProps["mainWeight"] if eventsActive[x] else 0 for x, y in events.items()}
         baseEventParticipantWeights = {x: y.baseProps["participantWeight"] for x, y in events.items() if "participantWeight" in y.baseProps}
         baseEventVictimWeights = {x: y.baseProps["victimWeight"] for x, y in events.items() if "victimWeight" in y.baseProps}
+        baseEventSponsorWeights = {x: y.baseProps["sponsorWeight"] for x, y in events.items() if "sponsorWeight" in y.baseProps}
         #Do callbacks for modifying base weights
         for callback in callbacks["modifyBaseWeights"]:
-            callback(baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, turnNumber)
+            callback(baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber)
         # Now go through the contestants and trigger events based on their individualized probabilities
         alreadyUsed = set()
         for contestantKey in randOrderContestantKeys: #This is not statistically uniform because these multi-person events are hard and probably not worth figuring out in exact detail...
@@ -178,11 +240,9 @@ def main():
             indivProb = {}
             eventParticipantWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
             eventVictimWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+            eventSponsorWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
             for eventName, event in events.items():
                 indivProb[eventName] = baseEventActorWeights[eventName]
-                if contestantKey in lastEvents and lastEvents[contestantKey] == eventName: # Rig it so the same event never happens twice to the same person (makes game feel better)
-                    indivProb[eventName] = 0
-                    continue
                 eventMayProceed = True
                 for callback in callbacks["modifyIndivActorWeights"]:
                     indivProb[eventName], eventMayProceed = callback(actor, indivProb[eventName], event)
@@ -192,79 +252,25 @@ def main():
                     continue
                 origIndivWeight = indivProb[eventName]
                 # Probability correction for multi-contestant events, if necessary
-                if eventName in baseEventParticipantWeights:
-                    # A bit of set magic
-                    validParticipants = set(liveContestants) - alreadyUsed
-                    for x in validParticipants:
-                        try:
-                            validParticipants.difference_update(contestants[x].eventDisabled[eventName]["participant"])
-                        except:
-                            pass
-                    if len(validParticipants) < event.baseProps["numParticipants"]:
-                        indivProb[eventName] = 0 # This event cannot happen
-                        continue
-                    for participant in validParticipants:
-                        eventParticipantWeights[eventName][participant] = baseEventParticipantWeights[eventName]
-                        eventMayProceed = True
-                        for callback in callbacks["modifyIndivActorWeightsWithParticipants"]:
-                            eventParticipantWeights[eventName][participant], eventMayProceed = callback(actor, contestants[participant],
-                                                                                                        eventParticipantWeights[eventName][participant],
-                                                                                                        event)
-                            if not eventMayProceed:
-                                break
-                    correctionParticipantWeight = sum(eventParticipantWeights[eventName].values())/len(eventParticipantWeights)
-                    indivProb[eventName] *= min(correctionParticipantWeight/origIndivWeight, settings["maxParticipantEffect"])
-                if eventName in baseEventVictimWeights:
-                    # A bit of set magic
-                    validVictims = set(liveContestants) - alreadyUsed
-                    for x in validVictims:
-                        try:
-                            validVictims.difference_update(contestants[x].eventDisabled[eventName]["victim"])
-                        except:
-                            pass
-                    if len(validVictims) < event.baseProps["numVictims"]:
-                        indivProb[eventName] = 0 # This event cannot happen
-                        continue
-                    for victim in validVictims:
-                        eventVictimWeights[eventName][victim] = baseEventVictimWeights[eventName]
-                        eventMayProceed = True
-                        for callback in callbacks["modifyIndivActorWeightsWithVictims"]:
-                            eventVictimWeights[eventName][victim], eventMayProceed = callback(actor, contestants[victim],
-                                                                                                        eventVictimWeights[eventName][victim],
-                                                                                                        event)
-                            if not eventMayProceed:
-                                break
-                    correctionVictimWeight = sum(eventVictimWeights[eventName].values())/len(eventVictimWeights)
-                    indivProb[eventName] *= min(correctionVictimWeight/origIndivWeight, settings["maxParticipantEffect"])
+                # this feels silly but is very useful
+                modifyWeightForMultipleActors(baseEventParticipantWeights, eventParticipantWeights, "pariticipant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
+                modifyWeightForMultipleActors(baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
+                modifyWeightForMultipleActors(baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
             
             #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
             eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
             # Handle event overrides, if any
             proceedAsUsual = True
             for override in callbacks["overrideContestantEvent"]:
-                proceedAsUsual = override(contestantKey, eventName, state) and proceedAsUsual # Because of short-circuit processing, the order here is important
+                proceedAsUsual = override(contestantKey, eventName, state, proceedAsUsual) and proceedAsUsual # Because of short-circuit processing, the order here is important
             if proceedAsUsual:
                 #Determine participants, victims, if any.
                 thisevent = events[eventName]
-                if eventName in baseEventParticipantWeights:
-                    participantkeys = ArenaUtils.weightedDictRandom(eventParticipantWeights[eventName], thisevent.baseProps["numParticipants"])
-                    try:
-                        participants = [contestants[key] for key in participantkeys]
-                    except KeyError:
-                        participants = [contestants[participantkeys]]
-                else:
-                    participants = []
-                if eventName in baseEventVictimWeights:
-                    victimkeys = ArenaUtils.weightedDictRandom(eventVictimWeights[eventName], thisevent.baseProps["numVictims"])
-                    try:
-                        victims = [contestants[key] for key in victimkeys]
-                    except KeyError:
-                        victims = [contestants[victimkeys]]
-                else:
-                    victims = []
-                lastEvents[contestantKey] = eventName
-                desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims)
-                
+                participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, "numParticipants")
+                victims = selectRoles(baseEventVictimWeights, eventVictimWeights, "numVictims")
+                sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, "numSponsors", sponsors)
+                desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
+            
             # TODO: Placeholder. Probably want object or specialist function for this later.
             print(desc)
             

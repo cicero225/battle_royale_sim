@@ -2,7 +2,7 @@
 from Objs.Events.Event import Event
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None):
+def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
     # Hmm...having an object that takes care of this max 5 business would be nice    
     # Random relationship boost
     state["allRelationships"].IncreaseFriendLevel(mainActor.name, participants[0].name, random.randint(0,2)) 

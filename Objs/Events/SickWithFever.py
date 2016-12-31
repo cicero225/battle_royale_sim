@@ -1,6 +1,6 @@
 from Objs.Events.Event import Event
 
-def func(Event, mainActor, state=None, participants=None, victims=None):
+def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.permStatChange({'stability': -1,
                               'endurance': -3,
                               'combat ability': -3})

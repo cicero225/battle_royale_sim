@@ -20,23 +20,29 @@ class Event(object): #Python 2.x compatibility
         # bool unique, list[string] optional uniqueUsers #at the moment only supports unique contestants performing the event, rather than being the victim etc. This is bad for, say, Mami getting her head eaten.
         # bool itemRequired, string optional necessaryItem
         # (The event is more (or less) likely if actor has ANY relationship that meets the criterion >mainFriendLevel. Set bool to false if you want < instead.
+        # These are optional if no corresponding victim, participant, or sponsor is actually involved in the event
         # float mainFriendEffect (set 0 for none), (relation: bool, value: int) mainNeededFriendLevel  
         # float mainLoveEffect (set 0 for none), (relation: bool, value:int) mainNeededLoveLevel
         # These cause events to be more likely ONLY if ACTOR and PARTICIPANT (OR VICTIM) share relationship. By default it only checks ACTOR -> PARTICIPANT
         # bool optional mutual # This causes relationship checking to act both ways (the usual use case)
-        # float friendEffect (set 0 for none)
-        # float loveEffect (set 0 for none)
+        # bool optional reverse # This causes relationship checking to act backwards (usually only for sponsors)
+        # float friendEffectParticipant (set 0 for none)
+        # float loveEffectParticipant (set 0 for none)
         # float friendEffectVictim
         # float loveEffectVictim
+        # float friendEffectSponsor
+        # float loveEffectSponsor
         # If first bool is true, then you need friendship level > (or if bool false, <) the specified needed level
-        # bool optional friendRequired, (relation: bool, value:int) optional neededFriendLevel 
-        # bool optional loveRequired, (relation: bool, value:int) optional, neededLoveLevel
+        # bool optional friendRequiredParticipant, (relation: bool, value:int) optional neededFriendLevelParticipant 
+        # bool optional loveRequiredParticipant, (relation: bool, value:int) optional, neededLoveLevelParticipant
         # bool optional friendRequiredVictim, (relation: bool, value:int) optional neededFriendLevelVictim
         # bool optional loveRequiredVictim, (relation: bool, value:int) optional, neededLoveLevelVictim
+        # bool optional friendRequiredSponsor, (relation: bool, value:int) optional neededFriendLevelSponsor
+        # bool optional loveRequiredSponsor, (relation: bool, value:int) optional, neededLoveLevelSponsor
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
-        # of any given contestant being the victim
+        # of any given contestant being the victim, and sponsorWeight set probabiltiy of a given sponsor being the sponsor
 
         # modifier values list the contestant stats that affect the probabilities of these and by how relatively much (though
         # usually just 1 or -1). If there is a good way to make the json thing give dict(string)->float instead that'd be
@@ -56,10 +62,10 @@ class Event(object): #Python 2.x compatibility
     def registerEvent(cls, eventName, callback):
         cls.event_callbacks[eventName] = callback
     
-    def doEvent(self, mainActor, state=None, participants=None, victims=None):
+    def doEvent(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
         if self.name in self.event_callbacks:
             callback = self.event_callbacks[self.name]
-            return callback(mainActor, state, participants, victims)
+            return callback(mainActor, state, participants, victims, sponsors)
         else:
             desc = mainActor.name+' did absolutely nothing.'
             return (desc, [mainActor], []) # Second entry is the contestants named in desc, in order. Third is anyone who died.

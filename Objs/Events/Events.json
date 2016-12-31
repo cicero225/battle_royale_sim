@@ -2,73 +2,44 @@
 {"EventTemplate": 
     {"mainWeight": 0.0,
      "unique": false,
-     "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0},
+     "itemRequired": false
+     },
 "TestOneKill": 
     {"mainWeight": 1.0,
      "victimWeight": 1.0,
      "numVictims": 1,
      "unique": false,
      "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
      "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0},
+     "loveEffectVictim": 0.0
+     },
 "FindRiverCleanWater":
     {"mainWeight": 1.0,
      "mainModifiers": {"survivalism": 1.0},
      "unique": false,
-     "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0},
+     "itemRequired": false
+     },
 "OutOfCleanWater":
     {"mainWeight": 0.2,
      "mainModifiers": {"survivalism": -1.0},
      "unique": false,
      "itemRequired": true,
-     "necessaryItem": "Clean Water",
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0},
+     "necessaryItem": "Clean Water"
+     },
 "Dysentary":
     {"mainWeight": 0.5,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
-     "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0},
+     "itemRequired": false
+     },
 "MamiDecap":
     {"mainWeight": 0.05,
      "unique": true,
      "uniqueUsers": ["Tomoe Mami"],
      "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0,
-     "friendRequired": true,
-     "neededFriendLevel": {"relation": true, "value": 3}
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": true, "value": 3}
      },
 "ShareStoryofLife":
     {"mainWeight": 0.5,
@@ -83,27 +54,17 @@
      "unique": false,
      "itemRequired": false,
      "mutual": true,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.5,
-     "loveEffect": 1.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0,
-     "friendRequired": true,
-     "neededFriendLevel": {"relation": true, "value": -2}
+     "friendEffectParticipant": 0.5,
+     "loveEffectParticipant": 1.0,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": true, "value": -2}
      },
 "HuntsForOthers": 
     {"mainWeight": 1.0,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
      "unique": false,
-     "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0
+     "itemRequired": false
      },
 "AttacksButEscapes":
     {"mainWeight": 1,
@@ -114,16 +75,12 @@
      "victimModifiers": {"cleverness": -1},
      "unique": false,
      "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
      "friendEffectVictim": -1.0,
      "loveEffectVictim": -2.0,
-     "friendRequired": true,
-     "neededFriendLevel": {"relation": false, "value": 5},
-     "loveRequired": true,
-     "neededLoveLevel": {"relation": false, "value": 4}
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": false, "value": 5},
+     "loveRequiredParticipant": true,
+     "neededLoveLevelParticipant": {"relation": false, "value": 4}
      },
 "QuestionsSanity": 
     {"mainWeight": 0.5,
@@ -131,26 +88,16 @@
                     "stability": -1.0},
      "unique": false,
      "itemRequired": false,
-     "mainFriendEffect": -1.0,
-     "mainNeededFriendLevel": {"relation": true, "value": 4},
-     "mainLoveEffect": -2.0,
-     "mainNeededLoveLevel": {"relation": true, "value": 3},
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0
+     "mainfriendEffectParticipant": -1.0,
+     "mainneededFriendLevelParticipant": {"relation": true, "value": 4},
+     "mainloveEffectParticipant": -2.0,
+     "mainneededLoveLevelParticipant": {"relation": true, "value": 3}
      },
 "GetsFruitFromTree": 
     {"mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0},
      "unique": false,
-     "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0
+     "itemRequired": false
      },
  "ThreeWayFight":
     {"mainWeight": 0.5,
@@ -163,54 +110,44 @@
      "unique": false,
      "itemRequired": false,
      "mutual": true,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.5,
-     "loveEffect": 1.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0,
-     "friendRequired": true,
-     "neededFriendLevel": {"relation": false, "value": 5},
-     "loveRequired": true,
-     "neededLoveLevel": {"relation": false, "value": 4}
+     "friendEffectParticipant": 0.5,
+     "loveEffectParticipant": 1.0,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": false, "value": 5},
+     "loveRequiredParticipant": true,
+     "neededLoveLevelParticipant": {"relation": false, "value": 4}
      },
  "SickWithFever":
     {"mainWeight": 0.5,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
-     "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0
+     "itemRequired": false
      },
  "RecoversFromFever":
     {"mainWeight": 0,
      "mainModifiers": {"survivalism": 1.0,
                        "endurance": 1.0},
      "unique": false,
-     "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0
+     "itemRequired": false
      },
  "DiesFromFever":
     {"mainWeight": 0,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
+     "itemRequired": false
+     },
+ "SponsorGiveWater":
+    {"mainWeight": 0.5,
+     "sponsorWeight": 1,
+     "numSponsors": 1,
+     "unique": false,
      "itemRequired": false,
-     "mainFriendEffect": 0.0,
-     "mainLoveEffect": 0.0,
-     "friendEffect": 0.0,
-     "loveEffect": 0.0,
-     "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0
+     "reverse": true,
+     "friendEffectSponsor": 0.5,
+     "loveEffectSponsor": 1.0,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": true, "value": -2}
      }
  }

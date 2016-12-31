@@ -3,7 +3,7 @@ from Objs.Events.Event import Event
 from ..Utilities.ArenaUtils import weightedDictRandom
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None):
+def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
     numDead = random.randint(0,3)
     desc = mainActor.name+', '+participants[0].name+', and '+participants[1].name+' fought, '
     if not numDead:

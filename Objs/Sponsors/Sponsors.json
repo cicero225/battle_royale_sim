@@ -1,6 +1,7 @@
 
 {"Akuma Homura":
     {"imageFile": "Akuma.jpg",
+    "gender": "F",
     "stats": 
         {"gregariousness": 1,
          "forgiveness": 2,
@@ -10,7 +11,8 @@
          }
     },
 "Ultimate Madoka":
-    {"imageFile": "Akuma.jpg",
+    {"imageFile": "Madokami.jpg",
+    "gender": "F",
     "stats": 
         {"gregariousness": 9,
          "forgiveness": 10,

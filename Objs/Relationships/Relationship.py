@@ -27,68 +27,48 @@ class Relationship(object):
         self.loveships[name1][name2] = max(min(self.loveships[name1][name2]+change, 5), -5)
         
     def relationsMainWeightCallback(self, actor, baseEventActorWeight, event):
-        if event.baseProps["mainFriendEffect"]:
+        if "mainFriendEffect" in event.baseProps and event.baseProps["mainFriendEffect"]:
             negOrPos = 1 if event.baseProps["mainNeededFriendLevel"]["relation"] else -1
             for friendLevel in self.friendships[actor.name].values():
                 if negOrPos*friendLevel >= event.baseProps["mainNeededFriendLevel"]["value"]:
                     baseEventActorWeight *= (1+self.settings["relationInfluence"])**event.baseProps["mainFriendEffect"]
                     break
-        if event.baseProps["mainLoveEffect"]:
+        if "mainLoveEffect" in event.baseProps and event.baseProps["mainLoveEffect"]:
             negOrPos = 1 if event.baseProps["mainNeededLoveLevel"]["relation"] else -1
             for loveLevel in self.loveships[actor.name].values():
                 if negOrPos*loveLevel >= event.baseProps["mainNeededLoveLevel"]["value"]:
                     baseEventActorWeight *= (1+self.settings["relationInfluence"])**event.baseProps["mainLoveEffect"]
                     break
         return (baseEventActorWeight, True)
-
-    
-    def relationsParticipantWeightCallback(self, actor, participant, baseEventParticipantWeight, event):
-        if "friendRequired" in event.baseProps and event.baseProps["friendRequired"]:
-            negOrPos = 1 if event.baseProps["neededFriendLevel"]["relation"] else -1
-            if negOrPos*self.friendships[actor.name][participant.name]<negOrPos*event.baseProps["neededFriendLevel"]["value"]:
-                return (0, False)
-            if "mutual" in event.baseProps and event.baseProps["mutual"]:
-                if negOrPos*self.friendships[participant.name][actor.name]<negOrPos*event.baseProps["neededFriendLevel"]["value"]:
-                    return (0, False)
-        if "loveRequired" in event.baseProps and event.baseProps["loveRequired"]:
-            negOrPos = 1 if event.baseProps["neededLoveLevel"]["relation"] else -1
-            if negOrPos*self.loveships[actor.name][participant.name]<negOrPos*event.baseProps["neededLoveLevel"]["value"]:
-                return (0, False)
-            if "mutual" in event.baseProps and event.baseProps["mutual"]:
-                if negOrPos*self.loveships[participant.name][actor.name]<negOrPos*event.baseProps["neededLoveLevel"]["value"]:
-                    return (0, False)
-        friendlevel = self.friendships[actor.name][participant.name]
-        lovelevel = self.loveships[actor.name][participant.name]
-        if "mutual" in event.baseProps and event.baseProps["mutual"]:
-            friendlevel = (friendlevel+self.friendships[participant.name][actor.name])/2
-            lovelevel = (lovelevel+self.loveships[participant.name][actor.name])/2
-        return(baseEventParticipantWeight*
-              (1+self.settings["relationInfluence"])**(friendlevel*event.baseProps["friendEffect"])*
-              (1+self.settings["relationInfluence"])**(lovelevel*event.baseProps["loveEffect"]),
-              True)
      
-     
-    def relationsVictimWeightCallback(self, actor, victim, baseEventVictimWeight, event):
-        if "friendRequiredVictim" in event.baseProps and event.baseProps["friendRequiredVictim"]: 
-            negOrPos = 1 if event.baseProps["neededFriendLevelVictim"]["relation"] else -1
-            if negOrPos*self.friendships[actor.name][victim.name]<negOrPos*event.baseProps["neededFriendLevelVictim"]["value"]:
-                return (0, False)
-            if "mutual" in event.baseProps and event.baseProps["mutual"]:
-                if negOrPos*self.friendships[victim.name][actor.name]<negOrPos*event.baseProps["neededFriendLevel"]["value"]:
+    def relationsRoleWeightCallback(self, roleName, actor, role, baseEventRoleWeight, event): # the string roleName should be bound when this callback is registered
+        assert not (("mutual" in event.baseProps and event.baseProps["mutual"]) and ("reverse" in event.baseProps and event.baseProps["reverse"]))
+        if "friendRequired"+roleName in event.baseProps and event.baseProps["friendRequired"+roleName]: 
+            negOrPos = 1 if event.baseProps["neededFriendLevel"+roleName]["relation"] else -1
+            if not ("reverse" in event.baseProps and event.baseProps["reverse"]):
+                if negOrPos*self.friendships[actor.name][role.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
                     return (0, False)
-        if "loveRequiredVictim" in event.baseProps and event.baseProps["loveRequiredVictim"]:
-            negOrPos = 1 if event.neededLoveLevelVictim["relation"] else -1
-            if negOrPos*self.loveships[actor.name][victim.name]<negOrPos*event.baseProps["neededLoveLevelVictim"]["value"]:
-                return (0, False)
-            if "mutual" in event.baseProps and event.baseProps["mutual"]:
-                if negOrPos*self.loveships[victim.name][actor.name]<negOrPos*event.baseProps["neededLoveLevel"]["value"]:
+            if ("mutual" in event.baseProps and event.baseProps["mutual"]) or ("reverse" in event.baseProps and event.baseProps["reverse"]):
+                if negOrPos*self.friendships[role.name][actor.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
                     return (0, False)
-        friendlevel = self.friendships[actor.name][victim.name]
-        lovelevel = self.loveships[actor.name][victim.name]
-        if "mutual" in event.baseProps and event.baseProps["mutual"]:
-            friendlevel = (friendlevel+self.friendships[victim.name][actor.name])/2
-            lovelevel = (lovelevel+self.loveships[victim.name][actor.name])/2
-        return(baseEventVictimWeight*
-              (1+self.settings["relationInfluence"])**(friendlevel*event.baseProps["friendEffectVictim"])*
-              (1+self.settings["relationInfluence"])**(lovelevel*event.baseProps["loveEffectVictim"]),
+        if "loveRequired"+roleName in event.baseProps and event.baseProps["loveRequired"+roleName]:
+            negOrPos = 1 if event.baseProps["neededLoveLevel"+roleName]["relation"] else -1
+            if not ("reverse" in event.baseProps and event.baseProps["reverse"]):
+                if negOrPos*self.loveships[actor.name][role.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
+                    return (0, False)
+            if ("mutual" in event.baseProps and event.baseProps["mutual"]) or ("reverse" in event.baseProps and event.baseProps["reverse"]):
+                if negOrPos*self.loveships[role.name][actor.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
+                    return (0, False)
+        if "reverse" in event.baseProps and event.baseProps["reverse"]:
+            friendlevel = self.friendships[role.name][actor.name]
+            lovelevel = self.loveships[role.name][actor.name]
+        else:
+            friendlevel = self.friendships[actor.name][role.name]
+            lovelevel = self.loveships[actor.name][role.name]
+            if "mutual" in event.baseProps and event.baseProps["mutual"]:
+                friendlevel = (friendlevel+self.friendships[role.name][actor.name])/2
+                lovelevel = (lovelevel+self.loveships[role.name][actor.name])/2
+        return(baseEventRoleWeight*
+              (1+self.settings["relationInfluence"])**(friendlevel*event.baseProps["friendEffect"+roleName])*
+              (1+self.settings["relationInfluence"])**(lovelevel*event.baseProps["loveEffect"+roleName]),
               True)

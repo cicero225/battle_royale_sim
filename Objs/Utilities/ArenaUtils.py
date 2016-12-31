@@ -4,6 +4,7 @@ from __future__ import division
 import json
 import random
 import bisect
+import collections
     
 def weightedDictRandom(inDict, num_sel=1):
     """Given an input dictionary with weights as values, picks num_sel uniformly weighted random selection from the keys"""
@@ -53,8 +54,28 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
     for name in fromFile:
         objectDict[name] = objectType(name, fromFile[name], settings) # Constructor should \
                                                                   # take in dict and settings (also a dict)
-    return objectDict    
-          
+    return objectDict
+
+# Callbacks for specific arena features
+
+def logLastEventStartup(state):
+    state["callbackStore"]["lastEvent"] = collections.defaultdict(str)
+
+# Logs last event. Must be last callback in overrideContestantEvent. 
+def logLastEventByContestant(contestantKey, eventName, state, proceedAsUsual):
+    if proceedAsUsual:
+        state["callbackStore"]["lastEvent"][contestantKey] = eventName
+    else:
+        state["callbackStore"]["lastEvent"][contestantKey] = "overridden"
+    return proceedAsUsual
+
+# Rig it so the same event never happens twice to the same person (makes game feel better)
+def eventMayNotRepeat(actor, origProb , event, state): 
+    if state["callbackStore"]["lastEvent"][actor.name] == event.name: 
+        return 0, False
+    return origProb, True
+  
+# Ends the game if only one contestant left  
 def onlyOneLeft(liveContestants, _):
     if len(liveContestants) == 1:
         return True
