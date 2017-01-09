@@ -5,6 +5,7 @@ import json
 import random
 import bisect
 import collections
+import html
     
 def weightedDictRandom(inDict, num_sel=1):
     """Given an input dictionary with weights as values, picks num_sel uniformly weighted random selection from the keys"""

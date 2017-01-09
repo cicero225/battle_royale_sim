@@ -17,6 +17,9 @@ from Objs.World.World import World
 from Objs.Relationships.Relationship import Relationship
 import Objs.Utilities.ArenaUtils as ArenaUtils
 from Objs.Events import *
+from Objs.Display.HTMLWriter import HTMLWriter
+
+PRINTHTML = True
 
 def main():
     """The main for the battle royale sim"""
@@ -54,7 +57,7 @@ def main():
     # If number of contestants in settings more than those found in the json, add Rando Calrissians
     for i in range(len(contestantNames), settings['numContestants']):
         # Here contestants[0].stats is used as a template for making random stats
-        contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "M", "DUMMY_IMAGE", list(contestants.values())[0].stats, settings) # need Rando image to put here
+        contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "M", "Rando.jpg", list(contestants.values())[0].stats, settings) # need Rando image to put here
         
     assert(len(contestants)==settings['numContestants'])
     
@@ -81,6 +84,8 @@ def main():
     
     callbackStore = {} #Arbitrary storage specifically for non-main objects/callbacks to use. Make sure to use a unique key (ideally involving the name of the function)
     
+    thisWriter = None # current HTML display object
+    
     state = {
     "contestants": contestants,
     "sponsors": sponsors,
@@ -91,6 +96,7 @@ def main():
     "allRelationships": allRelationships,
     "turnNumber": turnNumber,
     "callbackStore": callbackStore,
+    "thisWriter": thisWriter,
     } # Allows for convenient passing of the entire game state to anything that needs it (usually events)
     
     # CALLBACKS
@@ -217,6 +223,9 @@ def main():
         if not restartTurn:
             turnNumber[0] += 1
             print("Day "+str(turnNumber[0]))
+        if PRINTHTML:
+            thisWriter = HTMLWriter()
+            thisWriter.addDay(turnNumber[0])
         restartTurn = False # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
         initialState = copy.deepcopy(state) #Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
         liveContestants = {x: y for x, y in contestants.items() if y.alive}
@@ -272,8 +281,11 @@ def main():
                 sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, "numSponsors", sponsors)
                 desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
             
-            # TODO: Placeholder. Probably want object or specialist function for this later.
-            print(desc)
+            print(eventName)
+            if PRINTHTML:
+                thisWriter.addEvent(desc, descContestants)
+            else:
+                print(desc)
             
             #Check if everyone is now dead...
             if all(not x.alive for x in liveContestants.values()):
@@ -281,21 +293,30 @@ def main():
                 for key, element in initialState.items(): # This is careful use of how python passing works. The values of state now point to the memory references of those in initialState.
                 # On the next loop, initialState will be overwritten by copy.deepcopy(state), but the references in state will still point to the right places and won't be released. 
                     state[key] = element
+                    # This is bad stuff, but...
+                    exec(key+'=element')
                 restartTurn = True
                 break
             
             # Remove the dead contestants from the live list. Add the contestants involved to alreadyUsed.
             for dead in theDead:
                 del liveContestants[dead]
-            alreadyUsed.update(descContestants) 
+            alreadyUsed.update([x.name for x in descContestants]) 
         
         if not restartTurn:    
             for callback in callbacks["endGameConditions"]: # conditions for ending the game
                 if callback(liveContestants, state):
                     # TODO: Placeholder under I decide what to do with this later
-                    print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
+                    if PRINTHTML:
+                        thisWriter.addBigLine(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
+                        thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
+                    else:
+                        print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
+
                     # TODO: Do any additional end of simulation stuff here
                     return
+        if PRINTHTML:
+            thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
             
 if __name__ == "__main__":
     main()

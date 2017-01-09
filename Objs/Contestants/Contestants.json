@@ -36,5 +36,24 @@
          "cleverness": 9,
          "combat ability": 7
          }
+    },
+"Trilicon":
+    {"imageFile": "Trilicon.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 9,
+         "stability": 3,
+         "forgiveness": 8,
+         "loyalty": 5,
+         "meanness": 5,
+         "ruthlessness": 3,
+         "aggression": 6,
+         "endurance": 5,
+         "survivalism": 4,
+         "loneliness": 8,
+         "friendliness": 7,
+         "cleverness": 4,
+         "combat ability": 3
+         }
     }
 }

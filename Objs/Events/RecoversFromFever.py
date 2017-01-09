@@ -8,7 +8,7 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     state["callbacks"]["modifyIndivActorWeights"].remove(state["callbackStore"]["SickWithFeverStore"][mainActor.name][0])
     state["callbacks"]["modifyIndivActorWeights"].remove(state["callbackStore"]["SickWithFeverStore"][mainActor.name][1])
     del state["callbackStore"]["SickWithFeverStore"][mainActor.name]
-    return (desc, [mainActor.name], []) # Second entry is the contestants named in desc, in order. Third is anyone who died. This is in strings.
+    return (desc, [mainActor], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
 Event.doEventRecoversFromFever = classmethod(func)
 

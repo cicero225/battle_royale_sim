@@ -8,7 +8,7 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     if "SickWithFeverStore" not in state["callbackStore"]:
         state["callbackStore"]["SickWithFeverStore"] = {} 
     state["callbackStore"]["SickWithFeverStore"][mainActor.name] = (Event.activateEventNextTurnForContestant("RecoversFromFever", mainActor.name, state, 10), Event.activateEventNextTurnForContestant("DiesFromFever", mainActor.name, state, 10))
-    return (desc, [mainActor.name], []) # Second entry is the contestants named in desc, in order. Third is anyone who died. This is in strings.
+    return (desc, [mainActor], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
 Event.doEventSickWithFever = classmethod(func)
 
