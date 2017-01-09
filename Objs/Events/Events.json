@@ -159,7 +159,8 @@
      },
  "ThrowSpearKill":
     {"mainWeight": 0.5,
-     "mainModifiers": {"aggression": 1.0,
+     "mainModifiers": {"ruthlessness": 1.0,
+                       "aggression": 1.0,
                        "combat ability": 1.0},
      "victimWeight": 1,
      "numVictims": 1,
