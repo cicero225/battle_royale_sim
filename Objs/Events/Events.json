@@ -5,7 +5,7 @@
      "itemRequired": false
      },
 "TestOneKill": 
-    {"mainWeight": 1.0,
+    {"mainWeight": 0.0,
      "victimWeight": 1.0,
      "numVictims": 1,
      "unique": false,

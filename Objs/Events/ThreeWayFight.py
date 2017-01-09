@@ -39,7 +39,7 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
         lootList.extend(Event.lootAll(liveList[0], deadList[1]))
         desc += deadList[0].name+' and '+deadList[1].name+' were killed!'
         if lootList:
-            desc += ' '+liveList[0].name+' looted the body for '+Event.englishList(lootList)+'.'
+            desc += ' '+liveList[0].name+' looted the bodies for '+Event.englishList(lootList)+'.'
         descList.extend(lootList)
     elif len(deadList) == 3:
         desc += 'all three died in the fighting!'

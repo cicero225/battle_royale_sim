@@ -162,6 +162,9 @@ def main():
     
     def modifyWeightForMultipleActors(baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
         if eventName in baseWeights:
+            if not origIndivWeight: # this causes numerical issues and shoudl end up 0 anyway
+                indivProb[eventName] = 0.0
+                return
             # A bit of set magic
             if forSponsors:
                 validRoles = people.keys()
