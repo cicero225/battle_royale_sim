@@ -1,6 +1,7 @@
  
 {"Clean Water":
-    {"statChanges": 
+    {"imageFile": "Water.jpg",
+    "statChanges": 
         {"endurance": 1
          },
     "eventMultipliers":
@@ -16,7 +17,8 @@
         }
     },
 "Fruit":
-    {"statChanges": 
+    {"imageFile": "Fruit.jpg",
+    "statChanges": 
         {"endurance": 1
          },
     "eventMultipliers":
@@ -30,7 +32,8 @@
         }
     },
 "Spear":
-    {"friendly": "a Spear",
+    {"imageFile": "Spear.png",
+    "friendly": "a Spear",
     "statChanges": 
         {"aggression": 1,
          "combat ability": 2

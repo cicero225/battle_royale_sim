@@ -7,6 +7,7 @@ class Item(object):
         # The item class has certain stereotyped effects on characters that can be encoded in json
         self.name = name
         self.friendly = inDict["friendly"] if "friendly" in inDict else self.name
+        self.imageFile = inDict["imageFile"]
         self.settings = settings
         # This dict (string:int) stores any direct additions/subtractions in stats given by the Item
         self.statChanges = inDict["statChanges"]
