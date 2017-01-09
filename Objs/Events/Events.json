@@ -139,7 +139,7 @@
      "itemRequired": false
      },
  "SponsorGiveWater":
-    {"mainWeight": 0.5,
+    {"mainWeight": 0.25,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -149,5 +149,50 @@
      "loveEffectSponsor": 1.0,
      "friendRequiredParticipant": true,
      "neededFriendLevelParticipant": {"relation": true, "value": -2}
+     },
+ "CraftSpear":
+    {"mainWeight": 0.5,
+     "mainModifiers": {"survivalism": 1.0,
+                       "aggression": 0.5},
+     "unique": false,
+     "itemRequired": false
+     },
+ "ThrowSpearKill":
+    {"mainWeight": 0.5,
+     "mainModifiers": {"aggression": 1.0,
+                       "combat ability": 1.0},
+     "victimWeight": 1,
+     "numVictims": 1,
+     "victimModifiers": {"combat ability": -1.0,
+                         "cleverness": -1.0},
+     "unique": false,
+     "itemRequired": true,
+     "necessaryItem": "Spear",
+     "friendEffectVictim": -1.0,
+     "loveEffectVictim": -2.0,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": false, "value": 5},
+     "loveRequiredParticipant": true,
+     "neededLoveLevelParticipant": {"relation": false, "value": 4}
+     },
+  "SponsorGiveSpear":
+    {"mainWeight": 0.25,
+     "sponsorWeight": 1,
+     "numSponsors": 1,
+     "unique": false,
+     "itemRequired": false,
+     "reverse": true,
+     "friendEffectSponsor": 0.5,
+     "loveEffectSponsor": 1.0,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": true, "value": -2}
+     },
+   "FindDeadBody":
+     {"mainWeight": 0.5,
+     "mainModifiers": {"survivalism": 1.0,
+                       "cleverness": 1.0},
+     "unique": false,
+     "itemRequired": false,
+     "requiresDeadContestant": true
      }
  }

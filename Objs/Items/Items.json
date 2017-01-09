@@ -28,5 +28,22 @@
     "eventsDisabled": {
         "GetsFruitFromTree": {"main": true}
         }
+    },
+"Spear":
+    {"friendly": "a Spear",
+    "statChanges": 
+        {"aggression": 1,
+         "combat ability": 2
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        "CraftSpear": {"main": true},
+        "SponsorGiveSpear": {"main": true}
+        }
     }
 }

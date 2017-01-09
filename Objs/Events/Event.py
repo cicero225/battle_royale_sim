@@ -83,6 +83,16 @@ class Event(object): #Python 2.x compatibility
             return "he"
         else:
             return "it"
+            
+    @staticmethod                                
+    def parseGenderObject(contestantObj):
+        genString = contestantObj.gender
+        if genString == "F":
+            return "her"
+        elif genString == "M":
+            return "him"
+        else:
+            return "it"
 
     @staticmethod                                
     def parseGenderPossessive(contestantObj):
@@ -104,3 +114,22 @@ class Event(object): #Python 2.x compatibility
         anonfunc = lambda actor, origWeight, event: func(actor, origWeight, event) # this anonymizes func, giving a new reference each this is called
         state["callbacks"]["modifyIndivActorWeights"].insert(0, anonfunc) # This needs to be at beginning for proper processing
         return anonfunc # If you ever intend to remove this callback, it's a good idea to keep track of this.
+    
+    @staticmethod
+    def lootAll(looter, looted):
+        lootList = []
+        for loot in looted.inventory:
+            looted.removeItem(loot)
+            if loot not in looter.inventory:
+                looter.addItem(loot)
+                lootList.append(loot)
+        return lootList
+        
+    @staticmethod
+    def englishList(itemList):
+        if len(itemList) == 1:
+            return itemList[0].friendly
+        elif len(itemList) == 2:
+            return itemList[0].friendly + ' and ' + itemList[1].friendly
+        else:
+            return ', '.join(x.friendly for x in itemList[:-1])+' and '+itemList[-1].friendly

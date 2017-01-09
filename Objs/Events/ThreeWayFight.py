@@ -18,23 +18,32 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     for theDead in deadNames:
         if theDead == 'main':
             mainActor.alive = False
-            deadList.append(mainActor.name)
+            deadList.append(mainActor)
         elif theDead == 'part1':
             participants[0].alive = False
-            deadList.append(participants[0].name)
+            deadList.append(participants[0])
         elif theDead == 'part2':
             participants[1].alive = False
-            deadList.append(participants[1].name)
+            deadList.append(participants[1])
+    liveList = [x for x in participants+[mainActor] if x.alive ]
     descList = [mainActor.name, participants[0].name, participants[1].name]
     if len(deadList) == 1:
-        desc += deadList[0]+' was killed!'
-        descList.append(deadList[0])
+        looter = liveList[random.randint(0,1)]
+        lootList = Event.lootAll(looter, deadList[0])
+        desc += deadList[0].name+' was killed!'
+        if lootList:
+            desc += ' '+looter.name+' looted the body for '+Event.englishList(lootList)+'.'
+        descList.append(deadList[0].name)
     elif len(deadList) == 2:
-        desc += deadList[0]+' and '+deadList[1]+' were killed!'
-        descList.extend([deadList[0], deadList[1]])
+        lootList = Event.lootAll(liveList[0], deadList[0])
+        lootList.extend(Event.lootAll(liveList[0], deadList[1]))
+        desc += deadList[0].name+' and '+deadList[1].name+' were killed!'
+        if lootList:
+            desc += ' '+liveList[0].name+' looted the body for '+Event.englishList(lootList)+'.'
+        descList.extend([deadList[0].name, deadList[1].name])
     elif len(deadList) == 3:
         desc += 'all three died in the fighting!'
-    return (desc, descList, deadList) # Second entry is the contestants named in desc, in order. Third is anyone who died. This is in strings.
+    return (desc, descList, [x.name for x in deadList]) # Second entry is the contestants named in desc, in order. Third is anyone who died. This is in strings.
 
 Event.doEventThreeWayFight = classmethod(func)
 
