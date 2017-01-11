@@ -35,6 +35,7 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
         desc += ' but the building is booby-trapped! '
         for person in eventPeople:
             if person.stats['cleverness']+person.stats['combat ability']+random.randint(0, 21)<21:
+                person.alive = False
                 fightDead.append(person)
         if not fightDead:
             desc += 'Everyone escaped safely.'
