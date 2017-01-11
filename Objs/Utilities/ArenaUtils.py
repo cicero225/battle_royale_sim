@@ -15,7 +15,7 @@ def weightedDictRandom(inDict, num_sel=1):
     if not num_sel:
         return ()
     if num_sel == len(inDict):
-        return inDict.keys() if num_sel > 1 else list(inDict.keys())[0]
+        return inDict.keys()
     keys = []
     allkeys = list(inDict.keys())
     allvalues = list(inDict.values())
