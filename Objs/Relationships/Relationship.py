@@ -1,4 +1,5 @@
 """Useful object for arranging relationship-related helper functions, etc."""
+from __future__ import division
 
 import itertools
 import collections
@@ -26,6 +27,31 @@ class Relationship(object):
     def IncreaseLoveLevel(self, name1, name2, change):
         self.loveships[name1][name2] = max(min(self.loveships[name1][name2]+change, 5), -5)
         
+    def groupFriendLevel(self, names):
+        totSum = 0
+        for x in names:
+            for y in names:
+                if x == y:
+                    continue
+                totSum += self.friendships[x][y]
+        return totSum/(len(names)*len(names))
+    
+    def groupLoveLevel(self, names):
+        totSum = 0
+        for x in names:
+            for y in names:
+                if x == y:
+                    continue
+                totSum += self.loveships[x][y]
+        return totSum/(len(names)*len(names))
+        
+    def groupCohesion(self, people): # this ends up being a value from -50 to 50
+        names = [person.name for person in people]
+        groupCohesion = sum([self.groupFriendLevel(names), 2*self.groupLoveLevel(names)])/3
+        groupCohesion *= (sum(person.stats['loyalty'] for person in people) if groupCohesion>0 else
+                               (10-sum(person.stats['forgiveness'] for person in people)))/len(people)
+        return groupCohesion
+    
     def relationsMainWeightCallback(self, actor, baseEventActorWeight, event):
         if "mainFriendEffect" in event.baseProps and event.baseProps["mainFriendEffect"]:
             negOrPos = 1 if event.baseProps["mainNeededFriendLevel"]["relation"] else -1

@@ -176,7 +176,7 @@
      "stats":
         {"gregariousness": 8,
          "stability": 6,
-         "Forgiveness": 7,
+         "forgiveness": 7,
          "loyalty": 10,
          "meanness": 3,
          "ruthlessness": 1,
@@ -195,7 +195,7 @@
      "stats":
         {"gregariousness": 6,
          "stability": 8,
-         "Forgiveness": 7,
+         "forgiveness": 7,
          "loyalty": 5,
          "meanness": 4,
          "ruthlessness": 7,

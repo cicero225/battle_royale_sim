@@ -6,6 +6,7 @@
 # shared events.
 
 import random
+from ..Utilities.ArenaUtils import weightedDictRandom
 
 class Event(object): #Python 2.x compatibility
 
@@ -16,6 +17,7 @@ class Event(object): #Python 2.x compatibility
         # Could also use setattr, but...
         # Should be: float mainWeight, float optional participantWeight, float optional victimWeight,
         # int optional numParticipants, int optional numVictims, dict (string: float) mainModifiers,
+        # int optional numParticipantsExtra, int optional numVictimsExtra, int optional numSponsorsExtra <- if there is some squishiness to the number of participants/victims
         # dict (string: float) optional participantModifiers, dict (string: float) optional victimModifiers,
         # bool unique, list[string] optional uniqueUsers #at the moment only supports unique contestants performing the event, rather than being the victim etc. This is bad for, say, Mami getting her head eaten.
         # bool itemRequired, string optional necessaryItem
@@ -117,19 +119,77 @@ class Event(object): #Python 2.x compatibility
     
     @staticmethod
     def lootAll(looter, looted):
+        if hasattr(looted, 'inventory'):
+            itemList = looted.inventory
+        else:
+            itemList = looted
         lootList = []
-        for loot in looted.inventory:
-            looted.removeItem(loot)
+        for loot in itemList:
+            if hasattr(looted, 'inventory'):
+                looted.removeItem(loot)
             if loot not in looter.inventory:
                 looter.addItem(loot)
                 lootList.append(loot)
         return lootList
-        
+    
     @staticmethod
-    def englishList(itemList):
-        if len(itemList) == 1:
-            return itemList[0].friendly
-        elif len(itemList) == 2:
-            return itemList[0].friendly + ' and ' + itemList[1].friendly
+    def lootRandom(looters, looted):
+        if hasattr(looted, 'inventory'):
+            itemList = looted.inventory
         else:
-            return ', '.join(x.friendly for x in itemList[:-1])+' and '+itemList[-1].friendly
+            itemList = looted
+        lootList = []
+        for loot in itemList:
+            if hasattr(looted, 'inventory'):
+                looted.removeItem(loot)
+            maybeLooters = [looter for looter in looters if loot not in looter.inventory]
+            if maybeLooters:
+                trueLooter = random.choice(maybeLooters)
+                trueLooter.addItem(loot)
+                lootList.append(loot)
+        return lootList
+    
+    @staticmethod
+    def fight(people):
+        numDead = random.randint(0, len(people))
+        if not numDead:
+            desc = 'but no one was hurt.'
+            return(desc,[], [])
+        fightDict = {x:person.stats['combat ability'] for x, person in enumerate(people)}
+        deadNames = weightedDictRandom(fightDict, numDead)
+        desc = 'and '
+        deadList = []
+        descList = []
+        for theDead in deadNames:
+            people[theDead].alive = False
+            deadList.append(people[theDead])
+        liveList = [x for x in people if x.alive ]
+        if len(deadList) < len(people):
+            for theDead in deadList:
+                lootList = Event.lootRandom(liveList, theDead)
+            if len(deadList) == 1:
+                desc += deadList[0].name+' was killed!'
+            else:
+                desc += Event.englishList(deadList)+' were killed!'
+            if lootList:
+                desc += ' '+Event.englishList(lootList)+' was looted.'
+            descList.extend(lootList)
+        elif len(deadList) == len(people):
+            desc += 'everyone died in the fighting!'
+        return(desc, descList, deadList)
+    
+    @staticmethod
+    def getFriendlyIfPossible(namedObject):
+        try:
+            return namedObject.friendly
+        except AttributeError:
+            return namedObject.name
+    
+    @staticmethod
+    def englishList(thingList):
+        if len(thingList) == 1:
+            return Event.getFriendlyIfPossible(thingList[0])
+        elif len(thingList) == 2:
+            return Event.getFriendlyIfPossible(thingList[0]) + ' and ' + Event.getFriendlyIfPossible(thingList[1])
+        else:
+            return ', '.join(Event.getFriendlyIfPossible(x) for x in thingList[:-1])+' and '+Event.getFriendlyIfPossible(thingList[-1])

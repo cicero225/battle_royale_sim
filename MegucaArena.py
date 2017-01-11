@@ -160,8 +160,11 @@ def main():
     
     # Nested functions that need access to variables in main
     
-    def modifyWeightForMultipleActors(baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
+    def modifyWeightForMultipleActors(trueNumRoles, baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
         if eventName in baseWeights:
+            trueNumRoles[eventName] = event.baseProps[numRoles]+(random.randint(0, event.baseProps[numRoles+"Extra"]) if numRoles+"Extra" in event.baseProps else 0)
+            if not trueNumRoles[eventName]:
+                return
             if not origIndivWeight: # this causes numerical issues and shoudl end up 0 anyway
                 indivProb[eventName] = 0.0
                 return
@@ -175,7 +178,7 @@ def main():
                         validRoles.difference_update(people[x].eventDisabled[eventName][roleName])
                     except:
                         pass
-                if len(validRoles) < event.baseProps[numRoles]:
+                if len(validRoles) < trueNumRoles[eventName]:
                     indivProb[eventName] = 0 # This event cannot happen
                     return
             for role in validRoles:
@@ -190,9 +193,9 @@ def main():
             correctionRoleWeight = sum(weights[eventName].values())/len(weights)
             indivProb[eventName] *= min(correctionRoleWeight/origIndivWeight, settings["maxParticipantEffect"])
             
-    def selectRoles(baseWeights, weights, numRoles, people=contestants):
-        if eventName in baseWeights:
-            rolekeys = ArenaUtils.weightedDictRandom(weights[eventName], thisevent.baseProps[numRoles])
+    def selectRoles(baseWeights, weights, trueNumRoles, people=contestants):
+        if eventName in baseWeights and trueNumRoles[eventName]>0:
+            rolekeys = ArenaUtils.weightedDictRandom(weights[eventName], trueNumRoles[eventName])
             try:
                 roles = [people[key] for key in rolekeys]
             except KeyError:
@@ -254,6 +257,9 @@ def main():
             eventParticipantWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
             eventVictimWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
             eventSponsorWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+            trueNumParticipants = {}
+            trueNumVictims = {}
+            trueNumSponsors = {}
             for eventName, event in events.items():
                 indivProb[eventName] = baseEventActorWeights[eventName]
                 eventMayProceed = True
@@ -266,10 +272,9 @@ def main():
                 origIndivWeight = indivProb[eventName]
                 # Probability correction for multi-contestant events, if necessary
                 # this feels silly but is very useful
-                modifyWeightForMultipleActors(baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
-                modifyWeightForMultipleActors(baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
-                modifyWeightForMultipleActors(baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
-            
+                modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
+                modifyWeightForMultipleActors(trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
+                modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
             #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
             eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
             # Handle event overrides, if any
@@ -279,9 +284,9 @@ def main():
             if proceedAsUsual:
                 #Determine participants, victims, if any.
                 thisevent = events[eventName]
-                participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, "numParticipants")
-                victims = selectRoles(baseEventVictimWeights, eventVictimWeights, "numVictims")
-                sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, "numSponsors", sponsors)
+                participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
+                victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
+                sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
                 desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
             
             print(eventName)

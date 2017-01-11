@@ -110,8 +110,8 @@
      "unique": false,
      "itemRequired": false,
      "mutual": true,
-     "friendEffectParticipant": 0.5,
-     "loveEffectParticipant": 1.0,
+     "friendEffectParticipant": -0.5,
+     "loveEffectParticipant": -1.0,
      "friendRequiredParticipant": true,
      "neededFriendLevelParticipant": {"relation": false, "value": 5},
      "loveRequiredParticipant": true,
@@ -195,5 +195,20 @@
      "unique": false,
      "itemRequired": false,
      "requiresDeadContestant": true
-     }
+     },
+   "FindAbandonedBuilding":
+    {"mainWeight": 0.5,
+     "mainModifiers": {"survivalism": 1.0,
+                       "cleverness": 1.0},
+     "participantWeight": 1,
+     "numParticipants": 0,
+     "numParticipantsExtra": 3,
+     "participantModifiers": {"survivalism": 1.0,
+                       "cleverness": 1.0},
+     "unique": false,
+     "itemRequired": false,
+     "mutual": true,
+     "friendEffectParticipant": 0.5,
+     "loveEffectParticipant": 1.0
+    }
  }
