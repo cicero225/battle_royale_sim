@@ -28,7 +28,7 @@ class Item(object):
 
     def applyObjectStatChanges(self, contestant): # this has to be processed before anything else...
         for changedStat in self.statChanges:
-            contestant.stats[changedStat] += self.statChanges[changedStat]
+            contestant.stats[changedStat] = max(min(contestant.stats[changedStat]+self.statChanges[changedStat],10),0)
 
     def onAcquisition(self, contestant):
         for eventName, eventModifier in self.eventMultipliers.items():

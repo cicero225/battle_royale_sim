@@ -9,9 +9,9 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     if not numDead:
         desc += 'but no one was hurt.'
         return(desc,[mainActor, participants[0], participants[1]], [])
-    fightDict = {'main': mainActor.stats['combat ability'],
-    'part1': participants[0].stats['combat ability'],
-    'part2': participants[1].stats['combat ability']}
+    fightDict = {'main': 11-mainActor.stats['combat ability'],
+    'part1': 11-participants[0].stats['combat ability'],
+    'part2': 11-participants[1].stats['combat ability']}
     deadNames = weightedDictRandom(fightDict, numDead)
     desc += 'and '
     deadList = []
