@@ -266,7 +266,7 @@ def main():
                 origIndivWeight = indivProb[eventName]
                 # Probability correction for multi-contestant events, if necessary
                 # this feels silly but is very useful
-                modifyWeightForMultipleActors(baseEventParticipantWeights, eventParticipantWeights, "pariticipant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
+                modifyWeightForMultipleActors(baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
                 modifyWeightForMultipleActors(baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
                 modifyWeightForMultipleActors(baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
             
