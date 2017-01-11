@@ -104,7 +104,7 @@ class Event(object): #Python 2.x compatibility
         elif genString == "M":
             return "his"
         else:
-            return "it's"
+            return "its"
     
     @staticmethod
     def activateEventNextTurnForContestant(eventName, contestantName, state, weight):
@@ -155,7 +155,7 @@ class Event(object): #Python 2.x compatibility
         if not numDead:
             desc = 'but no one was hurt.'
             return(desc,[], [])
-        fightDict = {x:person.stats['combat ability'] for x, person in enumerate(people)}
+        fightDict = {x:11-person.stats['combat ability'] for x, person in enumerate(people)}
         deadNames = weightedDictRandom(fightDict, numDead)
         desc = 'and '
         deadList = []
