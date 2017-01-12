@@ -105,6 +105,15 @@ class Event(object): #Python 2.x compatibility
             return "his"
         else:
             return "its"
+            
+    def parseGenderReflexive(contestantObj):
+        genString = contestantObj.gender
+        if genString == "F":
+            return "herself"
+        elif genString == "M":
+            return "himself"
+        else:
+            return "itself"
     
     @staticmethod
     def activateEventNextTurnForContestant(eventName, contestantName, state, weight):
@@ -151,6 +160,16 @@ class Event(object): #Python 2.x compatibility
     
     @staticmethod
     def fight(people, relationships, settings):
+        # Relationship changes
+        # Fights shouldn't cause everyone's mutual friendship to go down, because sometimes it might be 2v2, but this is really hard to model, so rng
+        relHitNum = random.randint(1,len(people)-1)
+        for person in people:
+            relDict = {i:6-(relationships.friendships[x.name][person.name]+relationships.friendships[person.name][x.name]+2*(relationships.loveships[person.name][x.name]+relationships.loveships[x.name][person.name]))/6 for i, x in enumerate(people) if x != person}
+            chosen = weightedDictRandom(relDict, relHitNum)
+            for index in chosen:
+                relationships.IncreaseFriendLevel(person, people[index], random.randint(-4,-3))
+                relationships.IncreaseLoveLevel(person, people[index], random.randint(-6,-4))  
+        # Actual fight
         fightDict = {}
         for i, person1 in enumerate(people): # people gain strength from their friends, but this has to be compared with the average strength of the rest of the group
             baseCombatAbility = person1.stats['combat ability']

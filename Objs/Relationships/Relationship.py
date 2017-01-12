@@ -3,6 +3,7 @@ from __future__ import division
 
 import itertools
 import collections
+import random
 from functools import partial
 
 class Relationship(object):
@@ -16,10 +17,10 @@ class Relationship(object):
             self.friendships[contestant]={}
             self.loveships[contestant]={}
         for contestant1, contestant2 in itertools.combinations(mergedpeople, 2):
-            self.friendships[contestant1][contestant2] = 0  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
-            self.friendships[contestant2][contestant1] = 0
-            self.loveships[contestant1][contestant2] = 0
-            self.loveships[contestant2][contestant1] = 0
+            self.friendships[contestant1][contestant2] = min(max(random.gauss(0, 1.5),0),5)  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
+            self.friendships[contestant2][contestant1] = self.friendships[contestant1][contestant2] # But start them off equal
+            self.loveships[contestant1][contestant2] = min(max(random.gauss(0, 1.5),0),5)
+            self.loveships[contestant2][contestant1] = self.loveships[contestant1][contestant2]
             
     def IncreaseFriendLevel(self, person1, person2, change):
         curLevel = self.friendships[person1.name][person2.name]

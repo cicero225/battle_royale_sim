@@ -210,5 +210,11 @@
      "mutual": true,
      "friendEffectParticipant": 0.5,
      "loveEffectParticipant": 1.0
-    }
+    },
+    "SelfFuneral":
+     {"mainWeight": 0.25,
+     "mainModifiers": {"stability": -2},
+     "unique": false,
+     "itemRequired": false
+     }
  }

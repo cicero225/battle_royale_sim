@@ -267,7 +267,7 @@
     },
     "College Applications":
     {"imageFile": "CollegeApplication.png",
-     "gender": "M",
+     "gender": "N",
      "stats":
         {"gregariousness": 0,
          "stability": 0,
