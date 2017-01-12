@@ -32,13 +32,16 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
             desc += fightDesc
             descList += fightList
     elif whatHappens == 2:
-        desc += ' but the building is booby-trapped! '
+        desc += ' but the building was booby-trapped! '
         for person in eventPeople:
             if person.stats['cleverness']+person.stats['combat ability']+random.randint(0, 21)<21:
                 person.alive = False
                 fightDead.append(person)
         if not fightDead:
-            desc += 'Everyone escaped safely.'
+            if len(eventPeople)>1:
+                desc += 'Everyone escaped safely.'
+            else:
+                desc += Event.parseGenderSubject(eventPeople[0])+' escaped safely.'
         elif len(fightDead) == 1:
             desc += Event.englishList(fightDead)+' was killed.'
         else:
