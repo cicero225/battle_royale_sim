@@ -283,5 +283,24 @@
          "cleverness": 10,
          "combat ability": 10
          }
+    },
+    "notthepenguins":
+    {"imageFile": "Notthepenguins.jpg",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 8,
+         "stability": 3,
+         "forgiveness": 7,
+         "loyalty": 7,
+         "meanness": 5,
+         "ruthlessness": 4,
+         "aggression": 5,
+         "endurance": 5,
+         "survivalism": 1,
+         "loneliness": 7,
+         "friendliness": 7,
+         "cleverness": 6,
+         "combat ability": 5
+         }
     }
 }

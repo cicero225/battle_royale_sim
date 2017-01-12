@@ -213,7 +213,7 @@
     },
     "SelfFuneral":
      {"mainWeight": 0.25,
-     "mainModifiers": {"stability": -2},
+     "mainModifiers": {"stability": -1.5},
      "unique": false,
      "itemRequired": false
      }
