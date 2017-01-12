@@ -38,6 +38,8 @@ def main():
     # objectInfluence = 1 # How much objects in inventory affect events. The default 1 uses the base stats.
     # relationInfluence = 0.1 # How much relationships affect event chance, calculated as (1+influence)^(relationship level*eventInfluenceLevel)
     # maxParticipantEffect = 3 # Maximum participants/victims can affect event probability. Arbitrary; there's no good way to estimate this.
+    # statFriendEffect = 0.5 # How much stats such as friendliness affect rate of relationship change
+    # friendCombatEffect = 0.5 # How much friends/lovers help in combat
     # Note that objects that fully disable a event should still do so!
     
     # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)

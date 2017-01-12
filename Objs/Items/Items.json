@@ -13,7 +13,8 @@
     "eventsDisabled": {
         "Dysentary": {"main": true},
         "GiftWater": {"main": true},
-        "FindRiverCleanWater": {"main": true}
+        "FindRiverCleanWater": {"main": true},
+        "SponsorGiveWater": {"main": true}
         }
     },
 "Fruit":

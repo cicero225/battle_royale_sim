@@ -3,7 +3,7 @@ import random
 
 def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.addItem(state["items"]["Spear"])
-    state["allRelationships"].IncreaseFriendLevel(mainActor.name, sponsors[0].name, random.randint(1,2))
+    state["allRelationships"].IncreaseFriendLevel(mainActor, sponsors[0], random.randint(1,2))
     choice = random.randint(0,1)
     if choice:
         desc = sponsors[0].name+' gave a spear to '+mainActor.name+"."

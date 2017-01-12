@@ -5,5 +5,7 @@
  "statInfluence": 0.3,
  "objectInfluence": 1,
  "relationInfluence": 0.1,
- "maxParticipantEffect": 3
+ "maxParticipantEffect": 3,
+ "statFriendEffect": 0.5,
+ "friendCombatEffect": 0.5
 }

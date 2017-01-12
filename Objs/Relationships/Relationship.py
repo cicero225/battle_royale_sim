@@ -21,11 +21,35 @@ class Relationship(object):
             self.loveships[contestant1][contestant2] = 0
             self.loveships[contestant2][contestant1] = 0
             
-    def IncreaseFriendLevel(self, name1, name2, change):
-        self.friendships[name1][name2] = max(min(self.friendships[name1][name2]+change, 5), -5)
+    def IncreaseFriendLevel(self, person1, person2, change):
+        curLevel = self.friendships[person1.name][person2.name]
+        if curLevel > 0:
+            if change > 0:
+                stat = 'friendliness'
+            else:
+                stat = 'loyalty'
+        else:
+            if change > 0:
+                stat = 'forgiveness'
+            else:
+                stat = 'meanness'    
+        change *= (1+self.settings['statFriendEffect']*(person1.stats[stat]-5)/5)*change
+        self.friendships[person1.name][person2.name] = max(min(curLevel+change, 5), -5)
         
-    def IncreaseLoveLevel(self, name1, name2, change):
-        self.loveships[name1][name2] = max(min(self.loveships[name1][name2]+change, 5), -5)
+    def IncreaseLoveLevel(self, person1, person2, change):
+        curLevel = self.loveships[person1.name][person2.name]
+        if curLevel > 0:
+            if change > 0:
+                stat = 'loneliness'
+            else:
+                stat = 'loyalty'
+        else:
+            if change > 0:
+                stat = 'forgiveness'
+            else:
+                stat = 'meanness'    
+        change *= (1+self.settings['statFriendEffect']*(person1.stats[stat]-5)/5)*change
+        self.loveships[person1.name][person2.name] = max(min(curLevel+change, 5), -5)
         
     def groupFriendLevel(self, names):
         totSum = 0
