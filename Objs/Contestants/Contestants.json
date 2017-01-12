@@ -207,5 +207,81 @@
          "cleverness": 10,
          "combat ability": 10
          }
+    },
+    "Balduran":
+    {"imageFile": "Balduran.jpg",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 4,
+         "stability": 6,
+         "forgiveness": 1,
+         "loyalty": 9,
+         "meanness": 7,
+         "ruthlessness": 2,
+         "aggression": 5,
+         "endurance": 3,
+         "survivalism": 1,
+         "loneliness": 0,
+         "friendliness": 4,
+         "cleverness": 6,
+         "combat ability": 6
+         }
+    },
+    "Snowy":
+    {"imageFile": "Snowy.jpg",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 6,
+         "stability": 9,
+         "Forgiveness": 2,
+         "loyalty": 3,
+         "meanness": 6,
+         "ruthlessness": 8,
+         "aggression": 10,
+         "endurance": 2,
+         "survivalism": 6,
+         "loneliness": 0,
+         "friendliness": 5,
+         "cleverness": 7,
+         "combat ability": 4
+         }
+    },
+    "Emeralis00":
+    {"imageFile": "Emeralis.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 9,
+         "stability": 7,
+         "forgiveness": 6,
+         "loyalty": 10,
+         "meanness": 3,
+         "ruthlessness": 4,
+         "aggression": 5,
+         "endurance": 6,
+         "survivalism": 8,
+         "loneliness": 7,
+         "friendliness": 9,
+         "cleverness": 7,
+         "combat ability": 4
+         }
+    },
+    "College Applications":
+    {"imageFile": "CollegeApplication.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 0,
+         "stability": 0,
+         "forgiveness": 0,
+         "loyalty": 0,
+         "meanness": 10,
+         "ruthlessness": 10,
+         "aggression": 10,
+         "endurance": 10,
+         "survivalism": 10,
+         "loneliness": 10,
+         "friendliness": 0,
+         "cleverness": 10,
+         "combat ability": 10
+         }
     }
 }
