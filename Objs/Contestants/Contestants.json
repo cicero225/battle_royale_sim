@@ -233,7 +233,7 @@
      "stats":
         {"gregariousness": 6,
          "stability": 9,
-         "Forgiveness": 2,
+         "forgiveness": 2,
          "loyalty": 3,
          "meanness": 6,
          "ruthlessness": 8,

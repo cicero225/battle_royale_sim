@@ -13,24 +13,26 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     fightDead = []
     if whatHappens == 0:
         desc += 'but it turned out to have nothing of value.'
-        probViolence = 0.25-relationships.groupCohesion(eventPeople)/200
-        if random.random()<probViolence:
-            desc += ' Violence broke out due to frustration, and '
-            fightDesc, fightList, fightDead = Event.fight(eventPeople)
-            desc += fightDesc
-            descList += fightList
+        if len(eventPeople)>1:
+            probViolence = 0.25-relationships.groupCohesion(eventPeople)/200
+            if random.random()<probViolence:
+                desc += ' Violence broke out due to frustration, and '
+                fightDesc, fightList, fightDead = Event.fight(eventPeople, relationships, state['settings'])
+                desc += fightDesc
+                descList += fightList
     elif whatHappens == 1:
         numItems = random.randint(1,2)
         itemsFound = random.sample(list(state['items'].values()), 2)
         desc += ' and found '+Event.englishList(itemsFound)+'.' 
-        probViolence = 0.5-relationships.groupCohesion(eventPeople)/100
         descList += itemsFound
         Event.lootRandom(eventPeople, itemsFound)
-        if random.random()<probViolence:
-            desc += ' A fight broke out over the loot, '
-            fightDesc, fightList, fightDead = Event.fight(eventPeople)
-            desc += fightDesc
-            descList += fightList
+        if len(eventPeople)>1:    
+            probViolence = 0.5-relationships.groupCohesion(eventPeople)/100
+            if random.random()<probViolence:
+                desc += ' A fight broke out over the loot, '
+                fightDesc, fightList, fightDead = Event.fight(eventPeople, relationships, state['settings'])
+                desc += fightDesc
+                descList += fightList
     elif whatHappens == 2:
         desc += ' but the building was booby-trapped! '
         for person in eventPeople:

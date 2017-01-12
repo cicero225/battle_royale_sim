@@ -150,20 +150,37 @@ class Event(object): #Python 2.x compatibility
         return lootList
     
     @staticmethod
-    def fight(people):
-        numDead = random.randint(0, len(people))
-        if not numDead:
-            desc = 'but no one was hurt.'
-            return(desc,[], [])
-        fightDict = {x:11-person.stats['combat ability'] for x, person in enumerate(people)}
-        deadNames = weightedDictRandom(fightDict, numDead)
-        desc = 'and '
+    def fight(people, relationships, settings):
+        fightDict = {}
+        for i, person1 in enumerate(people): # people gain strength from their friends, but this has to be compared with the average strength of the rest of the group
+            baseCombatAbility = person1.stats['combat ability']
+            for person2 in people:
+                if person1 == person2:
+                    continue
+                baseCombatAbility += settings['friendCombatEffect']*relationships.friendships[person2][person1]/5 * person2.stats['combat ability'] if relationships.friendships[person2][person1]>0 else 0
+                baseCombatAbility += settings['friendCombatEffect']*relationships.loveships[person2][person1]/5 * person2.stats['combat ability'] if relationships.loveships[person2][person1]>0 else 0
+            fightDict[i]=baseCombatAbility
+        probDict = {}
         deadList = []
+        liveList =[]
+        for i, person1 in enumerate(people):
+            meanAbilityTot = 0
+            for ii, person2 in enumerate(people):
+                if person1 == person2:
+                    continue
+                meanAbilityTot += fightDict[ii]
+            # Sigmoid probability! woo...
+            probDeath = 1/(1+(1+settings['combatAbilityEffect'])**(fightDict[i]-meanAbilityTot/(len(people)-1)))
+            if random.random()<probDeath:
+                deadList.append(person1)
+                person1.alive = False
+            else:
+                liveList.append(person1)
+        if not deadList:
+            desc = 'but no was was hurt.'
+            return(desc, [], [])
+        desc = 'and '
         descList = []
-        for theDead in deadNames:
-            people[theDead].alive = False
-            deadList.append(people[theDead])
-        liveList = [x for x in people if x.alive ]
         if len(deadList) < len(people):
             for theDead in deadList:
                 lootList = Event.lootRandom(liveList, theDead)

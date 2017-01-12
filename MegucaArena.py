@@ -40,6 +40,7 @@ def main():
     # maxParticipantEffect = 3 # Maximum participants/victims can affect event probability. Arbitrary; there's no good way to estimate this.
     # statFriendEffect = 0.5 # How much stats such as friendliness affect rate of relationship change
     # friendCombatEffect = 0.5 # How much friends/lovers help in combat
+    # combatAbilityEffect = 0.3 # How much combat ability (and associated modifiers) affect chance of death in combat. i.e. 0 would make it pure random
     # Note that objects that fully disable a event should still do so!
     
     # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
@@ -89,6 +90,7 @@ def main():
     thisWriter = None # current HTML display object
     
     state = {
+    "settings": settings,
     "contestants": contestants,
     "sponsors": sponsors,
     "events": events,
