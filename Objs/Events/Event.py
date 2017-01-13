@@ -196,7 +196,7 @@ class Event(object): #Python 2.x compatibility
             else:
                 liveList.append(person1)
         if not deadList:
-            desc = 'but no was was hurt.'
+            desc = 'but no was hurt.'
             return(desc, [], [])
         desc = 'and '
         descList = []

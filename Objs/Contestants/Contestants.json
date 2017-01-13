@@ -302,5 +302,43 @@
          "cleverness": 6,
          "combat ability": 5
          }
-    }
+    },
+    "Magery":
+    {"imageFile": "Magery.jpg",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 4,
+         "stability": 6,
+         "forgiveness": 4,
+         "loyalty": 8,
+         "meanness": 6,
+         "ruthlessness": 6,
+         "aggression": 4,
+         "endurance": 5,
+         "survivalism": 3,
+         "loneliness": 2,
+         "friendliness": 5,
+         "cleverness": 6,
+         "combat ability": 3
+         }
+    },
+    "Princess Meimei":
+    {"imageFile": "Meimei.jpg",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 1,
+         "stability": 1,
+         "forgiveness": 7,
+         "loyalty": 5,
+         "meanness": 3,
+         "ruthlessness": 1,
+         "aggression": 1,
+         "endurance": 1,
+         "survivalism": 1,
+         "loneliness": 1,
+         "friendliness": 1,
+         "cleverness": 10,
+         "combat ability": 1
+        }
+    }     
 }

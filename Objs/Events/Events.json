@@ -197,10 +197,10 @@
      "requiresDeadContestant": true
      },
    "FindAbandonedBuilding":
-    {"mainWeight": 0.5,
+    {"mainWeight": 0.25,
      "mainModifiers": {"survivalism": 1.0,
                        "cleverness": 1.0},
-     "participantWeight": 1,
+     "participantWeight": 0.5,
      "numParticipants": 0,
      "numParticipantsExtra": 3,
      "participantModifiers": {"survivalism": 1.0,
@@ -214,6 +214,41 @@
     "SelfFuneral":
      {"mainWeight": 0.25,
      "mainModifiers": {"stability": -1.5},
+     "unique": false,
+     "itemRequired": false
+     },
+    "SponsorGivesTips":
+    {"mainWeight": 0.15,
+     "sponsorWeight": 1,
+     "numSponsors": 1,
+     "unique": false,
+     "itemRequired": false,
+     "reverse": true,
+     "friendEffectSponsor": 0.5,
+     "loveEffectSponsor": 1.0,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": true, "value": 1}
+     },
+    "ShareIntimateConversation":
+    {"mainWeight": 0.25,
+     "mainModifiers": {"loneliness": 2.0},
+     "participantWeight": 1,
+     "numParticipants": 1,
+     "participantModifiers": {"loneliness": 2.0},
+     "unique": false,
+     "itemRequired": false,
+     "mutual": true,
+     "friendEffectParticipant": 0.5,
+     "loveEffectParticipant": 1.5,
+     "loveRequiredParticipant": true,
+     "neededLoveLevelParticipant": {"relation": true, "value": 1}
+     },
+     "ResolvesFeelingConfusion":
+    {"mainWeight": 0,
+     "numParticipants": 1,
+     "participantWeight": 1,
+     "friendEffectParticipant": 0,
+     "loveEffectParticipant": 0,
      "unique": false,
      "itemRequired": false
      }

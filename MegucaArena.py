@@ -141,7 +141,7 @@ def main():
     partial(allRelationships.relationsRoleWeightCallback, "Sponsor")
     ]
     
-    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantName, eventName, state, proceedAsUsual. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
+    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
     # Note that if *any* of these returns false, then normal event processing is overridden
     overrideContestantEvent = [
     ArenaUtils.logLastEventByContestant  # This should always be last.
@@ -282,15 +282,15 @@ def main():
             #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
             eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
             # Handle event overrides, if any
+            #Determine participants, victims, if any.
+            thisevent = events[eventName]
+            participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
+            victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
+            sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
             proceedAsUsual = True
             for override in callbacks["overrideContestantEvent"]:
-                proceedAsUsual = override(contestantKey, eventName, state, proceedAsUsual) and proceedAsUsual # Because of short-circuit processing, the order here is important
+                proceedAsUsual = override(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere) and proceedAsUsual # Because of short-circuit processing, the order here is important
             if proceedAsUsual:
-                #Determine participants, victims, if any.
-                thisevent = events[eventName]
-                participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
-                victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
-                sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
                 desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
             
             print(eventName)

@@ -63,9 +63,9 @@ def logLastEventStartup(state):
     state["callbackStore"]["lastEvent"] = collections.defaultdict(str)
 
 # Logs last event. Must be last callback in overrideContestantEvent. 
-def logLastEventByContestant(contestantKey, eventName, state, proceedAsUsual):
+def logLastEventByContestant(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere):
     if proceedAsUsual:
-        state["callbackStore"]["lastEvent"][contestantKey] = eventName
+        state["callbackStore"]["lastEvent"][contestantKey] = thisevent.name
     else:
         state["callbackStore"]["lastEvent"][contestantKey] = "overridden"
     return proceedAsUsual
