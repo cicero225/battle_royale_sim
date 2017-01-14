@@ -1,5 +1,6 @@
 
 from Objs.Events.Event import Event
+from Objs.Events.IndividualEventHandler import IndividualEventHandler
 import random
 from functools import partial
 
@@ -31,14 +32,16 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     elif len(confused) == 1:
         desc += ' '+Event.englishList(confused)+' found '+Event.parseGenderReflexive(confused[0])+' confused by '+Event.parseGenderPossessive(confused[0])+' feelings.'
         weight = 20
-    for person in confused:
+    if confused:
         state["callbackStore"].setdefault("ShareIntimateConversationConfusedStore", {})
-        partipantFunc = partial(onlyOneParticipant, (mainActor if person != mainActor else participants[0]), person, "ResolvesFeelingConfusion")
-        state["callbacks"]["overrideContestantEvent"].insert(0, partipantFunc)
-        state["callbackStore"]["ShareIntimateConversationConfusedStore"][person.name] =(Event.activateEventNextTurnForContestant("ResolvesFeelingConfusion", person.name, state, weight), partipantFunc)
-        state["callbackStore"]["ShareIntimateConversationConfusedStore"].setdefault('Banned', {})
-        state["callbackStore"]["ShareIntimateConversationConfusedStore"]['Banned'].setdefault(mainActor.name, Event.activateEventNextTurnForContestant("ShareIntimateConversation", mainActor.name, state, 0))
-        state["callbackStore"]["ShareIntimateConversationConfusedStore"]['Banned'].setdefault(participants[0].name, Event.activateEventNextTurnForContestant("ShareIntimateConversation", participants[0].name, state, 0))
+        eventHandler = IndividualEventHandler(state)
+        eventHandler.banEventForSingleContestant("ShareIntimateConversation", mainActor.name)
+        eventHandler.banEventForSingleContestant("ShareIntimateConversation", participants[0].name)
+        for person in confused:
+            eventHandler.bindRoleForContestantAndEvent("participants", [mainActor if person != mainActor else participants[0]], person, "ResolvesFeelingConfusion")
+            eventHandler.setEventWeightForSingleContestant("ResolvesFeelingConfusion", person.name, weight)
+        state["callbackStore"]["ShareIntimateConversationConfusedStore"][mainActor.name] = eventHandler
+        state["callbackStore"]["ShareIntimateConversationConfusedStore"][participants[0].name] = eventHandler # Yes, two copies
     return (desc, [mainActor, participants[0]], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings. 
 
 Event.doEventShareIntimateConversation = classmethod(func)

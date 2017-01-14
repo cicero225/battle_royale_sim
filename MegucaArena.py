@@ -165,6 +165,7 @@ def main():
     # Nested functions that need access to variables in main
     
     def modifyWeightForMultipleActors(trueNumRoles, baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
+        trueNumRoles[eventName] = 0
         if eventName in baseWeights:
             trueNumRoles[eventName] = event.baseProps[numRoles]+(random.randint(0, event.baseProps[numRoles+"Extra"]) if numRoles+"Extra" in event.baseProps else 0)
             if not trueNumRoles[eventName]:
