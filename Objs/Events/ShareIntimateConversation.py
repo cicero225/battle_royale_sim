@@ -20,10 +20,10 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
 
     confused = []
     if mainActor.gender == participants[0].gender:
-        if not random.randint(0,1):
+        if not random.randint(0,2):
             confused.append(mainActor)
             mainActor.permStatChange({'stability': -2})
-        if not random.randint(0,1):
+        if not random.randint(0,2):
             confused.append(participants[0])
             participants[0].permStatChange({'stability': -2})
     if len(confused) == 2:

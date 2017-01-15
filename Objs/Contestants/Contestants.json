@@ -56,7 +56,7 @@
          "combat ability": 3
          }
     },
-"Kyouko":
+"Sakura Kyouko":
     {"imageFile": "Kyouko.jpg",
      "gender": "F",
      "stats":
@@ -340,5 +340,119 @@
          "cleverness": 10,
          "combat ability": 1
         }
-    }     
+    },
+    "Kaname Madoka":
+    {"imageFile": "Madoka.jpg",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 9,
+         "stability": 10,
+         "forgiveness": 10,
+         "loyalty": 10,
+         "meanness": 0,
+         "ruthlessness": 0,
+         "aggression": 3,
+         "endurance": 7,
+         "survivalism": 3,
+         "loneliness": 4,
+         "friendliness": 10,
+         "cleverness": 7,
+         "combat ability": 10
+        }
+    },
+    "Miki Sayaka":
+    {"imageFile": "Sayaka.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 7,
+         "stability": 4,
+         "forgiveness": 5,
+         "loyalty": 8,
+         "meanness": 3,
+         "ruthlessness": 2,
+         "aggression": 6,
+         "endurance": 6,
+         "survivalism": 4,
+         "loneliness": 5,
+         "friendliness": 7,
+         "cleverness": 5,
+         "combat ability": 4
+        }
+    },
+    "Akemi Homura":
+    {"imageFile": "Homura.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 2,
+         "stability": 9,
+         "forgiveness": 3,
+         "loyalty": 10,
+         "meanness": 5,
+         "ruthlessness": 9,
+         "aggression": 5,
+         "endurance": 10,
+         "survivalism": 7,
+         "loneliness": 8,
+         "friendliness": 2,
+         "cleverness": 10,
+         "combat ability": 9
+        }
+    },
+    "Shizuki Hitomi":
+    {"imageFile": "Hitomi.jpg",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 6,
+         "stability": 6,
+         "forgiveness": 5,
+         "loyalty": 5,
+         "meanness": 6,
+         "ruthlessness": 7,
+         "aggression": 4,
+         "endurance": 4,
+         "survivalism": 2,
+         "loneliness": 3,
+         "friendliness": 5,
+         "cleverness": 7,
+         "combat ability": 3
+        }
+    },
+    "Shirou Asaka":
+    {"imageFile": "Asaka.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 3,
+         "stability": 6,
+         "forgiveness": 5,
+         "loyalty": 8,
+         "meanness": 3,
+         "ruthlessness": 3,
+         "aggression": 4,
+         "endurance": 8,
+         "survivalism": 6,
+         "loneliness": 6,
+         "friendliness": 4,
+         "cleverness": 7,
+         "combat ability": 6
+        }
+    },
+    "Nakihara Asami":
+    {"imageFile": "Asami.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 6,
+         "stability": 4,
+         "forgiveness": 6,
+         "loyalty": 10,
+         "meanness": 3,
+         "ruthlessness": 4,
+         "aggression": 6,
+         "endurance": 5,
+         "survivalism": 3,
+         "loneliness": 8,
+         "friendliness": 4,
+         "cleverness": 6,
+         "combat ability": 5
+        }
+    }
 }

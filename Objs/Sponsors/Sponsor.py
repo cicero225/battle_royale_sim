@@ -30,4 +30,6 @@ class Sponsor(Contestant):  # sponsors are so similar to Contestants that it's e
                     self.statEventMultipliers[eventName][multiplierType] *= (1+self.settings['statInfluence'])**((self.stats[modifier]-5)*multiplier)
                 self.fullEventMultipliers[eventName][multiplierType] = self.statEventMultipliers[eventName][multiplierType]
     
+    def __str__(self):
+        return self.name
     

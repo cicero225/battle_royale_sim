@@ -60,6 +60,9 @@ class Event(object): #Python 2.x compatibility
             if multiplierType+'Weight' in self.baseProps:
                 self.eventRandomize(multiplierType+'Weight')
     
+    def __str__(self):
+        return self.name
+    
     @classmethod
     def registerEvent(cls, eventName, callback):
         cls.event_callbacks[eventName] = callback

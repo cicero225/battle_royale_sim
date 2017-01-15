@@ -22,6 +22,9 @@ class Item(object):
             self.applyObjectInfluence(self.eventMultipliers)
             self.applyObjectInfluence(self.eventAdditions)
 
+    def __str__(self):
+        return self.name
+            
     def applyObjectInfluence(self, inDict):
         for key in inDict:
             inDict[key] *= self.settings["objectInfluence"]

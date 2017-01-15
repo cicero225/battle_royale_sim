@@ -76,6 +76,9 @@ class Contestant(object):
         self.eventAdditions = collections.defaultdict(dict)
         self.eventDisabled = collections.defaultdict(dict) # These events cannot happen to this contestant. Default False
 
+    def __str__(self):
+        return self.name
+        
     def contestantStatRandomize(self):
         for statName in self.stats:
             self.stats[statName] = min(max(self.stats[statName]+
