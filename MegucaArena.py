@@ -191,10 +191,13 @@ def main():
                 eventMayProceed = True
                 for callback in callbacks[callbackName]:
                     weights[eventName][role], eventMayProceed = callback(actor, people[role],
-                                                                                                weights[eventName][role],
-                                                                                                event)
+                                                                         weights[eventName][role],
+                                                                         event)
                     if not eventMayProceed:
                         break
+            if sum(bool(x) for x in weights[eventName].values())<trueNumRoles[eventName]:
+                indivProb[eventName] = 0
+                return
             correctionRoleWeight = sum(weights[eventName].values())/len(weights)
             indivProb[eventName] *= min(correctionRoleWeight/origIndivWeight, settings["maxParticipantEffect"])
             
@@ -231,9 +234,8 @@ def main():
     # Main loop of DEATH
     lastEvents = {}
     while True:
-        if not restartTurn:
-            turnNumber[0] += 1
-            print("Day "+str(turnNumber[0]))
+        turnNumber[0] += 1
+        print("Day "+str(turnNumber[0]))
         if PRINTHTML:
             thisWriter = HTMLWriter()
             thisWriter.addDay(turnNumber[0])
@@ -303,11 +305,18 @@ def main():
             #Check if everyone is now dead...
             if all(not x.alive for x in liveContestants.values()):
                 # This turn needs to be rerun
-                for key, element in initialState.items(): # This is careful use of how python passing works. The values of state now point to the memory references of those in initialState.
-                # On the next loop, initialState will be overwritten by copy.deepcopy(state), but the references in state will still point to the right places and won't be released. 
-                    state[key] = element
-                    # This is bad stuff, but...
-                    exec(key+'=element')
+                state = initialState.copy()
+                settings = state['settings']
+                contestants = state['contestants']
+                sponsors = state['sponsors']
+                events = state['events']
+                eventsActive = state['eventsActive']
+                items = state['items']
+                arena = state['arena']
+                allRelationships = state['allRelationships']
+                turnNumber = state['turnNumber']
+                callbackStore = state['callbackStore']
+                thisWriter = state['thisWriter']
                 restartTurn = True
                 break
             
@@ -328,8 +337,8 @@ def main():
 
                     # TODO: Do any additional end of simulation stuff here
                     return
-        if PRINTHTML:
-            thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
+            if PRINTHTML:
+                thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
             
 if __name__ == "__main__":
     main()

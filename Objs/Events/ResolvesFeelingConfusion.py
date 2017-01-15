@@ -4,6 +4,7 @@ from Objs.Events.Event import Event
 def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.permStatChange({'stability': 3})
     desc = mainActor.name + " spends a night with "+participants[0].name
+    print(state["callbackStore"]["ShareIntimateConversationConfusedStore"]) # temporary: there is a rare glitch here
     del state["callbackStore"]["ShareIntimateConversationConfusedStore"][mainActor.name]
     if participants[0].name in state["callbackStore"]["ShareIntimateConversationConfusedStore"]:
         participants[0].permStatChange({'stability': 3})
