@@ -38,8 +38,10 @@
      "unique": true,
      "uniqueUsers": ["Tomoe Mami"],
      "itemRequired": false,
-     "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": true, "value": 3}
+     "mainFriendEffect": 1.0,
+     "mainNeededFriendLevel": {"relation": true, "value": 5},
+     "mainLoveEffect": 1.0,
+     "mainNeededLoveLevel": {"relation": true, "value": 4}
      },
 "ShareStoryofLife":
     {"mainWeight": 0.5,
@@ -77,10 +79,10 @@
      "itemRequired": false,
      "friendEffectVictim": -1.0,
      "loveEffectVictim": -2.0,
-     "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": false, "value": 5},
-     "loveRequiredParticipant": true,
-     "neededLoveLevelParticipant": {"relation": false, "value": 4}
+     "friendRequiredVictim": true,
+     "neededFriendLevelVictim": {"relation": false, "value": 5},
+     "loveRequiredVictim": true,
+     "neededLoveLevelVictim": {"relation": false, "value": 4}
      },
 "QuestionsSanity": 
     {"mainWeight": 0.5,
@@ -147,8 +149,8 @@
      "reverse": true,
      "friendEffectSponsor": 0.5,
      "loveEffectSponsor": 1.0,
-     "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": true, "value": -2}
+     "friendRequiredSponsor": true,
+     "neededFriendLevelSponsor": {"relation": true, "value": -2}
      },
  "CraftSpear":
     {"mainWeight": 0.5,
@@ -172,10 +174,10 @@
      "necessaryItem": "Spear",
      "friendEffectVictim": -1.0,
      "loveEffectVictim": -2.0,
-     "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": false, "value": 5},
-     "loveRequiredParticipant": true,
-     "neededLoveLevelParticipant": {"relation": false, "value": 4}
+     "friendRequiredVictim": true,
+     "neededFriendLevelVictim": {"relation": false, "value": 5},
+     "loveRequiredVictim": true,
+     "neededLoveLevelVictim": {"relation": false, "value": 4}
      },
   "SponsorGiveSpear":
     {"mainWeight": 0.25,
@@ -186,8 +188,8 @@
      "reverse": true,
      "friendEffectSponsor": 0.5,
      "loveEffectSponsor": 1.0,
-     "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": true, "value": -2}
+     "friendRequiredSponsor": true,
+     "neededFriendLevelSponsor": {"relation": true, "value": -2}
      },
    "FindDeadBody":
      {"mainWeight": 0.5,
@@ -227,8 +229,8 @@
      "reverse": true,
      "friendEffectSponsor": 0.5,
      "loveEffectSponsor": 1.0,
-     "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": true, "value": 1}
+     "friendRequiredSponsor": true,
+     "neededFriendLevelSponsor": {"relation": true, "value": 1}
      },
     "ShareIntimateConversation":
     {"mainWeight": 0.25,
@@ -272,12 +274,12 @@
      "unique": false,
      "itemRequired": true,
      "necessaryItem": "MolotovCocktail",
-     "friendEffectVictim": -2.0,
-     "loveEffectVictim": -3.0,
-     "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": false, "value": 3},
-     "loveRequiredParticipant": true,
-     "neededLoveLevelParticipant": {"relation": false, "value": 2}
+     "friendEffectVictim": -1.0,
+     "loveEffectVictim": -2.0,
+     "friendRequiredVictim": true,
+     "neededFriendLevelVictim": {"relation": false, "value": 3},
+     "loveRequiredVictim": true,
+     "neededLoveLevelVictim": {"relation": false, "value": 2}
      },
      "SponsorCheatKill":
     {"mainWeight": 0.25,
@@ -288,9 +290,9 @@
      "reverse": true,
      "friendEffectSponsor": -1.0,
      "loveEffectSponsor": -2.0,
-     "friendRequiredParticipant": false,
-     "neededFriendLevelParticipant": {"relation": true, "value": 0},
-     "loveRequiredParticipant": false,
-     "neededLoveLevelParticipant": {"relation": true, "value": 0}
+     "friendRequiredSponsor": false,
+     "neededFriendLevelSponsor": {"relation": true, "value": 0},
+     "loveRequiredSponsor": false,
+     "neededLoveLevelSponsor": {"relation": true, "value": 0}
      }
  }
