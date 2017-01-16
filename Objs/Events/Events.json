@@ -66,7 +66,7 @@
      "unique": false,
      "itemRequired": false
      },
-"AttacksButEscapes":
+"AAttacksB":
     {"mainWeight": 1,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
@@ -153,7 +153,8 @@
  "CraftSpear":
     {"mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0,
-                       "aggression": 0.5},
+                       "aggression": 0.5,
+                       "cleverness": 0.5},
      "unique": false,
      "itemRequired": false
      },
@@ -251,5 +252,45 @@
      "loveEffectParticipant": 0,
      "unique": false,
      "itemRequired": false
+     },
+     "MakeMolotovCocktail":
+    {"mainWeight": 0.25,
+     "mainModifiers": {"aggression": 1.0,
+                       "ruthlessness": 1.0,
+                       "meanness": 0.5},
+     "unique": false,
+     "itemRequired": false
+     },
+     "KillWithMolotovCocktail":
+    {"mainWeight": 3.0,
+     "mainModifiers": {"aggression": 1.0,
+                       "ruthlessness": 1.0,
+                       "meanness": 0.5},
+     "victimWeight": 1,
+     "numVictims": 1,
+     "victimModifiers": {"cleverness": -0.5},
+     "unique": false,
+     "itemRequired": true,
+     "necessaryItem": "MolotovCocktail",
+     "friendEffectVictim": -2.0,
+     "loveEffectVictim": -3.0,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": false, "value": 3},
+     "loveRequiredParticipant": true,
+     "neededLoveLevelParticipant": {"relation": false, "value": 2}
+     },
+     "SponsorCheatKill":
+    {"mainWeight": 0.25,
+     "sponsorWeight": 1,
+     "numSponsors": 1,
+     "unique": false,
+     "itemRequired": false,
+     "reverse": true,
+     "friendEffectSponsor": -1.0,
+     "loveEffectSponsor": -2.0,
+     "friendRequiredParticipant": false,
+     "neededFriendLevelParticipant": {"relation": true, "value": 0},
+     "loveRequiredParticipant": false,
+     "neededLoveLevelParticipant": {"relation": true, "value": 0}
      }
  }

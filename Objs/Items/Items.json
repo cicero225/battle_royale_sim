@@ -47,7 +47,25 @@
         },
     "eventsDisabled": {
         "CraftSpear": {"main": true},
-        "SponsorGiveSpear": {"main": true}
+        "SponsorGiveSpear": {"main": true},
+        "AAttacksB": {"main": true}
+        }
+    },
+"MolotovCocktail":
+    {"imageFile": "MolotovCocktail.png",
+    "friendly": "a Molotov Cocktail",
+    "statChanges": 
+        {"aggression": 2,
+         "combat ability": 3
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        "MakeMolotovCocktail": {"main": true}
         }
     }
 }

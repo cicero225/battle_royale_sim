@@ -162,6 +162,15 @@ class Event(object): #Python 2.x compatibility
         return lootList
     
     @staticmethod
+    def DieOrEscapeProb1v1(person1, person2, settings, attackStat=None, defenseStat=None): # Attacker, victim
+        if attackStat is None:
+            attackStat = person1.stats['combat ability']
+        if defenseStat is None:
+            defenseStat = person2.stats['combat ability']
+        return 1/(1+(1+settings['combatAbilityEffect'])**(attackStat-defenseStat)) # probability of kill
+        
+    
+    @staticmethod
     def fight(people, relationships, settings):
         # Relationship changes
         # Fights shouldn't cause everyone's mutual friendship to go down, because sometimes it might be 2v2, but this is really hard to model, so rng
