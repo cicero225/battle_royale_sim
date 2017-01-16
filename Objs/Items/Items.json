@@ -52,7 +52,7 @@
         }
     },
 "MolotovCocktail":
-    {"imageFile": "MolotovCocktail.png",
+    {"imageFile": "MolotovCocktail.jpg",
     "friendly": "a Molotov Cocktail",
     "statChanges": 
         {"aggression": 2,
