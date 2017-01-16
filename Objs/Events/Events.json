@@ -264,7 +264,7 @@
      "itemRequired": false
      },
      "KillWithMolotovCocktail":
-    {"mainWeight": 3.0,
+    {"mainWeight": 5.0,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0,
                        "meanness": 0.5},
