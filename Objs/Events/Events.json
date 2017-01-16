@@ -282,7 +282,7 @@
      "neededLoveLevelVictim": {"relation": false, "value": 2}
      },
      "SponsorCheatKill":
-    {"mainWeight": 0.25,
+    {"mainWeight": 0.15,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
