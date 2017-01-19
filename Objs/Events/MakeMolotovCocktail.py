@@ -2,7 +2,7 @@
 from Objs.Events.Event import Event
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     probSuccess = mainActor.stats["cleverness"]*0.03+0.3
     probNormalFailure = (1-probSuccess)*0.8
     probHorrifcFailure = 1-probNormalFailure-probSuccess
@@ -20,7 +20,5 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     else:
         desc = mainActor.name + ' tried to make a Molotov Cocktail, but lit '+Event.parseGenderReflexive(mainActor)+' on fire, dying horribly.'
         return (desc, [mainActor], [mainActor.name])
-
-Event.doEventMakeMolotovCocktail= classmethod(func)
-
-Event.registerEvent("MakeMolotovCocktail", Event.doEventMakeMolotovCocktail)
+        
+Event.registerEvent("MakeMolotovCocktail", func)

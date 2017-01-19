@@ -1,7 +1,7 @@
 from Objs.Events.Event import Event
 from Objs.Events.IndividualEventHandler import IndividualEventHandler
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.permStatChange({'stability': -1,
                               'endurance': -3,
                               'combat ability': -3})
@@ -14,6 +14,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     state["callbackStore"]["SickWithFeverStore"][mainActor.name] = IndividualEventHandler(state) #registers event chain
     return (desc, [mainActor], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
-Event.doEventSickWithFever = classmethod(func)
-
-Event.registerEvent("SickWithFever", Event.doEventSickWithFever)
+Event.registerEvent("SickWithFever", func)

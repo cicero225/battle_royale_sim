@@ -7,6 +7,7 @@
 
 import random
 from ..Utilities.ArenaUtils import weightedDictRandom
+from functools import partial
 
 class Event(object): #Python 2.x compatibility
 
@@ -59,6 +60,7 @@ class Event(object): #Python 2.x compatibility
         for multiplierType in ['main', 'participant', 'victim']:
             if multiplierType+'Weight' in self.baseProps:
                 self.eventRandomize(multiplierType+'Weight')
+        self.doEvent = partial(self.event_callbacks[self.name], self)
     
     def __str__(self):
         return self.name
@@ -68,12 +70,8 @@ class Event(object): #Python 2.x compatibility
         cls.event_callbacks[eventName] = callback
     
     def doEvent(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-        if self.name in self.event_callbacks:
-            callback = self.event_callbacks[self.name]
-            return callback(mainActor, state, participants, victims, sponsors)
-        else:
-            desc = mainActor.name+' did absolutely nothing.'
-            return (desc, [mainActor], []) # Second entry is the contestants named in desc, in order. Third is anyone who died.
+        desc = mainActor.name+' did absolutely nothing.'
+        return (desc, [mainActor], []) # Second entry is the contestants named in desc, in order. Third is anyone who died.
 
     def eventRandomize(self, propName):
         self.baseProps[propName] = (self.baseProps[propName]

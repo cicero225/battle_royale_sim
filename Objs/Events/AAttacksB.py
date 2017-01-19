@@ -2,7 +2,7 @@
 from Objs.Events.Event import Event
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     # Hmm...having an object that takes care of this max 5 business would be nice    
     # Deteriorate relationship of victim toward participant
     state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, -2)
@@ -16,6 +16,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
         desc = mainActor.name+' attacked '+victims[0].name+' with '+Event.parseGenderPossessive(mainActor)+' bare fists, but '+Event.parseGenderSubject(victims[0])+' escaped.'
         return (desc, [mainActor, victims[0]], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
-Event.doEventAAttacksB = classmethod(func)
-
-Event.registerEvent("AAttacksB", Event.doEventAAttacksB)
+Event.registerEvent("AAttacksB", func)

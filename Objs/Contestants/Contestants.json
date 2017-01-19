@@ -454,5 +454,24 @@
          "cleverness": 6,
          "combat ability": 5
         }
+    },
+    "Cthulhu":
+    {"imageFile": "Cthulhu.png",
+     "gender": "N",
+     "stats":
+        {"gregariousness": 0,
+         "stability": 10,
+         "forgiveness": 0,
+         "loyalty": 5,
+         "meanness": 6,
+         "ruthlessness": 10,
+         "aggression": 10,
+         "endurance": 10,
+         "survivalism": 10,
+         "loneliness": 0,
+         "friendliness": 0,
+         "cleverness": 8,
+         "combat ability": 10
+        }
     }
 }

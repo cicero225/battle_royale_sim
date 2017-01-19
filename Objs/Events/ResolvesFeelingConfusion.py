@@ -1,7 +1,7 @@
 
 from Objs.Events.Event import Event
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.permStatChange({'stability': 3})
     desc = mainActor.name + " spends a night with "+participants[0].name
     print(state["callbackStore"]["ShareIntimateConversationConfusedStore"]) # temporary: there is a rare glitch here
@@ -14,6 +14,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
         desc += " and resolves "+Event.parseGenderPossessive(mainActor)+" confusion"
     return (desc, [mainActor, participants[0]], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
-Event.doEventResolvesFeelingConfusion = classmethod(func)
-
-Event.registerEvent("ResolvesFeelingConfusion", Event.doEventResolvesFeelingConfusion)
+Event.registerEvent("ResolvesFeelingConfusion", func)

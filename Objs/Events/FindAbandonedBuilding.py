@@ -4,7 +4,7 @@ from Objs.Events.Event import Event
 from ..Utilities.ArenaUtils import weightedDictRandom
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     whatHappens = random.randint(0,2) # 0 is empty, 1 is loot, 2 is trap
     eventPeople = [mainActor]+participants
     descList = eventPeople.copy()
@@ -51,6 +51,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
     
     return (desc, descList, [x.name for x in fightDead]) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
-Event.doEventFindAbandonedBuilding = classmethod(func)
-
-Event.registerEvent("FindAbandonedBuilding", Event.doEventFindAbandonedBuilding)
+Event.registerEvent("FindAbandonedBuilding", func)

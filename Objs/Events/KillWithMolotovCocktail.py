@@ -2,7 +2,7 @@
 from Objs.Events.Event import Event
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     probSurvival = (1-Event.DieOrEscapeProb1v1(mainActor, victims[0], state["settings"], defenseStat=(victims[0].stats['combat ability']*0.75+victims[0].stats['cleverness']*0.25)))*0.5 # This event is rigged against defender
     tempList = [mainActor, state["items"]["MolotovCocktail"], victims[0]]
     state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, -4)
@@ -23,6 +23,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
             tempList.extend(lootList)
         return (desc, tempList, [victims[0].name]) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
-Event.doEventKillWithMolotovCocktail = classmethod(func)
-
-Event.registerEvent("KillWithMolotovCocktail", Event.doEventKillWithMolotovCocktail)
+Event.registerEvent("KillWithMolotovCocktail", func)

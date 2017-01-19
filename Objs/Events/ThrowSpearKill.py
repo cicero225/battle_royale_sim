@@ -1,7 +1,7 @@
 from Objs.Events.Event import Event
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     probKill = Event.DieOrEscapeProb1v1(mainActor, victims[0], state["settings"], defenseStat=(victims[0].stats['combat ability']*0.75+victims[0].stats['cleverness']*0.25))
     spearBroken = random.randint(0,1)
     tempList = [mainActor, state["items"]["Spear"], victims[0]]
@@ -21,6 +21,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
         mainActor.removeItem(state["items"]["Spear"])
     return (desc, tempList, deadList) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
-Event.doEventThrowSpearKill = classmethod(func)
-
-Event.registerEvent("ThrowSpearKill", Event.doEventThrowSpearKill)
+Event.registerEvent("ThrowSpearKill", func)

@@ -1,7 +1,7 @@
 from Objs.Events.Event import Event
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.addItem(state["items"]["Spear"])
     state["allRelationships"].IncreaseFriendLevel(mainActor, sponsors[0], random.randint(1,2))
     choice = random.randint(0,1)
@@ -12,6 +12,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
         desc = 'An unknown sponsor gave a spear to '+mainActor.name+"."
         return (desc, [state["items"]["Spear"], mainActor], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
-Event.doEventSponsorGiveSpear = classmethod(func)
-
-Event.registerEvent("SponsorGiveSpear", Event.doEventSponsorGiveSpear)
+Event.registerEvent("SponsorGiveSpear", func)

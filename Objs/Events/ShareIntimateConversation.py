@@ -2,15 +2,8 @@
 from Objs.Events.Event import Event
 from Objs.Events.IndividualEventHandler import IndividualEventHandler
 import random
-from functools import partial
 
-def onlyOneParticipant(requiredParticipant, relevantActor, eventName, contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere):
-    if thisevent.name==eventName and relevantActor.name == contestantKey:
-        del participants[:]
-        participants.append(requiredParticipant)
-    return proceedAsUsual
-
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):    
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):    
     # Random relationship boost
     state["allRelationships"].IncreaseFriendLevel(mainActor, participants[0], random.randint(1,2)) 
     state["allRelationships"].IncreaseLoveLevel(mainActor, participants[0], random.randint(2,3))
@@ -44,6 +37,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
         state["callbackStore"]["ShareIntimateConversationConfusedStore"][participants[0].name] = eventHandler # Yes, two copies
     return (desc, [mainActor, participants[0]], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings. 
 
-Event.doEventShareIntimateConversation = classmethod(func)
-
-Event.registerEvent("ShareIntimateConversation", Event.doEventShareIntimateConversation)
+Event.registerEvent("ShareIntimateConversation", func)

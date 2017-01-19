@@ -2,7 +2,7 @@
 from Objs.Events.Event import Event
 import random
 
-def func(Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     desc = mainActor.name+' dug a grave and held an elaborate funeral ceremony for '+Event.parseGenderReflexive(mainActor)+', '
     potentialRescuers = [x for x in state['contestants'].values() if (x.alive and x != mainActor and (state['allRelationships'].friendships[x.name][mainActor.name]>=3 or state['allRelationships'].loveships[x.name][mainActor.name]>=2))]
     random.shuffle(potentialRescuers)
@@ -22,6 +22,4 @@ def func(Event, mainActor, state=None, participants=None, victims=None, sponsors
                               'loyalty': 1})
     return desc, [mainActor, trueRescuer], []
 
-Event.doEventSelfFuneral = classmethod(func)
-
-Event.registerEvent("SelfFuneral", Event.doEventSelfFuneral)
+Event.registerEvent("SelfFuneral", func)
