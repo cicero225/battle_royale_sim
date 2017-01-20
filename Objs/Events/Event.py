@@ -61,6 +61,7 @@ class Event(object): #Python 2.x compatibility
             if multiplierType+'Weight' in self.baseProps:
                 self.eventRandomize(multiplierType+'Weight')
         self.doEvent = partial(self.event_callbacks[self.name], self)
+        self.eventStore = {}  # arbitrary storage for event data, useful for holding information over multiple calls
     
     def __str__(self):
         return self.name

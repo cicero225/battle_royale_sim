@@ -26,15 +26,14 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += ' '+Event.englishList(confused)+' found '+Event.parseGenderReflexive(confused[0])+' confused by '+Event.parseGenderPossessive(confused[0])+' feelings.'
         weight = 20
     if confused:
-        state["callbackStore"].setdefault("ShareIntimateConversationConfusedStore", {})
         eventHandler = IndividualEventHandler(state)
         eventHandler.banEventForSingleContestant("ShareIntimateConversation", mainActor.name)
         eventHandler.banEventForSingleContestant("ShareIntimateConversation", participants[0].name)
         for person in confused:
             eventHandler.bindRoleForContestantAndEvent("participants", [mainActor if person != mainActor else participants[0]], person, "ResolvesFeelingConfusion")
             eventHandler.setEventWeightForSingleContestant("ResolvesFeelingConfusion", person.name, weight)
-        state["callbackStore"]["ShareIntimateConversationConfusedStore"][mainActor.name] = eventHandler
-        state["callbackStore"]["ShareIntimateConversationConfusedStore"][participants[0].name] = eventHandler # Yes, two copies
+        self.eventStore[mainActor.name] = eventHandler
+        self.eventStore[participants[0].name] = eventHandler # Yes, two copies
     return (desc, [mainActor, participants[0]], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings. 
 
 Event.registerEvent("ShareIntimateConversation", func)
