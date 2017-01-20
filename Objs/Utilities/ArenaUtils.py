@@ -105,15 +105,6 @@ def eventMayNotRepeat(actor, origProb, event, state):
     if state["callbackStore"]["lastEvent"][actor.name] == event.name: 
         return 0, False
     return origProb, True
-    
-# Handles events with the new requiresDeadContestant field
-def handleEventsRequiresDeadContestant(actor, origProb, event, state):
-    if "requiresDeadContestant" not in event.baseProps or not event.baseProps["requiresDeadContestant"]:
-        return origProb, True
-    for contestant in state["contestants"].values():
-        if not contestant.alive:
-            return origProb, True
-    return 0, False 
   
 # Ends the game if only one contestant left  
 def onlyOneLeft(liveContestants, _):

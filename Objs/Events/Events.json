@@ -140,8 +140,8 @@
      "unique": false,
      "itemRequired": false
      },
- "SponsorGiveWater":
-    {"mainWeight": 0.25,
+ "SponsorGivesItem":
+    {"mainWeight": 0.5,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -179,25 +179,12 @@
      "loveRequiredVictim": true,
      "neededLoveLevelVictim": {"relation": false, "value": 4}
      },
-  "SponsorGiveSpear":
-    {"mainWeight": 0.25,
-     "sponsorWeight": 1,
-     "numSponsors": 1,
-     "unique": false,
-     "itemRequired": false,
-     "reverse": true,
-     "friendEffectSponsor": 0.5,
-     "loveEffectSponsor": 1.0,
-     "friendRequiredSponsor": true,
-     "neededFriendLevelSponsor": {"relation": true, "value": -2}
-     },
    "FindDeadBody":
      {"mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0,
                        "cleverness": 1.0},
      "unique": false,
-     "itemRequired": false,
-     "requiresDeadContestant": true
+     "itemRequired": false
      },
    "FindAbandonedBuilding":
     {"mainWeight": 0.25,

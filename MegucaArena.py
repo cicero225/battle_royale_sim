@@ -121,7 +121,6 @@ def main():
     
     # modifyIndivActorWeights: Expected args: actor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeights = [
-    partial(ArenaUtils.handleEventsRequiresDeadContestant, state=state), 
     partial(ArenaUtils.eventMayNotRepeat, state=state),
     contestantIndivActorCallback,
     allRelationships.relationsMainWeightCallback
@@ -290,22 +289,33 @@ def main():
                 modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
                 modifyWeightForMultipleActors(trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
                 modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
-            #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
-            eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
-            # Handle event overrides, if any
-            #Determine participants, victims, if any.
-            thisevent = events[eventName]
-            participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
-            victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
-            sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
-            proceedAsUsual = True
-            for override in callbacks["overrideContestantEvent"]:
-                proceedAsUsual = override(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere) and proceedAsUsual # Because of short-circuit processing, the order here is important
-            if proceedAsUsual:
-                eventOutputs = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
-                desc, descContestants, theDead = eventOutputs[:3]
-            for postEvent in callbacks["postEventCallbacks"]:
-                postEvent(proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere)
+            # It is occasionally useful for an event to be able to force a new event to be chosen.
+            # While computationally wasteful, this prevents us from needing to make a special callback for
+            # events with unique trigger conditions. Events may signal for a reselection by returning None or []
+            # Note, however, that this _not_ a good way to enforce specific participants, etc. as this is both wasteful
+            # and not-statistically accurate.
+            while(True):
+                #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
+                eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
+                # Handle event overrides, if any
+                #Determine participants, victims, if any.
+                thisevent = events[eventName]
+                participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
+                victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
+                sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
+                proceedAsUsual = True
+                for override in callbacks["overrideContestantEvent"]:
+                    # Be very careful of modifying state here.
+                    proceedAsUsual = override(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere) and proceedAsUsual # Because of short-circuit processing, the order here is important
+                if proceedAsUsual:
+                    eventOutputs = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
+                    if not eventOutputs:
+                        indivProb[eventName] = 0 # Apparently this event is not valid for this contestant (participants etc. should not be considered)
+                        continue
+                    desc, descContestants, theDead = eventOutputs[:3]
+                for postEvent in callbacks["postEventCallbacks"]:
+                    postEvent(proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere)
+                break
             
             print(eventName)
             if PRINTHTML:

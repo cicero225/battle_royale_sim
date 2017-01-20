@@ -4,6 +4,8 @@ import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     theDead = [x for x in state["contestants"].values() if not x.alive]
+    if not theDead:  # Need new event
+        return None
     body = random.choice(theDead)
     tempList = [mainActor, body]
     if not body.inventory:
