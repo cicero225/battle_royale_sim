@@ -47,7 +47,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         elif len(fightDead) == 1:
             desc += Event.englishList(fightDead)+' was killed.'
         else:
-            desc += Event.englishList(fightDead)+' were killed.'    
+            desc += Event.englishList(fightDead)+' were killed.'
+        # This must be done separately because it assigns no killers
+        return (desc, descList, [x.name for x in fightDead], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     
     return (desc, descList, [x.name for x in fightDead]) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 

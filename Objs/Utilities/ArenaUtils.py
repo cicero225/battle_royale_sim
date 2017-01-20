@@ -1,7 +1,9 @@
 """Utility functions for battle royale sim"""
-from __future__ import division 
+from __future__ import division
+from Objs.Display.HTMLWriter import HTMLWriter
 
 import json
+import os
 import random
 import bisect
 import collections
@@ -63,13 +65,41 @@ def logLastEventStartup(state):
     state["callbackStore"]["lastEvent"] = collections.defaultdict(str)
 
 # Logs last event. Must be last callback in overrideContestantEvent. 
-def logLastEventByContestant(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere):
+def logLastEventByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
     if proceedAsUsual:
-        state["callbackStore"]["lastEvent"][contestantKey] = thisevent.name
+        state["callbackStore"]["lastEvent"][mainActor.name] = thisevent.name
     else:
-        state["callbackStore"]["lastEvent"][contestantKey] = "overridden"
+        state["callbackStore"]["lastEvent"][mainActor.name] = "overridden"
     return proceedAsUsual
-
+    
+def killCounterStartup(state):
+    state["callbackStore"]["killCounter"] = collections.defaultdict(int)
+    
+def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
+    if not len(eventOutputs[2]):
+        return
+    if len(eventOutputs)>3:
+        killers = eventOutputs[3]
+    elif "noBlame" not in thisevent.baseProps or not thisevent.baseProps["noBlame"]:
+        killers = [str(x) for x in set([mainActor]+participants+victims) if str(x) not in eventOutputs[2]]
+    else:
+        killers = []
+    for killer in killers:
+        state["callbackStore"]["killCounter"][str(killer)] += len(eventOutputs[2])/len(killers)
+        
+def killWrite(liveContestants, state):
+    #TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
+    killWriter = HTMLWriter()
+    killWriter.addTitle("Day "+str(state["turnNumber"][0])+" Kills")
+    for contestant, kills in state["callbackStore"]["killCounter"].items():
+        desc = 'Kills: ' + str(kills)
+        descContestant = state["contestants"][contestant]
+        if not descContestant.alive:
+            desc += ' - DEAD'
+        killWriter.addEvent(desc, [descContestant])
+    killWriter.finalWrite(os.path.join("Assets",str(state["turnNumber"][0])+" Kills.html"))
+    return False
+    
 # Rig it so the same event never happens twice to the same person (makes game feel better)
 def eventMayNotRepeat(actor, origProb, event, state): 
     if state["callbackStore"]["lastEvent"][actor.name] == event.name: 

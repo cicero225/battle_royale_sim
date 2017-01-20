@@ -111,7 +111,9 @@ def main():
     # Also, for now, relationship callbacks are in ArenaUtils
     
     # Run once before the start of the game. Expected args: state. Modify in place.
-    startup = [ArenaUtils.logLastEventStartup]
+    startup = [
+    ArenaUtils.logLastEventStartup,
+    ArenaUtils.killCounterStartup]
     
     # modifyBaseWeights: Expected args: baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber. Modify in place.
         # Also a good time to do any beginning of turn stuff
@@ -143,11 +145,15 @@ def main():
     
     # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
     # Note that if *any* of these returns false, then normal event processing is overridden
-    overrideContestantEvent = [
-    ArenaUtils.logLastEventByContestant  # This should always be last.
-    ]  
+    overrideContestantEvent = []  
+    
+    postEventCallbacks = [
+        ArenaUtils.logLastEventByContestant,
+        ArenaUtils.logKills
+    ]
     # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)
     endGameConditions = [
+    ArenaUtils.killWrite,
     ArenaUtils.onlyOneLeft
     ]
     
@@ -158,6 +164,7 @@ def main():
                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
                  "modifyIndivActorWeightsWithSponsors": modifyIndivActorWeightsWithSponsors,
                  "overrideContestantEvent": overrideContestantEvent,
+                 "postEventCallbacks": postEventCallbacks,
                  "endGameConditions": endGameConditions,
     }
     state["callbacks"] = callbacks # I define state before callbacks so it can be bound to a callback if necessary
@@ -242,6 +249,7 @@ def main():
         restartTurn = False # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
         initialState = copy.deepcopy(state) #Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
         liveContestants = {x: y for x, y in contestants.items() if y.alive}
+        origLiveContestants = copy.copy(liveContestants)
         # Sample contestants randomly
         randOrderContestantKeys = random.sample(liveContestants.keys(), len(liveContestants))
         # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
@@ -294,7 +302,10 @@ def main():
             for override in callbacks["overrideContestantEvent"]:
                 proceedAsUsual = override(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere) and proceedAsUsual # Because of short-circuit processing, the order here is important
             if proceedAsUsual:
-                desc, descContestants, theDead = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
+                eventOutputs = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
+                desc, descContestants, theDead = eventOutputs[:3]
+            for postEvent in callbacks["postEventCallbacks"]:
+                postEvent(proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere)
             
             print(eventName)
             if PRINTHTML:
@@ -328,7 +339,6 @@ def main():
         if not restartTurn:    
             for callback in callbacks["endGameConditions"]: # conditions for ending the game
                 if callback(liveContestants, state):
-                    # TODO: Placeholder under I decide what to do with this later
                     if PRINTHTML:
                         thisWriter.addBigLine(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
                         thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
@@ -338,6 +348,9 @@ def main():
                     # TODO: Do any additional end of simulation stuff here
                     return
             if PRINTHTML:
+                deadThisTurn = set(origLiveContestants.values()) - set(liveContestants.values())
+                if deadThisTurn:
+                    thisWriter.addEvent("The following names were added to the memorial wall: "+Event.Event.englishList(deadThisTurn), deadThisTurn)
                 thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
             
 if __name__ == "__main__":
