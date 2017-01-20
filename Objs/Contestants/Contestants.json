@@ -473,5 +473,43 @@
          "cleverness": 8,
          "combat ability": 10
         }
+    },
+    "Yuno":
+    {"imageFile": "Yuno.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 5,
+         "stability": 7,
+         "forgiveness": 9,
+         "loyalty": 10,
+         "meanness": 2,
+         "ruthlessness": 3,
+         "aggression": 2,
+         "endurance": 4,
+         "survivalism": 4,
+         "loneliness": 6,
+         "friendliness": 10,
+         "cleverness": 5,
+         "combat ability": 3
+        }
+    },
+    "Misaka":
+    {"imageFile": "Misaka.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 7,
+         "stability": 8,
+         "forgiveness": 7,
+         "loyalty": 10,
+         "meanness": 3,
+         "ruthlessness": 4,
+         "aggression": 5,
+         "endurance": 8,
+         "survivalism": 6,
+         "loneliness": 4,
+         "friendliness": 7,
+         "cleverness": 8,
+         "combat ability": 10
+        }
     }
 }

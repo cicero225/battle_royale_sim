@@ -67,7 +67,7 @@
         }
     },
     "Medicine":
-    {"imageFile": "Medicine.jpg",
+    {"imageFile": "Medicine.gif",
     "friendly": "Medicine",
     "statChanges": 
         {"stability": 2},
