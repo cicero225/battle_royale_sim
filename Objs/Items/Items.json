@@ -13,8 +13,7 @@
     "eventsDisabled": {
         "Dysentary": {"main": true},
         "GiftWater": {"main": true},
-        "FindRiverCleanWater": {"main": true},
-        "SponsorGiveWater": {"main": true}
+        "FindRiverCleanWater": {"main": true}
         }
     },
 "Fruit":
@@ -47,7 +46,6 @@
         },
     "eventsDisabled": {
         "CraftSpear": {"main": true},
-        "SponsorGiveSpear": {"main": true},
         "AAttacksB": {"main": true}
         }
     },

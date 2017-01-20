@@ -277,9 +277,23 @@
      "reverse": true,
      "friendEffectSponsor": -1.0,
      "loveEffectSponsor": -2.0,
-     "friendRequiredSponsor": false,
-     "neededFriendLevelSponsor": {"relation": true, "value": 0},
-     "loveRequiredSponsor": false,
-     "neededLoveLevelSponsor": {"relation": true, "value": 0}
+     "friendRequiredSponsor": true,
+     "neededFriendLevelSponsor": {"relation": false, "value": 0},
+     "loveRequiredSponsor": true,
+     "neededLoveLevelSponsor": {"relation": false, "value": 0}
+     },
+     "FriendGivesMedicine":
+    {"mainWeight": 0,
+     "numParticipants": 1,
+     "participantWeight": 1,
+     "participantModifiers": {"loyalty": 1,
+                              "ruthlessness": -1},
+     "reverse": true,
+     "friendEffectParticipant": 0.5,
+     "loveEffectParticipant": 1.5,
+     "unique": false,
+     "itemRequired": false,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": true, "value": 3}
      }
  }

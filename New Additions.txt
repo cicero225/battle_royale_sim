@@ -1,1 +1,4 @@
 Cthulhu
+Check that SponsorCheatKill is doing the right thing with its friend-checking
+Add death propagation to relationship thing?
+Figure out html tables
