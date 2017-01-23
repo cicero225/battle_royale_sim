@@ -30,7 +30,7 @@ class IndividualEventHandler(object):
     def setEventWeightForSingleContestant(self, eventName, contestantName, weight):
         def func(actor, origWeight, event):
             if event.name == eventName and actor.name == contestantName:
-                return (weight, True)
+                return (weight, bool(weight))  # if weight is 0, we almost always want this to return False and block the event entirely
             else:
                 return (origWeight, True)
         anonfunc = lambda actor, origWeight, event: func(actor, origWeight, event) # this anonymizes func, giving a new reference each time this is called

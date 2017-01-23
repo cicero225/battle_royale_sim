@@ -14,7 +14,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         eventHandler.setEventWeightForSingleContestant("RecoversFromFever", mainActor.name, 10)
         eventHandler.setEventWeightForSingleContestant("DiesFromFever", mainActor.name, 10)
         eventHandler.setEventWeightForSingleContestant("FriendGivesMedicine", mainActor.name, 10)
-        eventHandler.banEventForSingleContestant("DiesFromFever", mainActor.name)
+        eventHandler.banEventForSingleContestant("SickWithFever", mainActor.name)
         self.eventStore[mainActor.name] = eventHandler #registers event chain
     return (desc, [mainActor], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
