@@ -17,12 +17,14 @@ def weightedDictRandom(inDict, num_sel=1):
     if not num_sel:
         return ()
     if num_sel == len(inDict):
-        return inDict.keys()
+        return list(inDict.keys())
     keys = []
     allkeys = list(inDict.keys())
     allvalues = list(inDict.values())
     cumsum = [0]
     for weight in allvalues: 
+        if weight < 0:
+            raise TypeError("Weights of a dictionary for random weight selection cannot be less than 0")
         cumsum.append(cumsum[-1]+weight)
     for dummy in range(num_sel):
         thisrand = random.uniform(1e-100,cumsum[-1]-1e-100) #The 1e-100 is important for numerical reasons

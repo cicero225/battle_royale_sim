@@ -148,6 +148,8 @@ def main():
     # Note that if *any* of these returns false, then normal event processing is overridden
     overrideContestantEvent = []  
     
+    # Things that happen after event processing (usually logging or emergency reset. Note that resetting callbacks need to happen before logging.
+    # Expected args: proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere
     postEventCallbacks = [
         ArenaUtils.logLastEventByContestant,
         ArenaUtils.logKills
@@ -297,7 +299,7 @@ def main():
             # Note, however, that this _not_ a good way to enforce specific participants, etc. as this is both wasteful
             # and not-statistically accurate.
             while(True):
-                #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.                
+                #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
                 eventName = ArenaUtils.weightedDictRandom(indivProb)[0]                
                 # Handle event overrides, if any
                 #Determine participants, victims, if any.

@@ -1,4 +1,12 @@
 Cthulhu
-Check that SponsorCheatKill is doing the right thing with its friend-checking
+Misaka
+Yuno
+
 Add death propagation to relationship thing?
 Figure out html tables
+Convert event startup into a more generic thing that provides access to all callbacks.
+Change NeededFriendLevel/NeededLoveLevel to permit an "or" condition, then modify events accordingly.
+
+
+
+

@@ -17,9 +17,9 @@ class Relationship(object):
             self.friendships[contestant]={}
             self.loveships[contestant]={}
         for contestant1, contestant2 in itertools.combinations(mergedpeople, 2):
-            self.friendships[contestant1][contestant2] = min(max(random.gauss(0, 1.5),0),5)  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
+            self.friendships[contestant1][contestant2] = min(max(random.gauss(0, 1.5),-5),5)  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
             self.friendships[contestant2][contestant1] = self.friendships[contestant1][contestant2] # But start them off equal
-            self.loveships[contestant1][contestant2] = min(max(random.gauss(0, 1.5),0),5)
+            self.loveships[contestant1][contestant2] = min(max(random.gauss(0, 1.5),-5),5)
             self.loveships[contestant2][contestant1] = self.loveships[contestant1][contestant2]
             
     def IncreaseFriendLevel(self, person1, person2, change):
@@ -34,7 +34,7 @@ class Relationship(object):
                 stat = 'forgiveness'
             else:
                 stat = 'meanness'    
-        change *= (1+self.settings['statFriendEffect']*(person1.stats[stat]-5)/5)*change
+        change *= (1+self.settings['statFriendEffect']**(person1.stats[stat]-5)/5)*change
         self.friendships[person1.name][person2.name] = max(min(curLevel+change, 5), -5)
         
     def IncreaseLoveLevel(self, person1, person2, change):
@@ -49,7 +49,7 @@ class Relationship(object):
                 stat = 'forgiveness'
             else:
                 stat = 'meanness'    
-        change *= (1+self.settings['statFriendEffect']*(person1.stats[stat]-5)/5)*change
+        change *= (1+self.settings['statFriendEffect']**(person1.stats[stat]-5)/5)*change
         self.loveships[person1.name][person2.name] = max(min(curLevel+change, 5), -5)
         
     def groupFriendLevel(self, names):

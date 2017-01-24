@@ -40,7 +40,8 @@ class IndividualEventHandler(object):
     def bindRoleForContestantAndEvent(self, roleName, fixedRoleList, relevantActor, eventName):
         anonfunc = partial(self.fixedRoleCallback, roleName, fixedRoleList, relevantActor, eventName)
         self.registerEvent(self.state["callbacks"]["overrideContestantEvent"], anonfunc)
-        # It must _also_ be checked that the people bound all still live
+        # It must _also_ be checked that the people bound all still live. This has be done before the event is selected, to prevent the selection
+        # of invalid events.
         def func(actor, origWeight, event): # Black magic
             if event.name == eventName and actor.name == relevantActor.name:
                 for person in fixedRoleList:

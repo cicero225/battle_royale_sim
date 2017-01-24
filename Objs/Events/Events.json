@@ -295,5 +295,11 @@
      "itemRequired": false,
      "friendRequiredParticipant": true,
      "neededFriendLevelParticipant": {"relation": true, "value": 3}
+     },
+     "AWorshipsB":
+     {"mainWeight": 0.25,
+     "mainModifiers": {"stability": -1.0},
+     "unique": false,
+     "itemRequired": false
      }
  }
