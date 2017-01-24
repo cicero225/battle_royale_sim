@@ -11,7 +11,8 @@
      "unique": false,
      "itemRequired": false,
      "friendEffectVictim": 0.0,
-     "loveEffectVictim": 0.0
+     "loveEffectVictim": 0.0,
+     "murder": true
      },
 "FindRiverCleanWater":
     {"mainWeight": 1.0,
@@ -82,7 +83,8 @@
      "friendRequiredVictim": true,
      "neededFriendLevelVictim": {"relation": false, "value": 5},
      "loveRequiredVictim": true,
-     "neededLoveLevelVictim": {"relation": false, "value": 4}
+     "neededLoveLevelVictim": {"relation": false, "value": 4},
+     "murder": true
      },
 "QuestionsSanity": 
     {"mainWeight": 0.5,
@@ -117,7 +119,8 @@
      "friendRequiredParticipant": true,
      "neededFriendLevelParticipant": {"relation": false, "value": 5},
      "loveRequiredParticipant": true,
-     "neededLoveLevelParticipant": {"relation": false, "value": 4}
+     "neededLoveLevelParticipant": {"relation": false, "value": 4},
+     "murder": true
      },
  "SickWithFever":
     {"mainWeight": 0.5,
@@ -177,7 +180,8 @@
      "friendRequiredVictim": true,
      "neededFriendLevelVictim": {"relation": false, "value": 5},
      "loveRequiredVictim": true,
-     "neededLoveLevelVictim": {"relation": false, "value": 4}
+     "neededLoveLevelVictim": {"relation": false, "value": 4},
+     "murder": true
      },
    "FindDeadBody":
      {"mainWeight": 0.5,
@@ -199,7 +203,8 @@
      "itemRequired": false,
      "mutual": true,
      "friendEffectParticipant": 0.5,
-     "loveEffectParticipant": 1.0
+     "loveEffectParticipant": 1.0,
+     "murder": true
     },
     "SelfFuneral":
      {"mainWeight": 0.25,
@@ -266,7 +271,8 @@
      "friendRequiredVictim": true,
      "neededFriendLevelVictim": {"relation": false, "value": 3},
      "loveRequiredVictim": true,
-     "neededLoveLevelVictim": {"relation": false, "value": 2}
+     "neededLoveLevelVictim": {"relation": false, "value": 2},
+     "murder": true
      },
      "SponsorCheatKill":
     {"mainWeight": 0.15,

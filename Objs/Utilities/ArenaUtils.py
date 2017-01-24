@@ -78,14 +78,12 @@ def killCounterStartup(state):
     state["callbackStore"]["killCounter"] = collections.defaultdict(int)
     
 def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
-    if not len(eventOutputs[2]):
+    if not len(eventOutputs[2]) or "murder" not in thisevent.baseProps or not thisevent.baseProps["murder"]:
         return
     if len(eventOutputs)>3:
         killers = eventOutputs[3]
-    elif "noBlame" not in thisevent.baseProps or not thisevent.baseProps["noBlame"]:
-        killers = [str(x) for x in set([mainActor]+participants+victims) if str(x) not in eventOutputs[2]]
     else:
-        killers = []
+        killers = [str(x) for x in set([mainActor]+participants+victims) if str(x) not in eventOutputs[2]]
     for killer in killers:
         state["callbackStore"]["killCounter"][str(killer)] += len(eventOutputs[2])/len(killers)
         
