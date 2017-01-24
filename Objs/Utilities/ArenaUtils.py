@@ -72,7 +72,6 @@ def logLastEventByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor,
         state["callbackStore"]["lastEvent"][mainActor.name] = thisevent.name
     else:
         state["callbackStore"]["lastEvent"][mainActor.name] = "overridden"
-    return proceedAsUsual
     
 def killCounterStartup(state):
     state["callbackStore"]["killCounter"] = collections.defaultdict(int)

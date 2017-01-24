@@ -307,5 +307,33 @@
      "mainModifiers": {"stability": -1.0},
      "unique": false,
      "itemRequired": false
+     },
+     "MadokamiKillsBadWorshipper":
+     {"mainWeight": 0,
+     "sponsorWeight": 1,
+     "numSponsors": 1,
+     "unique": false,
+     "itemRequired": false,
+     "reverse": true,
+     "friendEffectSponsor": -0.5,
+     "loveEffectSponsor": -1.0,
+     "friendRequiredSponsor": true,
+     "neededFriendLevelSponsor": {"relation": false, "value": 2},
+     "loveRequiredSponsor": true,
+     "neededLoveLevelSponsor": {"relation": false, "value": 2}
+     },
+     "HomuciferKillsBadWorshipper":
+     {"mainWeight": 0,
+     "sponsorWeight": 1,
+     "numSponsors": 1,
+     "unique": false,
+     "itemRequired": false,
+     "reverse": true,
+     "friendEffectSponsor": -0.5,
+     "loveEffectSponsor": -1.0,
+     "friendRequiredSponsor": true,
+     "neededFriendLevelSponsor": {"relation": false, "value": 2},
+     "loveRequiredSponsor": true,
+     "neededLoveLevelSponsor": {"relation": false, "value": 2}
      }
  }

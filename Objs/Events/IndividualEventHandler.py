@@ -53,7 +53,7 @@ class IndividualEventHandler(object):
         return anonfunc # Just in case it's needed by the calling function
     
     @staticmethod
-    def fixedRoleCallback(roleName, fixedRoleList, relevantActor, eventName, contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere):
+    def fixedRoleCallback(roleName, fixedRoleList, relevantActor, eventName, contestantKey, thisevent, state, participants, victims, sponsorsHere):
         #Avoiding eval here
         roleDict = {"participants": participants,
         "victims": victims,
@@ -61,17 +61,17 @@ class IndividualEventHandler(object):
         if thisevent.name==eventName and relevantActor.name == contestantKey:
             del roleDict[roleName][:] # Have to clear the list BUT keep the reference
             roleDict[roleName].extend(fixedRoleList)
-        return proceedAsUsual
+        return True, False
         
     def banEventForSingleContestant(self, eventName, contestantName):
         self.setEventWeightForSingleContestant(eventName, contestantName, 0)
         
     def banMurderEventsAtoB(self, cannotKill, cannotBeVictim):
-        def func(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere):
+        def func(contestantKey, thisevent, state, participants, victims, sponsorsHere):
             if  "murder" in thisevent.baseProps and thisevent.baseProps["murder"] and contestantKey == str(cannotKill):
                 if cannotBeVictim in victims or (not victims) and cannotBeVictim in participants:
                     return False, True
             return True, False
-        anonfunc = lambda contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere: func(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere) # this anonymizes func, giving a new reference each time this is called
+        anonfunc = lambda contestantKey, thisevent, state, participants, victims, sponsorsHere: func(contestantKey, thisevent, state, participants, victims, sponsorsHere) # this anonymizes func, giving a new reference each time this is called
         self.registerEvent(self.state["callbacks"]["overrideContestantEvent"], anonfunc) # This needs to be at beginning for proper processing
         return anonfunc # Just in case it's needed by the calling function

@@ -142,7 +142,7 @@ def main():
     partial(allRelationships.relationsRoleWeightCallback, "Sponsor")
     ]
     
-    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere. Return: bool proceedAsUsual, resetEvent (True if you want the usual event chain to still happen, and True if you want the event to Reset entirely)
+    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantKey, thisevent, state, participants, victims, sponsorsHere. Return: bool proceedAsUsual, resetEvent (True if you want the usual event chain to still happen, and True if you want the event to Reset entirely)
     # Note that if *any* of these returns "unusually", then normal event processing is overridden and no further callbacks occur
     overrideContestantEvent = []  
     
@@ -314,7 +314,7 @@ def main():
                 resetEvent = False
                 for override in callbacks["overrideContestantEvent"]:
                     # Be very careful of modifying state here.
-                    proceedAsUsual, resetEvent = override(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere)
+                    proceedAsUsual, resetEvent = override(contestantKey, thisevent, state, participants, victims, sponsorsHere)
                     if not proceedAsUsual or resetEvent:
                         break
                 if resetEvent:

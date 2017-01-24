@@ -20,7 +20,16 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     eventHandler = IndividualEventHandler(state)
     eventHandler.banMurderEventsAtoB(mainActor.name, chosen)
     eventHandler.banEventForSingleContestant("AWorshipsB", mainActor.name)
-    self.eventStore[mainActor.name] = eventHandler
+    self.eventStore.setdefault("permanent", {})
+    self.eventStore["permanent"][mainActor.name] = eventHandler
+    if chosen == "Kaname Madoka":
+        eventHandler = IndividualEventHandler(state)
+        eventHandler.setEventWeightForSingleContestant("HomuciferKillsBadWorshipper", mainActor.name, 10)
+        self.eventStore[mainActor.name] = eventHandler
+    elif chosen == "Akemi Homura":
+        eventHandler = IndividualEventHandler(state)
+        eventHandler.setEventWeightForSingleContestant("MadokamiKillsBadWorshipper", mainActor.name, 10)
+        self.eventStore[mainActor.name] = eventHandler
     desc = 'In a delirious state, '+mainActor.name+' had a religious epiphany, realizing that '+chosen+' is the avatar of a divine being.'
     return (desc, [mainActor], [])
 
