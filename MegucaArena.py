@@ -115,8 +115,6 @@ def main():
     ArenaUtils.logLastEventStartup,
     ArenaUtils.killCounterStartup]
     
-    startup.extend(Event.Event.setup_callbacks.values())
-    
     # modifyBaseWeights: Expected args: baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber. Modify in place.
         # Also a good time to do any beginning of turn stuff
     modifyBaseWeights = []
@@ -170,6 +168,11 @@ def main():
                  "postEventCallbacks": postEventCallbacks,
                  "endGameConditions": endGameConditions,
     }
+    
+    # loophole that allows event-defining files to slip callbacks in
+    for store, funcList in Event.Event.inserted_callbacks.items():
+        callbacks[store].extend(funcList)
+    
     state["callbacks"] = callbacks # I define state before callbacks so it can be bound to a callback if necessary
     
     # Nested functions that need access to variables in main

@@ -12,7 +12,7 @@ from functools import partial
 class Event(object): #Python 2.x compatibility
 
     event_callbacks = {}  # It is important that this is a class attribute, which can be modified in Python
-    setup_callbacks = {}  # Some events need preliminary setup. Place here at import time.
+    inserted_callbacks = {}  # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
 
     def __init__(self, name, inDict, settings):
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
@@ -73,8 +73,9 @@ class Event(object): #Python 2.x compatibility
         return self.name
     
     @classmethod
-    def registerStartup(cls, eventName, callback):
-        cls.setup_callbacks[eventName] = callback
+    def registerInsertedCallback(cls, callbackLocation, callback):
+        cls.inserted_callbacks.setdefault(callbackLocation, [])
+        cls.inserted_callbacks[callbackLocation].append(callback)
     
     @classmethod
     def registerEvent(cls, eventName, callback):

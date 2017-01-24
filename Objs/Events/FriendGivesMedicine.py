@@ -1,14 +1,13 @@
 from Objs.Events.Event import Event
 import random
 
-def startup(state):
-    def func(actor, participant, baseEventActorWeight, event):
-        if state["items"]["Medicine"] in participant.inventory:
+def checkParticipantMedicine(actor, participant, baseEventActorWeight, event):
+    for item in participant.inventory:
+        if item.name == "Medicine":
             return baseEventActorWeight, True
-        return 0, False
-    state["callbacks"]["modifyIndivActorWeightsWithParticipants"].append(func)  # It's okay not to anonymize this one
+    return 0, False
 
-Event.registerStartup("FriendGivesMedicine", startup)
+Event.registerInsertedCallback("modifyIndivActorWeightsWithParticipants", checkParticipantMedicine)
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.addItem(state["items"]["Medicine"])

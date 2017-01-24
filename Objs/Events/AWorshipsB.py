@@ -13,7 +13,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         potentialContestants["Akemi Homura"] *=10
     if "Kaname Madoka" in potentialContestants:
         potentialContestants["Kaname Madoka"] *=10
-    print(potentialContestants)
     chosen = weightedDictRandom(potentialContestants, 1)[0]
     state["allRelationships"].IncreaseFriendLevel(mainActor, state["contestants"][chosen], 10)
     state["allRelationships"].IncreaseLoveLevel(mainActor, state["contestants"][chosen], 10)
