@@ -1,6 +1,7 @@
 
 from ..Utilities.ArenaUtils import weightedDictRandom
 from Objs.Events.Event import Event
+from Objs.Events.IndividualEventHandler import IndividualEventHandler
 import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
@@ -17,6 +18,10 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     state["allRelationships"].IncreaseFriendLevel(mainActor, state["contestants"][chosen], 10)
     state["allRelationships"].IncreaseLoveLevel(mainActor, state["contestants"][chosen], 10)
     mainActor.permStatChange({'stability': 2})
+    eventHandler = IndividualEventHandler(state)
+    eventHandler.banMurderEventsAtoB(mainActor.name, chosen)
+    eventHandler.banEventForSingleContestant("AWorshipsB", mainActor.name)
+    self.eventStore[mainActor.name] = eventHandler
     desc = 'In a delirious state, '+mainActor.name+' had a religious epiphany, realizing that '+chosen+' is the avatar of a divine being.'
     return (desc, [mainActor], [])
 

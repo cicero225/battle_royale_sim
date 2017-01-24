@@ -12,7 +12,7 @@ from functools import partial
 class Event(object): #Python 2.x compatibility
 
     event_callbacks = {}  # It is important that this is a class attribute, which can be modified in Python
-    setup_callbacks = {}  # Some events need preliminary setup. Place here.
+    setup_callbacks = {}  # Some events need preliminary setup. Place here at import time.
 
     def __init__(self, name, inDict, settings):
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
@@ -21,6 +21,7 @@ class Event(object): #Python 2.x compatibility
         # int optional numParticipants, int optional numVictims, dict (string: float) mainModifiers,
         # int optional numParticipantsExtra, int optional numVictimsExtra, int optional numSponsorsExtra <- if there is some squishiness to the number of participants/victims
         # dict (string: float) optional participantModifiers, dict (string: float) optional victimModifiers,
+        # bool optional murder: indicates that an event can cause someone to kill someone, counting as a kill. Should not be used for sponsor kills or deaths with no killer.
         # bool unique, list[string] optional uniqueUsers #at the moment only supports unique contestants performing the event, rather than being the victim etc. This is bad for, say, Mami getting her head eaten.
         # bool itemRequired, string optional necessaryItem
         # (The event is more (or less) likely if actor has ANY relationship that meets the criterion >mainFriendLevel. Set bool to false if you want < instead.

@@ -144,8 +144,8 @@ def main():
     partial(allRelationships.relationsRoleWeightCallback, "Sponsor")
     ]
     
-    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere. Return: bool proceedAsUsual (True if you want the usual event chain to still happen)
-    # Note that if *any* of these returns false, then normal event processing is overridden
+    # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere. Return: bool proceedAsUsual, resetEvent (True if you want the usual event chain to still happen, and True if you want the event to Reset entirely)
+    # Note that if *any* of these returns "unusually", then normal event processing is overridden and no further callbacks occur
     overrideContestantEvent = []  
     
     # Things that happen after event processing (usually logging or emergency reset. Note that resetting callbacks need to happen before logging.
@@ -308,9 +308,14 @@ def main():
                 victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
                 sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
                 proceedAsUsual = True
+                resetEvent = False
                 for override in callbacks["overrideContestantEvent"]:
                     # Be very careful of modifying state here.
-                    proceedAsUsual = override(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere) and proceedAsUsual # Because of short-circuit processing, the order here is important
+                    proceedAsUsual, resetEvent = override(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere)
+                    if not proceedAsUsual or resetEvent:
+                        break
+                if resetEvent:
+                    continue
                 if proceedAsUsual:
                     eventOutputs = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
                     if not eventOutputs:

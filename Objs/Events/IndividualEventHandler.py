@@ -65,3 +65,13 @@ class IndividualEventHandler(object):
         
     def banEventForSingleContestant(self, eventName, contestantName):
         self.setEventWeightForSingleContestant(eventName, contestantName, 0)
+        
+    def banMurderEventsAtoB(self, cannotKill, cannotBeVictim):
+        def func(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere):
+            if  "murder" in thisevent.baseProps and thisevent.baseProps["murder"] and contestantKey == str(cannotKill):
+                if cannotBeVictim in victims or (not victims) and cannotBeVictim in participants:
+                    return False, True
+            return True, False
+        anonfunc = lambda contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere: func(contestantKey, thisevent, state, proceedAsUsual, participants, victims, sponsorsHere) # this anonymizes func, giving a new reference each time this is called
+        self.registerEvent(self.state["callbacks"]["overrideContestantEvent"], anonfunc) # This needs to be at beginning for proper processing
+        return anonfunc # Just in case it's needed by the calling function
