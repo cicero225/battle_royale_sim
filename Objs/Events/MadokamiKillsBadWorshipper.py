@@ -5,7 +5,7 @@ import random
 def fixedMadokamiCallback(contestantKey, thisevent, state, participants, victims, sponsorsHere): 
     if thisevent.name == "MadokamiKillsBadWorshipper":
         del sponsorsHere[:] # Have to clear the list BUT keep the reference
-        sponsorsHere.append(state["sponsors"]["Ultimate Madoka"])
+        sponsorsHere.append(state["sponsors"]["Madokami"])
     return True, False
     
 Event.registerInsertedCallback("overrideContestantEvent", fixedMadokamiCallback)

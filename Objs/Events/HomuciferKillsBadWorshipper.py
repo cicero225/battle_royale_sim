@@ -19,8 +19,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         del state["events"]["AWorshipsB"].eventStore[mainActor.name]
         deadList = [mainActor.name]
     else:
-        desc = sponsors[0].name+' tried to strike down '+mainActor.name + " for "+Event.parseGenderPossessive(mainActor)+" dangerous beliefs, but Ultimate Madoka was able to intervene successfully."
-        tempList = [sponsors[0], mainActor, state["sponsors"]["Ultimate Madoka"]]
+        desc = sponsors[0].name+' tried to strike down '+mainActor.name + " for "+Event.parseGenderPossessive(mainActor)+" dangerous beliefs, but Madokami was able to intervene successfully."
+        tempList = [sponsors[0], mainActor, state["sponsors"]["Madokami"]]
         deadList = []
     return (desc, tempList, deadList) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
