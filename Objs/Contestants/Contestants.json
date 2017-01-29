@@ -511,5 +511,24 @@
          "cleverness": 8,
          "combat ability": 10
         }
+    },
+    "Oregon Trail":
+    {"imageFile": "OregonTrail.jpg",
+     "gender": "N",
+     "stats":
+        {"gregariousness": 0,
+         "stability": 3,
+         "forgiveness": 0,
+         "loyalty": 0,
+         "meanness": 10,
+         "ruthlessness": 10,
+         "aggression": 10,
+         "endurance": 10,
+         "survivalism": 10,
+         "loneliness": 0,
+         "friendliness": 0,
+         "cleverness": 5,
+         "combat ability": 5
+        }
     }
 }

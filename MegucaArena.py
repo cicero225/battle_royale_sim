@@ -26,6 +26,9 @@ def main():
     
     # Initial Setup:
 
+    # State initialization. This should NEVER EVER be reassigned.
+    state = {}
+    
     # Import Settings from JSON -> going to make it a dictionarys
     with open('Settings.json') as settings_file:
         settings = json.load(settings_file)
@@ -46,6 +49,8 @@ def main():
     # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
     
     # Initialize Events
+    # Ugly, but oh well.
+    Event.Event.stateStore[0] = state
     events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Events', 'Events.json'), settings, Event.Event)
     eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
 
@@ -89,7 +94,7 @@ def main():
     
     thisWriter = None # current HTML display object
     
-    state = {
+    state.update({
     "settings": settings,
     "contestants": contestants,
     "sponsors": sponsors,
@@ -101,7 +106,7 @@ def main():
     "turnNumber": turnNumber,
     "callbackStore": callbackStore,
     "thisWriter": thisWriter,
-    } # Allows for convenient passing of the entire game state to anything that needs it (usually events)
+    }) # Allows for convenient passing of the entire game state to anything that needs it (usually events)
     
     # CALLBACKS
     # As much as possible influence event processing from here. Note that these callbacks happen IN ORDER. It would be possible to do this in a more
@@ -173,7 +178,7 @@ def main():
     for store, funcList in Event.Event.inserted_callbacks.items():
         callbacks[store].extend(funcList)
     
-    state["callbacks"] = callbacks # I define state before callbacks so it can be bound to a callback if necessary
+    state["callbacks"] = callbacks
     
     # Nested functions that need access to variables in main
     
@@ -338,7 +343,8 @@ def main():
             #Check if everyone is now dead...
             if all(not x.alive for x in liveContestants.values()):
                 # This turn needs to be rerun
-                state = initialState.copy()
+                state.clear()
+                state.update(initialState.copy())
                 settings = state['settings']
                 contestants = state['contestants']
                 sponsors = state['sponsors']
@@ -350,6 +356,7 @@ def main():
                 turnNumber = state['turnNumber']
                 callbackStore = state['callbackStore']
                 thisWriter = state['thisWriter']
+                Event.stateStore = state
                 restartTurn = True
                 break
             
@@ -368,12 +375,18 @@ def main():
                         print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
 
                     # TODO: Do any additional end of simulation stuff here
-                    return
+                    return list(liveContestants.values())[0].name
             if PRINTHTML:
                 deadThisTurn = set(origLiveContestants.values()) - set(liveContestants.values())
                 if deadThisTurn:
                     thisWriter.addEvent("The following names were added to the memorial wall: "+Event.Event.englishList(deadThisTurn), deadThisTurn)
                 thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
-            
+
+def statCollection(): # expand to count number of days, and fun stuff like epiphany targets?
+    statDict = collections.defaultdict(int)
+    for _ in range(0,10000):
+        statDict[main()] += 1
+    print(statDict)
+                
 if __name__ == "__main__":
-    main()
+    statCollection()

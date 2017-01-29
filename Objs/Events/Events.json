@@ -70,7 +70,7 @@
      "itemRequired": false
      },
 "AAttacksB":
-    {"mainWeight": 1,
+    {"mainWeight": 1.5,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
      "victimWeight": 1,
@@ -104,7 +104,7 @@
      "itemRequired": false
      },
  "ThreeWayFight":
-    {"mainWeight": 0.5,
+    {"mainWeight": 0.75,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
      "participantWeight": 1,
@@ -123,7 +123,7 @@
      "murder": true
      },
  "SickWithFever":
-    {"mainWeight": 0.5,
+    {"mainWeight": 0.75,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
@@ -164,7 +164,7 @@
      "itemRequired": false
      },
  "ThrowSpearKill":
-    {"mainWeight": 0.5,
+    {"mainWeight": 1,
      "mainModifiers": {"ruthlessness": 1.0,
                        "aggression": 1.0,
                        "combat ability": 1.0},
@@ -335,5 +335,27 @@
      "neededFriendLevelSponsor": {"relation": false, "value": 2},
      "loveRequiredSponsor": true,
      "neededLoveLevelSponsor": {"relation": false, "value": 2}
+     },
+     "HurtsSelfPracticingCombat":
+    {"mainWeight": 0.5,
+     "mainModifiers": {"aggression": 1.0,
+                       "survivalism": 1.0},
+     "unique": false,
+     "itemRequired": false
+     },
+     "FriendHelpsInjury":
+    {"mainWeight": 10,
+     "numParticipants": 1,
+     "participantWeight": 1,
+     "participantModifiers": {"loyalty": 1,
+                              "ruthlessness": -1,
+                              "survivalism": 0.5},
+     "reverse": true,
+     "friendEffectParticipant": 0.5,
+     "loveEffectParticipant": 1.5,
+     "unique": false,
+     "itemRequired": false,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": true, "value": 1}
      }
  }

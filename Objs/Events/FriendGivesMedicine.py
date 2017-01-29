@@ -2,10 +2,12 @@ from Objs.Events.Event import Event
 import random
 
 def checkParticipantMedicine(actor, participant, baseEventActorWeight, event):
-    for item in participant.inventory:
-        if item.name == "Medicine":
-            return baseEventActorWeight, True
-    return 0, False
+    if event.name == "FriendGivesMedicine":
+        for item in participant.inventory:
+            if item.name == "Medicine":
+                return baseEventActorWeight, True
+        return 0, False
+    return baseEventActorWeight, True
 
 Event.registerInsertedCallback("modifyIndivActorWeightsWithParticipants", checkParticipantMedicine)
 

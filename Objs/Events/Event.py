@@ -13,6 +13,7 @@ class Event(object): #Python 2.x compatibility
 
     event_callbacks = {}  # It is important that this is a class attribute, which can be modified in Python
     inserted_callbacks = {}  # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
+    stateStore = [None]  # This allows import time access to a pointer to state, which is needed occasionally by doEvent functors. It must be supplied by main during initialization.
 
     def __init__(self, name, inDict, settings):
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
