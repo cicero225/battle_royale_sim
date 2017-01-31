@@ -10,6 +10,8 @@ class Relationship(object):
 
     def __init__(self, contestants, sponsors, settings):
         self.settings = settings
+        self.contestants = contestants
+        self.sponsors = sponsors
         self.friendships = collections.defaultdict(partial(collections.defaultdict,int)) #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
         self.loveships = collections.defaultdict(partial(collections.defaultdict,int)) # In this case, the use of these dictionaries is very immunzied from json typos
         mergedpeople = list(contestants.keys()) + list(sponsors.keys()) #Or I could write a generator to combine the iterators, but I'll just spend the memory for now
@@ -21,8 +23,16 @@ class Relationship(object):
             self.friendships[contestant2][contestant1] = self.friendships[contestant1][contestant2] # But start them off equal
             self.loveships[contestant1][contestant2] = min(max(random.gauss(0, 1.5),-5),5)
             self.loveships[contestant2][contestant1] = self.loveships[contestant1][contestant2]
-            
-    def IncreaseFriendLevel(self, person1, person2, change):
+    
+    def propagateFriendshipChange(self, original, target, change): # For now, changes in friendship propagate to friendship, but changes in loveship do not propagate. Note that this propagates to sponsors!
+        for person in list(self.contestants.values()) + list(self.sponsors.values()):
+            if person.name == str(original) or person.name == str(target):
+                continue
+            self.IncreaseFriendLevel(person, target, change*max((self.friendships[person.name][original.name] + 2*self.loveships[person.name][original.name])/5*self.settings["relationshipPropagation"], 1) , False)
+    
+    def IncreaseFriendLevel(self, person1, person2, change, propagate=True):
+        if propagate:
+            self.propagateFriendshipChange(person1, person2, change)
         curLevel = self.friendships[person1.name][person2.name]
         if curLevel > 0:
             if change > 0:

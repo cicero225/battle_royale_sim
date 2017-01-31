@@ -6,26 +6,29 @@ under a key such as mainActor.name which will properly identify it). When the ca
 state. If a group of callbacks may be deleted under different circumstances, it is probably best to make two objects."""
 
 from functools import partial
+import warnings
 
 class IndividualEventHandler(object):
 
     def __init__(self, state):
         self.state = state
-        self.callbackReferences = [] # List of tuples, (callback kist where callback is stored, callback)
+        self.callbackReferences = [] # List of tuples, (callback list name where callback is stored, callback)
         
-    def __del__(self):
+    def clear(self):
         for toRemove in self.callbackReferences:
             try:
-                toRemove[0].remove(toRemove[1])
+                self.state["callbacks"][toRemove[0]].remove(toRemove[1])
+                #print('removing '+str(toRemove[1])+' from '+str(toRemove[0]))
             except ValueError:
-                pass
+                warnings.warn('IndividualEventHandler: Attempted to remove invalid callback '+str(toRemove[1])+' from '+toRemove[0])
+        self.callbackReferences = []
     
-    def registerEvent(self, locationList, func, front=True):
+    def registerEvent(self, locationListName, func, front=True):
         if front:
-            locationList.insert(0, func)
+            self.state["callbacks"][locationListName].insert(0, func)
         else:
-            locationList.append(func)
-        self.callbackReferences.append((locationList, func))
+            self.state["callbacks"][locationListName].append(func)
+        self.callbackReferences.append((locationListName, func))
     
     def setEventWeightForSingleContestant(self, eventName, contestantName, weight):
         def func(actor, origWeight, event):
@@ -34,12 +37,17 @@ class IndividualEventHandler(object):
             else:
                 return (origWeight, True)
         anonfunc = lambda actor, origWeight, event: func(actor, origWeight, event) # this anonymizes func, giving a new reference each time this is called
-        self.registerEvent(self.state["callbacks"]["modifyIndivActorWeights"], anonfunc) # This needs to be at beginning for proper processing
+        anonfunc.eventName = eventName # Notes on the functor for debug purposes
+        anonfunc.contestantName = contestantName
+        self.registerEvent("modifyIndivActorWeights", anonfunc) # This needs to be at beginning for proper processing
         return anonfunc # Just in case it's needed by the calling function
         
     def bindRoleForContestantAndEvent(self, roleName, fixedRoleList, relevantActor, eventName):
         anonfunc = partial(self.fixedRoleCallback, roleName, fixedRoleList, relevantActor, eventName)
-        self.registerEvent(self.state["callbacks"]["overrideContestantEvent"], anonfunc)
+        anonfunc.eventName = eventName # Notes on the functor for debug purposes
+        anonfunc.relevantActor = relevantActor
+        anonfunc.fixedRoleList = fixedRoleList
+        self.registerEvent("overrideContestantEvent", anonfunc)
         # It must _also_ be checked that the people bound all still live. This has be done before the event is selected, to prevent the selection
         # of invalid events.
         def func(actor, origWeight, event): # Black magic
@@ -48,9 +56,9 @@ class IndividualEventHandler(object):
                     if not person.alive:
                         return (0, False)
             return (origWeight, True)
-        anonfunc = lambda actor, origWeight, event: func(actor, origWeight, event) # this anonymizes func, giving a new reference each time this is called
-        self.registerEvent(self.state["callbacks"]["modifyIndivActorWeights"], anonfunc, False) # This needs to be at beginning for proper processing
-        return anonfunc # Just in case it's needed by the calling function
+        anonfunc2 = lambda actor, origWeight, event: func(actor, origWeight, event) # this anonymizes func, giving a new reference each time this is called
+        self.registerEvent("modifyIndivActorWeights", anonfunc2, False) # This needs to be at beginning for proper processing
+        return anonfunc, anonfunc2 # Just in case it's needed by the calling function
     
     @staticmethod
     def fixedRoleCallback(roleName, fixedRoleList, relevantActor, eventName, contestantKey, thisevent, state, participants, victims, sponsorsHere):
@@ -73,5 +81,7 @@ class IndividualEventHandler(object):
                     return False, True
             return True, False
         anonfunc = lambda contestantKey, thisevent, state, participants, victims, sponsorsHere: func(contestantKey, thisevent, state, participants, victims, sponsorsHere) # this anonymizes func, giving a new reference each time this is called
-        self.registerEvent(self.state["callbacks"]["overrideContestantEvent"], anonfunc) # This needs to be at beginning for proper processing
+        anonfunc.cannotKill = cannotKill # Notes on the functor for debug purposes
+        anonfunc.cannotBeVictim = cannotBeVictim
+        self.registerEvent("overrideContestantEvent", anonfunc) # This needs to be at beginning for proper processing
         return anonfunc # Just in case it's needed by the calling function

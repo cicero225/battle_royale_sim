@@ -530,5 +530,81 @@
          "cleverness": 5,
          "combat ability": 5
         }
+    },
+    "Elephant Parade":
+    {"imageFile": "ElephantParade.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 5,
+         "stability": 2,
+         "forgiveness": 7,
+         "loyalty": 9,
+         "meanness": 3,
+         "ruthlessness": 4,
+         "aggression": 2,
+         "endurance": 3,
+         "survivalism": 2,
+         "loneliness": 9,
+         "friendliness": 3,
+         "cleverness": 8,
+         "combat ability": 2
+        }
+    },
+    "Railgun":
+    {"imageFile": "Railgun.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 6,
+         "stability": 9,
+         "forgiveness": 7,
+         "loyalty": 9,
+         "meanness": 4,
+         "ruthlessness": 6,
+         "aggression": 2,
+         "endurance": 4,
+         "survivalism": 4,
+         "loneliness": 6,
+         "friendliness": 7,
+         "cleverness": 8,
+         "combat ability": 6
+        }
+    },
+    "DIPLOMASTER":
+    {"imageFile": "DIPLOMASTER.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 10,
+         "stability": 1,
+         "forgiveness": 1,
+         "loyalty": 1,
+         "meanness": 10,
+         "ruthlessness": 10,
+         "aggression": 10,
+         "endurance": 1,
+         "survivalism": 1,
+         "loneliness": 1,
+         "friendliness": 10,
+         "cleverness": 10,
+         "combat ability": 10
+        }
+    },
+    "Hieronym":
+    {"imageFile": "Hieronym.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 3,
+         "stability": 7,
+         "forgiveness": 6,
+         "loyalty": 9,
+         "meanness": 2,
+         "ruthlessness": 6,
+         "aggression": 3,
+         "endurance": 3,
+         "survivalism": 3,
+         "loneliness": 8,
+         "friendliness": 3,
+         "cleverness": 9,
+         "combat ability": 5
+        }
     }
 }

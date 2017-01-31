@@ -2,13 +2,14 @@
 
 from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
 
-
+import sys
 import copy
 import json
 import os
 import random # A not very good random library, but probably fine for our purposes
 import collections
 from functools import partial # Might be useful later
+import traceback
 
 from Objs.Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
 from Objs.Items.Item import Item
@@ -20,6 +21,8 @@ from Objs.Events import *
 from Objs.Display.HTMLWriter import HTMLWriter
 
 PRINTHTML = True
+DEBUG = False
+STATSDEBUG = {}
 
 def main():
     """The main for the battle royale sim"""
@@ -159,9 +162,11 @@ def main():
     ]
     # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)
     endGameConditions = [
-    ArenaUtils.killWrite,
     ArenaUtils.onlyOneLeft
     ]
+    
+    if PRINTHTML:
+        endGameConditions.insert(0, ArenaUtils.killWrite)
     
     callbacks = {"startup": startup,
                  "modifyBaseWeights": modifyBaseWeights,
@@ -308,7 +313,10 @@ def main():
             # and not-statistically accurate.
             while(True):
                 #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
-                eventName = ArenaUtils.weightedDictRandom(indivProb)[0]                
+                eventName = ArenaUtils.weightedDictRandom(indivProb)[0]     
+                if DEBUG:
+                   STATSDEBUG["state"] = state
+                   STATSDEBUG["indivProb"] = indivProb
                 # Handle event overrides, if any
                 #Determine participants, victims, if any.
                 thisevent = events[eventName]
@@ -384,9 +392,33 @@ def main():
 
 def statCollection(): # expand to count number of days, and fun stuff like epiphany targets?
     statDict = collections.defaultdict(int)
-    for _ in range(0,10000):
-        statDict[main()] += 1
+    numErrors = 0
+    global PRINTHTML
+    PRINTHTML = False
+    for _ in range(0,5000):
+        printtrace = True
+        try:
+            statDict[main()] += 1
+        except Exception as e:
+            if not DEBUG:
+                numErrors +=1
+            else:
+                if printtrace:
+                    traceback.print_exc()
+                    printtrace = False
+                while True:
+                    y = input()
+                    if y.lower() == "q":
+                        break
+                    try:
+                        eval('print('+y+')')
+                    except Exception as e2:
+                        print(e2)
     print(statDict)
-                
-if __name__ == "__main__":
-    statCollection()
+    print(numErrors)
+
+if __name__ == '__main__':
+    if len(sys.argv)>1 and sys.argv[1] == '--stats':
+        statCollection()
+    else:
+        main()

@@ -1,6 +1,6 @@
 {
  "traitRandomness": 3,
- "numContestants": 30,
+ "numContestants": 32,
  "eventRandomness": 0.5,
  "statInfluence": 0.3,
  "objectInfluence": 1,
@@ -8,6 +8,6 @@
  "maxParticipantEffect": 3,
  "statFriendEffect": 0.5,
  "friendCombatEffect": 0.25,
- "combatAbilityEffect": 0.3
- 
+ "combatAbilityEffect": 0.3,
+ "relationshipPropagation": 0.5
 }

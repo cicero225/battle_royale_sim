@@ -5,9 +5,13 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     mainActor.permStatChange({'stability': 3})
     desc = mainActor.name + " spends a night with "+participants[0].name
     print(state["events"]["ShareIntimateConversation"].eventStore) # temporary: there is a rare glitch here
+    print(participants[0].name)
+    print(participants[0].name in state["events"]["ShareIntimateConversation"].eventStore)
+    state["events"]["ShareIntimateConversation"].eventStore[mainActor.name].clear()
     del state["events"]["ShareIntimateConversation"].eventStore[mainActor.name]
     if participants[0].name in state["events"]["ShareIntimateConversation"].eventStore:
         participants[0].permStatChange({'stability': 3})
+        state["events"]["ShareIntimateConversation"].eventStore[participants[0].name].clear()
         del state["events"]["ShareIntimateConversation"].eventStore[participants[0].name]
         desc += " and they resolve their confusion."
     else:
