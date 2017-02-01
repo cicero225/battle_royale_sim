@@ -18,7 +18,9 @@ class Event(object): #Python 2.x compatibility
     def __init__(self, name, inDict, settings):
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
         # Could also use setattr, but...
-        # Should be: float mainWeight, float optional participantWeight, float optional victimWeight,
+        # Should be: 
+        # list(string) phase <- sets which phases the event is valid for (day, night, etc.). If this is not set, it is assumed it is always valid.
+        # float mainWeight, float optional participantWeight, float optional victimWeight,
         # int optional numParticipants, int optional numVictims, dict (string: float) mainModifiers,
         # int optional numParticipantsExtra, int optional numVictimsExtra, int optional numSponsorsExtra <- if there is some squishiness to the number of participants/victims
         # dict (string: float) optional participantModifiers, dict (string: float) optional victimModifiers,

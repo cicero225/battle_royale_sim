@@ -1,6 +1,7 @@
 """Utility functions for battle royale sim"""
 from __future__ import division
 from Objs.Display.HTMLWriter import HTMLWriter
+from functools import partial
 
 import json
 import os
@@ -64,14 +65,14 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
 # Callbacks for specific arena features
 
 def logLastEventStartup(state):
-    state["callbackStore"]["lastEvent"] = collections.defaultdict(str)
+    state["callbackStore"]["lastEvent"] = collections.defaultdict(partial(collections.defaultdict, str))
 
 # Logs last event. Must be last callback in overrideContestantEvent. 
 def logLastEventByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
     if proceedAsUsual:
-        state["callbackStore"]["lastEvent"][mainActor.name] = thisevent.name
+        state["callbackStore"]["lastEvent"][state["curPhase"]][mainActor.name] = thisevent.name
     else:
-        state["callbackStore"]["lastEvent"][mainActor.name] = "overridden"
+        state["callbackStore"]["lastEvent"][state["curPhase"]][mainActor.name] = "overridden"
     
 def killCounterStartup(state):
     state["callbackStore"]["killCounter"] = collections.defaultdict(int)
@@ -86,7 +87,7 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
     for killer in killers:
         state["callbackStore"]["killCounter"][str(killer)] += len(eventOutputs[2])/len(killers)
         
-def killWrite(liveContestants, state):
+def killWrite(state):
     #TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
     killWriter = HTMLWriter()
     killWriter.addTitle("Day "+str(state["turnNumber"][0])+" Kills")
@@ -99,9 +100,9 @@ def killWrite(liveContestants, state):
     killWriter.finalWrite(os.path.join("Assets",str(state["turnNumber"][0])+" Kills.html"))
     return False
     
-# Rig it so the same event never happens twice to the same person (makes game feel better)
+# Rig it so the same event never happens twice to the same person in the same phase(makes game feel better)
 def eventMayNotRepeat(actor, origProb, event, state): 
-    if state["callbackStore"]["lastEvent"][actor.name] == event.name: 
+    if state["callbackStore"]["lastEvent"][state["curPhase"]][actor.name] == event.name: 
         return 0, False
     return origProb, True
   

@@ -35,6 +35,9 @@ def main():
     # Import Settings from JSON -> going to make it a dictionarys
     with open('Settings.json') as settings_file:
         settings = json.load(settings_file)
+        
+    with open('Phases.json') as phases_file:
+        phases = json.load(phases_file)
  
     # List of settings as I come up with them. It can stay as a dict.
     # traitRandomness = 3
@@ -109,6 +112,7 @@ def main():
     "turnNumber": turnNumber,
     "callbackStore": callbackStore,
     "thisWriter": thisWriter,
+    "phases": phases
     }) # Allows for convenient passing of the entire game state to anything that needs it (usually events)
     
     # CALLBACKS
@@ -165,8 +169,11 @@ def main():
     ArenaUtils.onlyOneLeft
     ]
     
+    postDayCallbacks = [ # Things that happen after each day
+    ]
+    
     if PRINTHTML:
-        endGameConditions.insert(0, ArenaUtils.killWrite)
+        postDayCallbacks.insert(0, ArenaUtils.killWrite)
     
     callbacks = {"startup": startup,
                  "modifyBaseWeights": modifyBaseWeights,
@@ -177,6 +184,7 @@ def main():
                  "overrideContestantEvent": overrideContestantEvent,
                  "postEventCallbacks": postEventCallbacks,
                  "endGameConditions": endGameConditions,
+                 "postDayCallbacks": postDayCallbacks
     }
     
     # loophole that allows event-defining files to slip callbacks in
@@ -258,144 +266,159 @@ def main():
     lastEvents = {}
     while True:
         turnNumber[0] += 1
+        if turnNumber[0] in phases:
+            thisDay = phases[turnNumber[0]]
+        else:
+            thisDay = phases["default"]
         print("Day "+str(turnNumber[0]))
-        if PRINTHTML:
-            thisWriter = HTMLWriter()
-            thisWriter.addDay(turnNumber[0])
-        restartTurn = False # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
-        initialState = copy.deepcopy(state) #Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
-        liveContestants = {x: y for x, y in contestants.items() if y.alive}
-        origLiveContestants = copy.copy(liveContestants)
-        # Sample contestants randomly
-        randOrderContestantKeys = random.sample(liveContestants.keys(), len(liveContestants))
-        # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
-        baseEventActorWeights = {x: y.baseProps["mainWeight"] if eventsActive[x] else 0 for x, y in events.items()}
-        baseEventParticipantWeights = {x: y.baseProps["participantWeight"] for x, y in events.items() if "participantWeight" in y.baseProps}
-        baseEventVictimWeights = {x: y.baseProps["victimWeight"] for x, y in events.items() if "victimWeight" in y.baseProps}
-        baseEventSponsorWeights = {x: y.baseProps["sponsorWeight"] for x, y in events.items() if "sponsorWeight" in y.baseProps}
-        #Do callbacks for modifying base weights
-        for callback in callbacks["modifyBaseWeights"]:
-            callback(baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber)
-        # Now go through the contestants and trigger events based on their individualized probabilities
-        alreadyUsed = set()
-        for contestantKey in randOrderContestantKeys: #This is not statistically uniform because these multi-person events are hard and probably not worth figuring out in exact detail...
-            if contestantKey in alreadyUsed:
-                continue
-            actor = liveContestants[contestantKey] # Some contestants may die in events, they get removed at the end of the for loop
-            alreadyUsed.add(contestantKey) 
-            # Calculate individualized/multi-contestant corrected event probabilities
-            indivProb = {}
-            eventParticipantWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-            eventVictimWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-            eventSponsorWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-            trueNumParticipants = {}
-            trueNumVictims = {}
-            trueNumSponsors = {}
-            for eventName, event in events.items():
-                indivProb[eventName] = baseEventActorWeights[eventName]                
-                eventMayProceed = True
-                for callback in callbacks["modifyIndivActorWeights"]:
-                    indivProb[eventName], eventMayProceed = callback(actor, indivProb[eventName], event)
-                    if not eventMayProceed: # If one returns false, it signals that the event has been blocked
-                        break
-                if not eventMayProceed:
-                    continue
-                origIndivWeight = indivProb[eventName]
-                # Probability correction for multi-contestant events, if necessary
-                # this feels silly but is very useful
-                modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
-                modifyWeightForMultipleActors(trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
-                modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
-            # It is occasionally useful for an event to be able to force a new event to be chosen.
-            # While computationally wasteful, this prevents us from needing to make a special callback for
-            # events with unique trigger conditions. Events may signal for a reselection by returning None or []
-            # Note, however, that this _not_ a good way to enforce specific participants, etc. as this is both wasteful
-            # and not-statistically accurate.
-            while(True):
-                #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
-                eventName = ArenaUtils.weightedDictRandom(indivProb)[0]     
-                if DEBUG:
-                   STATSDEBUG["state"] = state
-                   STATSDEBUG["indivProb"] = indivProb
-                # Handle event overrides, if any
-                #Determine participants, victims, if any.
-                thisevent = events[eventName]
-                participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
-                victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
-                sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
-                proceedAsUsual = True
-                resetEvent = False
-                for override in callbacks["overrideContestantEvent"]:
-                    # Be very careful of modifying state here.
-                    proceedAsUsual, resetEvent = override(contestantKey, thisevent, state, participants, victims, sponsorsHere)
-                    if not proceedAsUsual or resetEvent:
-                        break
-                if resetEvent:
-                    continue
-                if proceedAsUsual:
-                    eventOutputs = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
-                    if not eventOutputs:
-                        indivProb[eventName] = 0 # Apparently this event is not valid for this contestant (participants etc. should not be considered)
+        for phaseNum, thisPhase in enumerate(thisDay["phases"]):
+            titleString = thisDay["titles"][phaseNum]
+            state["curPhase"] = thisPhase
+            eventsActive = {eventName: True for eventName, x in events.items() if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]}
+            while True: # this just allows resetting the iteration
+                if PRINTHTML:
+                    thisWriter = HTMLWriter()
+                    thisWriter.addTitle(titleString.replace('#', str(turnNumber[0])))
+                restartTurn = False # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
+                initialState = copy.deepcopy(state) #Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
+                liveContestants = {x: y for x, y in contestants.items() if y.alive}
+                if phaseNum == 0: # I want to be explicit here
+                    origLiveContestants = copy.copy(liveContestants)
+                # Sample contestants randomly
+                randOrderContestantKeys = random.sample(liveContestants.keys(), len(liveContestants))
+                # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
+                baseEventActorWeights = {x: y.baseProps["mainWeight"] if x in eventsActive and eventsActive[x] else 0 for x, y in events.items()}
+                baseEventParticipantWeights = {x: y.baseProps["participantWeight"] for x, y in events.items() if "participantWeight" in y.baseProps}
+                baseEventVictimWeights = {x: y.baseProps["victimWeight"] for x, y in events.items() if "victimWeight" in y.baseProps}
+                baseEventSponsorWeights = {x: y.baseProps["sponsorWeight"] for x, y in events.items() if "sponsorWeight" in y.baseProps}
+                #Do callbacks for modifying base weights
+                for callback in callbacks["modifyBaseWeights"]:
+                    callback(baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber)
+                # Now go through the contestants and trigger events based on their individualized probabilities
+                alreadyUsed = set()
+                for contestantKey in randOrderContestantKeys: #This is not statistically uniform because these multi-person events are hard and probably not worth figuring out in exact detail...
+                    if contestantKey in alreadyUsed:
                         continue
-                    desc, descContestants, theDead = eventOutputs[:3]
-                for postEvent in callbacks["postEventCallbacks"]:
-                    postEvent(proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere)
-                break
-            
-            print(eventName)
-            if PRINTHTML:
-                thisWriter.addEvent(desc, descContestants)
-            else:
-                print(desc)
-            
-            #Check if everyone is now dead...
-            if all(not x.alive for x in liveContestants.values()):
-                # This turn needs to be rerun
-                state.clear()
-                state.update(initialState.copy())
-                settings = state['settings']
-                contestants = state['contestants']
-                sponsors = state['sponsors']
-                events = state['events']
-                eventsActive = state['eventsActive']
-                items = state['items']
-                arena = state['arena']
-                allRelationships = state['allRelationships']
-                turnNumber = state['turnNumber']
-                callbackStore = state['callbackStore']
-                thisWriter = state['thisWriter']
-                Event.stateStore = state
-                restartTurn = True
-                break
-            
-            # Remove the dead contestants from the live list. Add the contestants involved to alreadyUsed.
-            for dead in theDead:
-                del liveContestants[dead]
-            alreadyUsed.update([x.name for x in descContestants]) 
-        
-        if not restartTurn:    
-            for callback in callbacks["endGameConditions"]: # conditions for ending the game
-                if callback(liveContestants, state):
+                    actor = liveContestants[contestantKey] # Some contestants may die in events, they get removed at the end of the for loop
+                    alreadyUsed.add(contestantKey) 
+                    # Calculate individualized/multi-contestant corrected event probabilities
+                    indivProb = {}
+                    eventParticipantWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+                    eventVictimWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+                    eventSponsorWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+                    trueNumParticipants = {}
+                    trueNumVictims = {}
+                    trueNumSponsors = {}
+                    for eventName, event in events.items():
+                        indivProb[eventName] = baseEventActorWeights[eventName]                
+                        eventMayProceed = True
+                        for callback in callbacks["modifyIndivActorWeights"]:
+                            indivProb[eventName], eventMayProceed = callback(actor, indivProb[eventName], event)
+                            if not eventMayProceed: # If one returns false, it signals that the event has been blocked
+                                break
+                        if not eventMayProceed:
+                            continue
+                        origIndivWeight = indivProb[eventName]
+                        # Probability correction for multi-contestant events, if necessary
+                        # this feels silly but is very useful
+                        modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
+                        modifyWeightForMultipleActors(trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
+                        modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
+                    # It is occasionally useful for an event to be able to force a new event to be chosen.
+                    # While computationally wasteful, this prevents us from needing to make a special callback for
+                    # events with unique trigger conditions. Events may signal for a reselection by returning None or []
+                    # Note, however, that this _not_ a good way to enforce specific participants, etc. as this is both wasteful
+                    # and not-statistically accurate.
+                    while(True):
+                        #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
+                        eventName = ArenaUtils.weightedDictRandom(indivProb)[0]     
+                        if DEBUG:
+                           STATSDEBUG["state"] = state
+                           STATSDEBUG["indivProb"] = indivProb
+                        # Handle event overrides, if any
+                        #Determine participants, victims, if any.
+                        thisevent = events[eventName]
+                        participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
+                        victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
+                        sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
+                        proceedAsUsual = True
+                        resetEvent = False
+                        for override in callbacks["overrideContestantEvent"]:
+                            # Be very careful of modifying state here.
+                            proceedAsUsual, resetEvent = override(contestantKey, thisevent, state, participants, victims, sponsorsHere)
+                            if not proceedAsUsual or resetEvent:
+                                break
+                        if resetEvent:
+                            continue
+                        if proceedAsUsual:
+                            eventOutputs = thisevent.doEvent(contestants[contestantKey], state, participants, victims, sponsorsHere)
+                            if not eventOutputs:
+                                indivProb[eventName] = 0 # Apparently this event is not valid for this contestant (participants etc. should not be considered)
+                                continue
+                            desc, descContestants, theDead = eventOutputs[:3]
+                        for postEvent in callbacks["postEventCallbacks"]:
+                            postEvent(proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere)
+                        break
+                    
+                    print(eventName)
                     if PRINTHTML:
-                        thisWriter.addBigLine(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
-                        thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
+                        thisWriter.addEvent(desc, descContestants)
                     else:
-                        print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
+                        print(desc)
+                    
+                    #Check if everyone is now dead...
+                    if all(not x.alive for x in liveContestants.values()):
+                        # This turn needs to be rerun
+                        state.clear()
+                        state.update(initialState.copy())
+                        settings = state['settings']
+                        contestants = state['contestants']
+                        sponsors = state['sponsors']
+                        events = state['events']
+                        eventsActive = state['eventsActive']
+                        items = state['items']
+                        arena = state['arena']
+                        allRelationships = state['allRelationships']
+                        turnNumber = state['turnNumber']
+                        callbackStore = state['callbackStore']
+                        thisWriter = state['thisWriter']
+                        Event.stateStore = state
+                        restartTurn = True
+                        break
+                    
+                    # Remove the dead contestants from the live list. Add the contestants involved to alreadyUsed.
+                    for dead in theDead:
+                        del liveContestants[dead]
+                    alreadyUsed.update([x.name for x in descContestants])   
+            
+                if not restartTurn:    
+                    for callback in callbacks["endGameConditions"]: # conditions for ending the game
+                        if callback(liveContestants, state):
+                            if PRINTHTML:
+                                thisWriter.addBigLine(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
+                                thisWriter.finalWrite(os.path.join("Assets", str(turnNumber[0])+" Phase "+thisPhase+".html"))
+                            else:
+                                print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
 
-                    # TODO: Do any additional end of simulation stuff here
-                    return list(liveContestants.values())[0].name
-            if PRINTHTML:
-                deadThisTurn = set(origLiveContestants.values()) - set(liveContestants.values())
-                if deadThisTurn:
-                    thisWriter.addEvent("The following names were added to the memorial wall: "+Event.Event.englishList(deadThisTurn), deadThisTurn)
-                thisWriter.finalWrite(os.path.join("Assets",str(turnNumber[0])+".html"))
+                            # TODO: Do any additional end of simulation stuff here
+                            return list(liveContestants.values())[0].name
+                    if PRINTHTML:
+                        if phaseNum == len(thisDay["phases"])-1:
+                            deadThisTurn = set(origLiveContestants.values()) - set(liveContestants.values())
+                            if deadThisTurn:
+                                thisWriter.addEvent("The following names were added to the memorial wall: "+Event.Event.englishList(deadThisTurn), deadThisTurn)
+                        thisWriter.finalWrite(os.path.join("Assets", str(turnNumber[0])+" Phase "+thisPhase+".html"))
+                    break
+        for callback in callbacks["postDayCallbacks"]:
+            callback(state)    
 
+                    
 def statCollection(): # expand to count number of days, and fun stuff like epiphany targets?
     statDict = collections.defaultdict(int)
     numErrors = 0
     global PRINTHTML
     PRINTHTML = False
-    for _ in range(0,5000):
+    for _ in range(0,500):
         printtrace = True
         try:
             statDict[main()] += 1

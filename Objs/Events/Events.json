@@ -1,11 +1,13 @@
         
 {"EventTemplate": 
-    {"mainWeight": 0.0,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.0,
      "unique": false,
      "itemRequired": false
      },
 "TestOneKill": 
-    {"mainWeight": 0.0,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.0,
      "victimWeight": 1.0,
      "numVictims": 1,
      "unique": false,
@@ -15,27 +17,31 @@
      "murder": true
      },
 "FindRiverCleanWater":
-    {"mainWeight": 1.0,
+    {"phase": ["Day"],
+     "mainWeight": 1.0,
      "mainModifiers": {"survivalism": 1.0},
      "unique": false,
      "itemRequired": false
      },
 "OutOfCleanWater":
-    {"mainWeight": 0.2,
+    {"phase": ["Day"],
+     "mainWeight": 0.2,
      "mainModifiers": {"survivalism": -1.0},
      "unique": false,
      "itemRequired": true,
      "necessaryItem": "Clean Water"
      },
 "Dysentary":
-    {"mainWeight": 0.5,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.5,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
      "itemRequired": false
      },
 "MamiDecap":
-    {"mainWeight": 0.05,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.05,
      "unique": true,
      "uniqueUsers": ["Tomoe Mami"],
      "itemRequired": false,
@@ -45,7 +51,8 @@
      "mainNeededLoveLevel": {"relation": true, "value": 4}
      },
 "ShareStoryofLife":
-    {"mainWeight": 0.5,
+    {"phase": ["Night"],
+     "mainWeight": 0.5,
      "mainModifiers": {"gregariousness": 1.0,
                        "loneliness": 1.0,
                        "friendliness": 1.0},
@@ -63,14 +70,16 @@
      "neededFriendLevelParticipant": {"relation": true, "value": -2}
      },
 "HuntsForOthers": 
-    {"mainWeight": 1.0,
+    {"phase": ["Day"],
+     "mainWeight": 1.0,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
      "unique": false,
      "itemRequired": false
      },
 "AAttacksB":
-    {"mainWeight": 1.5,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 1.5,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
      "victimWeight": 1,
@@ -87,7 +96,8 @@
      "murder": true
      },
 "QuestionsSanity": 
-    {"mainWeight": 0.5,
+    {"phase": ["Night"],
+     "mainWeight": 0.5,
      "mainModifiers": {"survivalism": -1.0,
                     "stability": -1.0},
      "unique": false,
@@ -98,13 +108,15 @@
      "mainneededLoveLevelParticipant": {"relation": true, "value": 3}
      },
 "GetsFruitFromTree": 
-    {"mainWeight": 0.5,
+    {"phase": ["Day"],
+     "mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0},
      "unique": false,
      "itemRequired": false
      },
  "ThreeWayFight":
-    {"mainWeight": 0.75,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.75,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
      "participantWeight": 1,
@@ -123,28 +135,32 @@
      "murder": true
      },
  "SickWithFever":
-    {"mainWeight": 0.75,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.75,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
      "itemRequired": false
      },
  "RecoversFromFever":
-    {"mainWeight": 0,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0,
      "mainModifiers": {"survivalism": 1.0,
                        "endurance": 1.0},
      "unique": false,
      "itemRequired": false
      },
  "DiesFromFever":
-    {"mainWeight": 0,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
      "itemRequired": false
      },
  "SponsorGivesItem":
-    {"mainWeight": 0.5,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.5,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -156,7 +172,8 @@
      "neededFriendLevelSponsor": {"relation": true, "value": -2}
      },
  "CraftSpear":
-    {"mainWeight": 0.5,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0,
                        "aggression": 0.5,
                        "cleverness": 0.5},
@@ -164,7 +181,8 @@
      "itemRequired": false
      },
  "ThrowSpearKill":
-    {"mainWeight": 1,
+    {"phase": ["Day"],
+     "mainWeight": 1,
      "mainModifiers": {"ruthlessness": 1.0,
                        "aggression": 1.0,
                        "combat ability": 1.0},
@@ -184,14 +202,16 @@
      "murder": true
      },
    "FindDeadBody":
-     {"mainWeight": 0.5,
+     {"phase": ["Day"],
+     "mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0,
                        "cleverness": 1.0},
      "unique": false,
      "itemRequired": false
      },
    "FindAbandonedBuilding":
-    {"mainWeight": 0.25,
+    {"phase": ["Day"],
+     "mainWeight": 0.25,
      "mainModifiers": {"survivalism": 1.0,
                        "cleverness": 1.0},
      "participantWeight": 0.5,
@@ -207,13 +227,15 @@
      "murder": true
     },
     "SelfFuneral":
-     {"mainWeight": 0.25,
+     {"phase": ["Day"],
+     "mainWeight": 0.25,
      "mainModifiers": {"stability": -1.5},
      "unique": false,
      "itemRequired": false
      },
     "SponsorGivesTips":
-    {"mainWeight": 0.15,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.15,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -225,7 +247,8 @@
      "neededFriendLevelSponsor": {"relation": true, "value": 1}
      },
     "ShareIntimateConversation":
-    {"mainWeight": 0.25,
+    {"phase": ["Night"],
+    "mainWeight": 0.25,
      "mainModifiers": {"loneliness": 2.0},
      "participantWeight": 1,
      "numParticipants": 1,
@@ -239,7 +262,8 @@
      "neededLoveLevelParticipant": {"relation": true, "value": 1}
      },
      "ResolvesFeelingConfusion":
-    {"mainWeight": 0,
+    {"phase": ["Night"],
+     "mainWeight": 0,
      "numParticipants": 1,
      "participantWeight": 1,
      "friendEffectParticipant": 0,
@@ -248,7 +272,8 @@
      "itemRequired": false
      },
      "MakeMolotovCocktail":
-    {"mainWeight": 0.25,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.25,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0,
                        "meanness": 0.5},
@@ -256,7 +281,8 @@
      "itemRequired": false
      },
      "KillWithMolotovCocktail":
-    {"mainWeight": 5.0,
+    {"phase": ["Day", "Night"],
+    "mainWeight": 5.0,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0,
                        "meanness": 0.5},
@@ -275,7 +301,8 @@
      "murder": true
      },
      "SponsorCheatKill":
-    {"mainWeight": 0.15,
+    {"phase": ["Night"],
+    "mainWeight": 0.15,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -289,7 +316,8 @@
      "neededLoveLevelSponsor": {"relation": false, "value": 0}
      },
      "FriendGivesMedicine":
-    {"mainWeight": 0,
+    {"phase": ["Day", "Night"],
+    "mainWeight": 0,
      "numParticipants": 1,
      "participantWeight": 1,
      "participantModifiers": {"loyalty": 1,
@@ -303,13 +331,15 @@
      "neededFriendLevelParticipant": {"relation": true, "value": 3}
      },
      "AWorshipsB":
-     {"mainWeight": 0.25,
+     {"phase": ["Night"],
+     "mainWeight": 0.25,
      "mainModifiers": {"stability": -1.0},
      "unique": false,
      "itemRequired": false
      },
      "MadokamiKillsBadWorshipper":
-     {"mainWeight": 0,
+     {"phase": ["Day", "Night"],
+     "mainWeight": 0,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -323,7 +353,8 @@
      "neededLoveLevelSponsor": {"relation": false, "value": 2}
      },
      "HomuciferKillsBadWorshipper":
-     {"mainWeight": 0,
+     {"phase": ["Day", "Night"],
+     "mainWeight": 0,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -337,14 +368,16 @@
      "neededLoveLevelSponsor": {"relation": false, "value": 2}
      },
      "HurtsSelfPracticingCombat":
-    {"mainWeight": 0.5,
+    {"phase": ["Day"],
+     "mainWeight": 0.5,
      "mainModifiers": {"aggression": 1.0,
                        "survivalism": 1.0},
      "unique": false,
      "itemRequired": false
      },
      "FriendHelpsInjury":
-    {"mainWeight": 10,
+    {"phase": ["Day", "Night"],
+     "mainWeight": 10,
      "numParticipants": 1,
      "participantWeight": 1,
      "participantModifiers": {"loyalty": 1,

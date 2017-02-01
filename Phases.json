@@ -1,0 +1,4 @@
+{
+ "default": {"phases": ["Day", "Night"],
+             "titles": ["Day #", "Night #"]}
+}

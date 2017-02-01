@@ -43,9 +43,6 @@ img {
     def addTitle(self, title):
         self.bodylist.insert(1,self.wrap(self.wrap(title, "banner"),"p"))
         
-    def addDay(self, day):
-        self.addTitle("Day "+str(day))
-        
     def addEvent(self, desc, descContestants):
         tempStringList = []
         for contestant in descContestants:
