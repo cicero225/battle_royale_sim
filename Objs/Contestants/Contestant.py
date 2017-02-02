@@ -1,10 +1,6 @@
-""" Hmm...the Rando Calrissian's are actually a problem, since I have been trying to avoid hard-coding
-# stats here, but they need a list of stats to randomize...
+"""stats should vary from 0-10. 5 is average and will not affect any events."""
 
-# I'm going to make it so that the alternate initialized, used for Randos, needs to also take in a
-# list of keys, which can be derived from any other instance in the main.
-
-# stats should vary from 0-10. 5 is average and will not affect any events."""
+from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
 
 import random
 import collections
@@ -61,7 +57,8 @@ class Contestant(object):
         self.stats = inDict['stats']
         self.inventory = []
         self.settings = settings
-        self.contestantStatRandomize()
+        if not self.settings["statNormalization"]:
+            self.contestantStatRandomize()
         self.originalStats = self.stats.copy() # NOT a reference, but an actual copy. Probably useful for some events.
         # Note that this is not a deepcopy.
         self.alive = True
@@ -95,6 +92,36 @@ class Contestant(object):
             inDict['stats'][key] = random.randint(0, 10)
         return cls(name, inDict, settings)
 
+    def contestantStatNormalizer(self, target):
+        vari = random.uniform(1-self.settings["normalizationRange"], 1+self.settings["normalizationRange"])
+        curSum = sum(self.stats.values())
+        modifier = vari*target/curSum
+        for i in self.stats:
+            self.stats[i] = round(self.stats[i]*modifier)
+        # Shuffle overflow stats (>10 or <0) to something else
+        for key, value in self.stats.items():
+            distribute = 0
+            if value < 0:
+                distribute = value
+                self.stats[key] = 0
+            elif value > 10:
+                distribute = value - 10
+                self.stats[key] = 10
+            move = 1 if distribute > 0 else -1
+            if move > 0:
+                valid = lambda y: y < 10
+            else:
+                valid = lambda y: y > 0
+            validList = [x for x, y in self.stats.items() if valid(y)]
+            for _ in range(abs(distribute)):
+                if not len(validList):
+                    raise AssertionError('Stats reached limit in stat normalization!')
+                chosen = random.choice(validList)
+                self.stats[chosen] += move
+                if not valid(self.stats[chosen]):
+                    validList.remove(chosen)
+        self.originalStats = self.stats.copy()
+        
     def InitializeEventModifiers(self, events): # Note that each event carries information about which stats affect them
         # This mixing of classes is regrettable but probably necessary
         self.events = events

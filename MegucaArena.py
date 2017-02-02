@@ -7,6 +7,7 @@ import copy
 import json
 import os
 import random # A not very good random library, but probably fine for our purposes
+import statistics # Note: this is Python 3.4 +
 import collections
 from functools import partial # Might be useful later
 import traceback
@@ -75,7 +76,11 @@ def main():
         
     assert(len(contestants)==settings['numContestants'])
     
+    if settings["statNormalization"]:
+        targetSum = sum(sum(x.stats.values()) for x in contestants.values())/len(contestants)
     for contestant in contestants.values():
+        if settings["statNormalization"]:
+            contestant.contestantStatNormalizer(targetSum)
         contestant.InitializeEventModifiers(events)
 
     # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
@@ -401,7 +406,7 @@ def main():
                                 print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
 
                             # TODO: Do any additional end of simulation stuff here
-                            return list(liveContestants.values())[0].name
+                            return list(liveContestants.values())[0].name, turnNumber[0]
                     if PRINTHTML:
                         if phaseNum == len(thisDay["phases"])-1:
                             deadThisTurn = set(origLiveContestants.values()) - set(liveContestants.values())
@@ -416,12 +421,15 @@ def main():
 def statCollection(): # expand to count number of days, and fun stuff like epiphany targets?
     statDict = collections.defaultdict(int)
     numErrors = 0
+    days = []
     global PRINTHTML
     PRINTHTML = False
-    for _ in range(0,500):
+    for _ in range(0,1000):
         printtrace = True
         try:
-            statDict[main()] += 1
+            winner, day = main()
+            statDict[winner] += 1
+            days.append(day)
         except Exception as e:
             if not DEBUG:
                 numErrors +=1
@@ -438,6 +446,8 @@ def statCollection(): # expand to count number of days, and fun stuff like epiph
                     except Exception as e2:
                         print(e2)
     print(statDict)
+    print(sum(days)/len(days))
+    print(statistics.stdev(days))
     print(numErrors)
 
 if __name__ == '__main__':
