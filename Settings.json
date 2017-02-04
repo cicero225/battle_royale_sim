@@ -1,6 +1,7 @@
 {
  "traitRandomness": 3,
- "numContestants": 32,
+ "matchContestantCount": true,
+ "numContestants": 33,
  "eventRandomness": 0.5,
  "statInfluence": 0.3,
  "objectInfluence": 1,

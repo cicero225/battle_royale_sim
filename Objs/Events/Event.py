@@ -47,10 +47,6 @@ class Event(object): #Python 2.x compatibility
         # bool optional loveRequiredVictim, (relation: bool, value:int) optional, neededLoveLevelVictim
         # bool optional friendRequiredSponsor, (relation: bool, value:int) optional neededFriendLevelSponsor
         # bool optional loveRequiredSponsor, (relation: bool, value:int) optional, neededLoveLevelSponsor
-        
-        # These optional parameters are used by callback:
-        # bool optional requiresDeadContestant: This event requires someone, anyone to be dead before it can happen
-        # bool optional noBlame: deaths caused by this event should not give anyone any kills.
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability

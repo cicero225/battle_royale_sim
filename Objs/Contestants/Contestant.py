@@ -72,6 +72,8 @@ class Contestant(object):
         # event should have its own dict in here regardless of anything else that is going on, so that's safe.
         self.eventAdditions = collections.defaultdict(dict)
         self.eventDisabled = collections.defaultdict(dict) # These events cannot happen to this contestant. Default False
+        self.injured = False
+        self.hypothermic = None # This is an integer indicating which turn it happened on. It's canceled at the end of the next turn unless set again.
 
     def __str__(self):
         return self.name
@@ -149,7 +151,36 @@ class Contestant(object):
                 if event.baseProps['itemRequired']:
                     if event.baseProps['necessaryItem'] in [x.name for x in self.inventory]:
                         self.eventDisabled[eventName]['main'] = False
-            
+    
+    def SetInjured(self):
+        if self.injured:
+            return
+        self.permStatChange({'stability': -1,
+                             'endurance': -2,
+                             'combat ability': -2})
+        self.injured = True
+        
+    def SetUninjured(self):
+        if not self.injured:
+            return
+        self.permStatChange({'stability': 1,
+                             'endurance': 2,
+                             'combat ability': 2})
+        self.injured = False
+        
+    def SetHypothermic(self, turnNumber):
+        if not self.hypothermic:
+            self.permStatChange({'stability': -1,
+                             'endurance': -2})
+        self.hypothermic = turnNumber
+        
+    def SetUnhypothermic(self):
+        if not self.hypothermic:
+            return
+        self.permStatChange({'stability': 1,
+                             'endurance': 2})
+        self.hypothermic = None
+        
     # Later on, items will be responsible for manipulating the contestant event modifiers on
     # addition to inventory. This gives an item to perform arbitrary manipulations. For example, this could
     # be done by extending the item class for a particular item and making sure to include the new item class in the list.

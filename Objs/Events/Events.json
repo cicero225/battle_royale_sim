@@ -117,12 +117,10 @@
  "ThreeWayFight":
     {"phase": ["Day", "Night"],
      "mainWeight": 0.75,
-     "mainModifiers": {"ruthlessness": 1.0,
-                    "aggression": 1.0},
+     "mainModifiers": {"aggression": 1.0},
      "participantWeight": 1,
      "numParticipants": 2,
-     "participantModifiers": {"ruthlessness": 1.0,
-                    "aggression": 1.0},
+     "participantModifiers": {"aggression": 1.0},
      "unique": false,
      "itemRequired": false,
      "mutual": true,
@@ -390,5 +388,12 @@
      "itemRequired": false,
      "friendRequiredParticipant": true,
      "neededFriendLevelParticipant": {"relation": true, "value": 1}
+     },
+     "MakeCampfire":
+    {"phase": ["Night"],
+     "mainWeight": 1,
+     "unique": false,
+     "itemRequired": false,
+     "murder": true
      }
  }

@@ -63,18 +63,21 @@ def main():
 
     # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
     contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Contestants', 'Contestants.json'), settings, Contestant)
-    # If number of contestants in settings less than those found in the json, randomly remove some
-    contestantNames = contestants.keys()
-    if settings['numContestants'] < len(contestantNames):
-        contestantNames = random.sample(contestantNames, len(contestantNames)-settings['numContestants'])
-        for remove in contestantNames:
-            del contestants[remove]
-    # If number of contestants in settings more than those found in the json, add Rando Calrissians
-    for i in range(len(contestantNames), settings['numContestants']):
-        # Here contestants[0].stats is used as a template for making random stats
-        contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "M", "Rando.jpg", list(contestants.values())[0].stats, settings) # need Rando image to put here
+    if not settings['matchContestantCount']:
+        # If number of contestants in settings less than those found in the json, randomly remove some
+        contestantNames = contestants.keys()
+        if settings['numContestants'] < len(contestantNames):
+            contestantNames = random.sample(contestantNames, len(contestantNames)-settings['numContestants'])
+            for remove in contestantNames:
+                del contestants[remove]
+        # If number of contestants in settings more than those found in the json, add Rando Calrissians
+        for i in range(len(contestantNames), settings['numContestants']):
+            # Here contestants[0].stats is used as a template for making random stats
+            contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "M", "Rando.jpg", list(contestants.values())[0].stats, settings) # need Rando image to put here
         
-    assert(len(contestants)==settings['numContestants'])
+        assert(len(contestants)==settings['numContestants'])
+    else:
+        settings['numContestants'] = len(contestants)
     
     if settings["statNormalization"]:
         targetSum = sum(sum(x.stats.values()) for x in contestants.values())/len(contestants)
@@ -175,6 +178,7 @@ def main():
     ]
     
     postDayCallbacks = [ # Things that happen after each day
+    ArenaUtils.endHypothermiaIfDayHasPassed
     ]
     
     if PRINTHTML:

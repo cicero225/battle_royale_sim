@@ -606,5 +606,24 @@
          "cleverness": 9,
          "combat ability": 5
         }
+    },
+    "Natasha Daemondottr":
+    {"imageFile": "Natasha.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 0,
+         "stability": 7,
+         "forgiveness": 0,
+         "loyalty": 7,
+         "meanness": 10,
+         "ruthlessness": 10,
+         "aggression": 10,
+         "endurance": 7,
+         "survivalism": 7,
+         "loneliness": 1,
+         "friendliness": 1,
+         "cleverness": 5,
+         "combat ability": 10
+        }
     }
 }
