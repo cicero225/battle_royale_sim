@@ -197,12 +197,13 @@ class Event(object): #Python 2.x compatibility
         # Actual fight
         fightDict = {}
         for i, person1 in enumerate(people): # people gain strength from their friends, but this has to be compared with the average strength of the rest of the group
-            baseCombatAbility = person1.stats['combat ability']
+            baseCombatAbility = person1.stats['combat ability']*(1+((person1.stats['aggression']*2+person1.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
             for person2 in people:
                 if person1 == person2:
                     continue
-                baseCombatAbility += settings['friendCombatEffect']*relationships.friendships[person2][person1]/5 * person2.stats['combat ability'] if relationships.friendships[person2][person1]>0 else 0
-                baseCombatAbility += settings['friendCombatEffect']*relationships.loveships[person2][person1]/5 * person2.stats['combat ability'] if relationships.loveships[person2][person1]>0 else 0
+                person2Ability = person2.stats['combat ability']*(1+((person2.stats['aggression']*2+person2.stats['ruthlessness'])/15 - 1)*0.3)
+                baseCombatAbility += settings['friendCombatEffect']*relationships.friendships[person2][person1]/5 * person2Ability if relationships.friendships[person2][person1]>0 else 0
+                baseCombatAbility += settings['friendCombatEffect']*relationships.loveships[person2][person1]/5 * person2Ability if relationships.loveships[person2][person1]>0 else 0
             fightDict[i]=baseCombatAbility
         probDict = {}
         deadList = []

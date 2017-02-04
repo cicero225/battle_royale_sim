@@ -84,8 +84,13 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
         killers = eventOutputs[3]
     else:
         killers = [str(x) for x in set([mainActor]+participants+victims) if str(x) not in eventOutputs[2]]
-    for killer in killers:
-        state["callbackStore"]["killCounter"][str(killer)] += len(eventOutputs[2])/len(killers)
+    if not killers:
+        return
+    for dead in eventOutputs[2]:
+        # This dict uses relationship levels to give a weight to how likely it is that someone is the killer
+        killDict = {x:1.1**(state["allRelationships"].friendships[str(x)][str(dead)]+2*state["allRelationships"].loveships[str(x)][str(dead)]) for x in killers}
+        trueKiller = weightedDictRandom(killDict)[0]
+        state["callbackStore"]["killCounter"][str(trueKiller)] += 1
         
 def killWrite(state):
     #TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
