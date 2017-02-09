@@ -16,7 +16,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         mainActor.alive = False
         desc = sponsors[0].name+' struck down '+mainActor.name + " for "+Event.parseGenderPossessive(mainActor)+" dangerous beliefs."
         tempList = [sponsors[0], mainActor]
-        state["events"]["AWorshipsB"].eventStore[mainActor.name].clear()
         del state["events"]["AWorshipsB"].eventStore[mainActor.name]
         deadList = [mainActor.name]
     else:

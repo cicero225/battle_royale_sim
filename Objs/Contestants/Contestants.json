@@ -547,7 +547,7 @@
          "loneliness": 9,
          "friendliness": 3,
          "cleverness": 8,
-         "combat ability": 2
+         "combat ability": 7
         }
     },
     "Railgun":
@@ -580,7 +580,7 @@
          "meanness": 10,
          "ruthlessness": 10,
          "aggression": 10,
-         "endurance": 1,
+         "endurance": 10,
          "survivalism": 1,
          "loneliness": 1,
          "friendliness": 10,
@@ -624,6 +624,25 @@
          "friendliness": 1,
          "cleverness": 5,
          "combat ability": 10
+        }
+    },
+    "Vyslante":
+    {"imageFile": "Vyslante.jpg",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 8,
+         "stability": 8,
+         "forgiveness": 8,
+         "loyalty": 8,
+         "meanness": 4,
+         "ruthlessness": 5,
+         "aggression": 5,
+         "endurance": 4,
+         "survivalism": 4,
+         "loneliness": 6,
+         "friendliness": 8,
+         "cleverness": 10,
+         "combat ability": 6
         }
     }
 }

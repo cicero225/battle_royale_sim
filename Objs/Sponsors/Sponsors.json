@@ -22,5 +22,17 @@
          "friendliness": 10,
          "meanness": 2
          }
+    },
+"Kyubey":
+    {"imageFile": "Kyubey.png",
+    "gender": "N",
+    "stats": 
+        {"gregariousness": 6,
+         "forgiveness": 3,
+         "loyalty": 0,
+         "loneliness": 0,
+         "friendliness": 0,
+         "meanness": 7
+         }
     }
 }

@@ -14,13 +14,13 @@ class IndividualEventHandler(object):
         self.state = state
         self.callbackReferences = [] # List of tuples, (callback list name where callback is stored, callback)
         
-    def clear(self):
+    def __del__(self):
         for toRemove in self.callbackReferences:
             try:
                 self.state["callbacks"][toRemove[0]].remove(toRemove[1])
-                #print('removing '+str(toRemove[1])+' from '+str(toRemove[0]))
             except ValueError:
-                warnings.warn('IndividualEventHandler: Attempted to remove invalid callback '+str(toRemove[1])+' from '+toRemove[0])
+                pass
+                #warnings.warn('IndividualEventHandler: Attempted to remove invalid callback '+str(toRemove[1])+'('+toRemove[1].eventName+') from '+toRemove[0])
         self.callbackReferences = []
     
     def registerEvent(self, locationListName, func, front=True):

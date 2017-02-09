@@ -391,7 +391,7 @@
      },
      "MakeCampfire":
     {"phase": ["Night"],
-     "mainWeight": 1,
+     "mainWeight": 3,
      "unique": false,
      "itemRequired": false,
      "murder": true

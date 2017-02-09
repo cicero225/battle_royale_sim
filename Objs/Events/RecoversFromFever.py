@@ -8,7 +8,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     if state["items"]["Medicine"] in mainActor.inventory:
         mainActor.removeItem(state["items"]["Medicine"])
         desc = "Thanks to "+Event.parseGenderPossessive(mainActor)+" medicine, "+desc
-    state["events"]["SickWithFever"].eventStore[mainActor.name].clear()
     del state["events"]["SickWithFever"].eventStore[mainActor.name]
     return (desc, [mainActor], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 

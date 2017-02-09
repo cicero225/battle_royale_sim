@@ -22,7 +22,7 @@ from Objs.Events import *
 from Objs.Display.HTMLWriter import HTMLWriter
 
 PRINTHTML = True
-DEBUG = False
+DEBUG = True
 STATSDEBUG = {}
 
 def main():
@@ -382,6 +382,7 @@ def main():
                         state.update(initialState.copy())
                         settings = state['settings']
                         contestants = state['contestants']
+                        callbacks = state['callbacks']
                         sponsors = state['sponsors']
                         events = state['events']
                         eventsActive = state['eventsActive']
@@ -419,9 +420,13 @@ def main():
                         thisWriter.finalWrite(os.path.join("Assets", str(turnNumber[0])+" Phase "+thisPhase+".html"))
                     break
         for callback in callbacks["postDayCallbacks"]:
-            callback(state)    
+            callback(state)  
+        if turnNumber[0]>200:
+            raise TooManyDays('Way too many days')
 
-                    
+class TooManyDays(Exception):
+    pass
+            
 def statCollection(): # expand to count number of days, and fun stuff like epiphany targets?
     statDict = collections.defaultdict(int)
     numErrors = 0
@@ -434,6 +439,8 @@ def statCollection(): # expand to count number of days, and fun stuff like epiph
             winner, day = main()
             statDict[winner] += 1
             days.append(day)
+        except TooManyDays:
+            pass
         except Exception as e:
             if not DEBUG:
                 numErrors +=1
