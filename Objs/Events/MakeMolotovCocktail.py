@@ -19,6 +19,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         return (desc, [mainActor], [])
     else:
         desc = mainActor.name + ' tried to make a Molotov Cocktail, but lit '+Event.parseGenderReflexive(mainActor)+' on fire, dying horribly.'
+        mainActor.alive = False
         return (desc, [mainActor], [mainActor.name])
         
 Event.registerEvent("MakeMolotovCocktail", func)

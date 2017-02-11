@@ -132,8 +132,7 @@ def main():
     
     # Run once before the start of the game. Expected args: state. Modify in place.
     startup = [
-    ArenaUtils.logLastEventStartup,
-    ArenaUtils.killCounterStartup]
+    ArenaUtils.loggingStartup,]
     
     # modifyBaseWeights: Expected args: baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber. Modify in place.
         # Also a good time to do any beginning of turn stuff
@@ -169,7 +168,7 @@ def main():
     # Things that happen after event processing (usually logging or emergency reset. Note that resetting callbacks need to happen before logging.
     # Expected args: proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere
     postEventCallbacks = [
-        ArenaUtils.logLastEventByContestant,
+        ArenaUtils.logEventsByContestant,
         ArenaUtils.logKills
     ]
     # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)

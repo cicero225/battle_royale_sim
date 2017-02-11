@@ -64,18 +64,16 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
 
 # Callbacks for specific arena features
 
-def logLastEventStartup(state):
-    state["callbackStore"]["lastEvent"] = collections.defaultdict(partial(collections.defaultdict, str))
+def loggingStartup(state):
+    state["callbackStore"]["eventLog"] = collections.defaultdict(partial(collections.defaultdict, partial(collections.defaultdict, str))) # Crazy nesting...
+    state["callbackStore"]["killCounter"] = collections.defaultdict(int)
 
 # Logs last event. Must be last callback in overrideContestantEvent. 
-def logLastEventByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
+def logEventsByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
     if proceedAsUsual:
-        state["callbackStore"]["lastEvent"][state["curPhase"]][mainActor.name] = thisevent.name
+        state["callbackStore"]["eventLog"][state["turnNumber"][0]][state["curPhase"]][mainActor.name] = thisevent.name
     else:
-        state["callbackStore"]["lastEvent"][state["curPhase"]][mainActor.name] = "overridden"
-    
-def killCounterStartup(state):
-    state["callbackStore"]["killCounter"] = collections.defaultdict(int)
+        state["callbackStore"]["eventLog"][state["turnNumber"][0]][state["curPhase"]][mainActor.name] = "overridden"
     
 def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
     if not eventOutputs[2] or "murder" not in thisevent.baseProps or not thisevent.baseProps["murder"]:
@@ -113,10 +111,12 @@ def endHypothermiaIfDayHasPassed(state):
         if contestant.hypothermic and contestant.hypothermic<=state["turnNumber"][0]-1:
             contestant.SetUnhypothermic()
     
-# Rig it so the same event never happens twice to the same person in the same phase(makes game feel better)
-def eventMayNotRepeat(actor, origProb, event, state): 
-    if state["callbackStore"]["lastEvent"][state["curPhase"]][actor.name] == event.name: 
-        return 0, False
+# Rig it so the same event never happens twice to the same person in consecutive turns (makes game feel better)
+def eventMayNotRepeat(actor, origProb, event, state):
+    if state["turnNumber"][0]>1: # Since defaultdict, this would work fine even without this check, but this makes it more explicit (and is more robust to future changes)
+        for x in state["callbackStore"]["eventLog"][state["turnNumber"][0]-1].values():
+            if x[actor.name] == event.name: 
+                return 0, False
     return origProb, True
   
 # Ends the game if only one contestant left  

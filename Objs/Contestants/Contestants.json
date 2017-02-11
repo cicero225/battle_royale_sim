@@ -143,12 +143,12 @@
          "meanness": 4,
          "ruthlessness": 7,
          "aggression": 5,
-         "endurance": 9,
+         "endurance": 8,
          "survivalism": 7,
          "loneliness": 6,
          "friendliness": 2,
          "cleverness": 8,
-         "combat ability": 10
+         "combat ability": 8
          }
     },
     "Skarmory":
@@ -384,14 +384,14 @@
      "gender": "F",
      "stats":
         {"gregariousness": 2,
-         "stability": 9,
+         "stability": 7,
          "forgiveness": 3,
          "loyalty": 10,
          "meanness": 5,
          "ruthlessness": 9,
          "aggression": 5,
          "endurance": 10,
-         "survivalism": 7,
+         "survivalism": 5,
          "loneliness": 8,
          "friendliness": 2,
          "cleverness": 10,
@@ -460,15 +460,15 @@
      "gender": "N",
      "stats":
         {"gregariousness": 0,
-         "stability": 10,
-         "forgiveness": 0,
+         "stability": 7,
+         "forgiveness": 3,
          "loyalty": 5,
          "meanness": 6,
          "ruthlessness": 10,
          "aggression": 10,
          "endurance": 10,
          "survivalism": 10,
-         "loneliness": 0,
+         "loneliness": 3,
          "friendliness": 0,
          "cleverness": 8,
          "combat ability": 10
@@ -493,7 +493,7 @@
          "combat ability": 3
         }
     },
-    "Misaka":
+    "Misaka Mikoto":
     {"imageFile": "Misaka.png",
      "gender": "F",
      "stats":
