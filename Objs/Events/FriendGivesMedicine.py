@@ -14,7 +14,7 @@ Event.registerInsertedCallback("modifyIndivActorWeightsWithParticipants", checkP
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.addItem(state["items"]["Medicine"])
     if not participants[0].removeItem(state["items"]["Medicine"]):
-        raise AssertionError
+        return None  # In a rare scenario, the person giving the medicine uses it before this event happens. In that case, the event is waived and, unfortunately, blocked entirely for this Actor for the turn. Fortunately rare.
     state["allRelationships"].IncreaseFriendLevel(mainActor, participants[0], random.randint(3,4))
     state["allRelationships"].IncreaseLoveLevel(mainActor, participants[0], random.randint(0,2))
     desc = participants[0].name+' gave Medicine to '+mainActor.name+" to help with "+Event.parseGenderPossessive(mainActor)+" fever."

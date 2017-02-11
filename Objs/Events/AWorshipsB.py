@@ -22,8 +22,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     eventHandler = IndividualEventHandler(state)
     eventHandler.banMurderEventsAtoB(mainActor.name, chosen)
     eventHandler.banEventForSingleContestant("AWorshipsB", mainActor.name)
-    self.eventStore.setdefault("permanent", {})
-    self.eventStore["permanent"][mainActor.name] = eventHandler
+    self.eventStore.setdefault("permanent", {})[mainActor.name] = eventHandler
     if chosen == "Kaname Madoka":
         eventHandler = IndividualEventHandler(state)
         eventHandler.setEventWeightForSingleContestant("HomuciferKillsBadWorshipper", mainActor.name, 10)

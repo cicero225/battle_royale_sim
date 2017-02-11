@@ -395,5 +395,15 @@
      "unique": false,
      "itemRequired": false,
      "murder": true
+     },
+     "SponsorForceFight":
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0,
+     "numParticipants": 1,
+     "participantWeight": 1,
+     "friendEffectParticipant": 0,
+     "loveEffectParticipant": 0,
+     "unique": false,
+     "itemRequired": false
      }
  }

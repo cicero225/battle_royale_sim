@@ -134,9 +134,10 @@ def main():
     startup = [
     ArenaUtils.loggingStartup,]
     
-    # modifyBaseWeights: Expected args: baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber. Modify in place.
+    # modifyBaseWeights: Expected args: liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state. Modify in place.
         # Also a good time to do any beginning of turn stuff
-    modifyBaseWeights = []
+    modifyBaseWeights = [
+    ArenaUtils.logContestants]
     
     # modifyIndivActorWeights: Expected args: actor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeights = [
@@ -301,7 +302,7 @@ def main():
                 baseEventSponsorWeights = {x: y.baseProps["sponsorWeight"] for x, y in events.items() if "sponsorWeight" in y.baseProps}
                 #Do callbacks for modifying base weights
                 for callback in callbacks["modifyBaseWeights"]:
-                    callback(baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber)
+                    callback(liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state)
                 # Now go through the contestants and trigger events based on their individualized probabilities
                 alreadyUsed = set()
                 for contestantKey in randOrderContestantKeys: #This is not statistically uniform because these multi-person events are hard and probably not worth figuring out in exact detail...

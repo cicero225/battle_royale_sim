@@ -73,8 +73,7 @@ class Event(object): #Python 2.x compatibility
     
     @classmethod
     def registerInsertedCallback(cls, callbackLocation, callback):
-        cls.inserted_callbacks.setdefault(callbackLocation, [])
-        cls.inserted_callbacks[callbackLocation].append(callback)
+        cls.inserted_callbacks.setdefault(callbackLocation, []).append(callback)
     
     @classmethod
     def registerEvent(cls, eventName, callback):

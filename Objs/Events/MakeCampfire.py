@@ -9,8 +9,7 @@ from collections import defaultdict
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     success = True
-    self.eventStore.setdefault('turnRecord', defaultdict(lambda: -1))
-    self.eventStore["turnRecord"][mainActor.name] = state["turnNumber"][0] # It's okay to overwrite since we only care if it happened this turn
+    self.eventStore.setdefault('turnRecord', defaultdict(lambda: -1))[mainActor.name] = state["turnNumber"][0] # It's okay to overwrite since we only care if it happened this turn
     if str(mainActor) not in self.eventStore or not self.eventStore[str(mainActor)]:
         # base is 50%. unless the character has already done it before in which case success is assured
         chanceSuccess = mainActor.stats["cleverness"]*0.02 + mainActor.stats["survivalism"]*0.05 + 0.5  # Yes this can overload past 1

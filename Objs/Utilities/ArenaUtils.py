@@ -67,6 +67,7 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
 def loggingStartup(state):
     state["callbackStore"]["eventLog"] = collections.defaultdict(partial(collections.defaultdict, partial(collections.defaultdict, str))) # Crazy nesting...
     state["callbackStore"]["killCounter"] = collections.defaultdict(int)
+    state["callbackStore"]["contestantLog"] = collections.defaultdict(dict)
 
 # Logs last event. Must be last callback in overrideContestantEvent. 
 def logEventsByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
@@ -92,6 +93,9 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
         # This is treated as if someone had done the worst possible thing to the dead person
         state["allRelationships"].IncreaseFriendLevel(state["contestants"][str(dead)], state["contestants"][str(trueKiller)], -10)
         state["allRelationships"].IncreaseLoveLevel(state["contestants"][str(dead)], state["contestants"][str(trueKiller)], -10)
+        
+def logContestants(liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state):
+    state["callbackStore"]["contestantLog"][turnNumber[0]] = liveContestants
         
 def killWrite(state):
     #TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
