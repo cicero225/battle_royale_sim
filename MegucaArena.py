@@ -137,7 +137,8 @@ def main():
     # modifyBaseWeights: Expected args: liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state. Modify in place.
         # Also a good time to do any beginning of turn stuff
     modifyBaseWeights = [
-    ArenaUtils.logContestants]
+    ArenaUtils.logContestants,
+    ArenaUtils.resetKillFlag]
     
     # modifyIndivActorWeights: Expected args: actor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeights = [
@@ -154,6 +155,9 @@ def main():
     modifyIndivActorWeightsWithVictims = [
     contestantIndivActorWithVictimsCallback,
     partial(allRelationships.relationsRoleWeightCallback, "Victim")
+    ]
+    
+    modifyIndivActorWeightsWithPartipantsAndVictims = [
     ]
     
     # modifyIndivActorWeightsWithSponsors: Expected args: actor, sponsor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
@@ -188,6 +192,7 @@ def main():
                  "modifyBaseWeights": modifyBaseWeights,
                  "modifyIndivActorWeights": modifyIndivActorWeights,
                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
+                 "modifyIndivActorWeightsWithPartipantsAndVictims": modifyIndivActorWeightsWithPartipantsAndVictims,
                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
                  "modifyIndivActorWeightsWithSponsors": modifyIndivActorWeightsWithSponsors,
                  "overrideContestantEvent": overrideContestantEvent,
@@ -244,10 +249,7 @@ def main():
     def selectRoles(baseWeights, weights, trueNumRoles, people=contestants):
         if eventName in baseWeights and trueNumRoles[eventName]>0:
             rolekeys = ArenaUtils.weightedDictRandom(weights[eventName], trueNumRoles[eventName])
-            try:
-                roles = [people[key] for key in rolekeys]
-            except KeyError:
-                roles = [people[rolekeys]]
+            roles = [people[key] for key in rolekeys] 
         else:
             roles = []
         return roles
@@ -333,6 +335,8 @@ def main():
                         modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
                         modifyWeightForMultipleActors(trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
                         modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
+                        if trueNumParticipants[eventName] + trueNumVictims[eventName] + list(eventVictimWeights[eventName].values()).count(0) > len(eventVictimWeights):
+                            indivProb[eventName] = 0
                     # It is occasionally useful for an event to be able to force a new event to be chosen.
                     # While computationally wasteful, this prevents us from needing to make a special callback for
                     # events with unique trigger conditions. Events may signal for a reselection by returning None or []
@@ -348,7 +352,10 @@ def main():
                         #Determine participants, victims, if any.
                         thisevent = events[eventName]
                         participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
-                        victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
+                        possibleVictimWeights = eventVictimWeights.copy() # Can't be both a participant and a victim... (this creates a bit of bias, but oh well)
+                        for x in participants:
+                            possibleVictimWeights[eventName][x.name] = 0
+                        victims = selectRoles(baseEventVictimWeights, possibleVictimWeights, trueNumVictims) 
                         sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
                         proceedAsUsual = True
                         resetEvent = False
@@ -371,7 +378,7 @@ def main():
                     
                     print(eventName)
                     if PRINTHTML:
-                        thisWriter.addEvent(desc, descContestants)
+                        thisWriter.addEvent(desc, descContestants, state)
                     else:
                         print(desc)
                     
@@ -406,7 +413,7 @@ def main():
                         if callback(liveContestants, state):
                             if PRINTHTML:
                                 thisWriter.addBigLine(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
-                                thisWriter.finalWrite(os.path.join("Assets", str(turnNumber[0])+" Phase "+thisPhase+".html"))
+                                thisWriter.finalWrite(os.path.join("Assets", str(turnNumber[0])+" Phase "+thisPhase+".html"), state)
                             else:
                                 print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
 
@@ -417,7 +424,7 @@ def main():
                             deadThisTurn = set(origLiveContestants.values()) - set(liveContestants.values())
                             if deadThisTurn:
                                 thisWriter.addEvent("The following names were added to the memorial wall: "+Event.Event.englishList(deadThisTurn), deadThisTurn)
-                        thisWriter.finalWrite(os.path.join("Assets", str(turnNumber[0])+" Phase "+thisPhase+".html"))
+                        thisWriter.finalWrite(os.path.join("Assets", str(turnNumber[0])+" Phase "+thisPhase+".html"), state)
                     break
         for callback in callbacks["postDayCallbacks"]:
             callback(state)  
@@ -433,7 +440,7 @@ def statCollection(): # expand to count number of days, and fun stuff like epiph
     days = []
     global PRINTHTML
     PRINTHTML = False
-    for _ in range(0,1000):
+    for _ in range(0,100):
         printtrace = True
         try:
             winner, day = main()

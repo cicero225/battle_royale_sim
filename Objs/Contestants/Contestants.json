@@ -644,5 +644,81 @@
          "cleverness": 10,
          "combat ability": 6
         }
+    },
+    "Hinata Aina":
+    {"imageFile": "HinataAina.jpg",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 8,
+         "stability": 4,
+         "forgiveness": 0,
+         "loyalty": 10,
+         "meanness": 8,
+         "ruthlessness": 9,
+         "aggression": 10,
+         "endurance": 6,
+         "survivalism": 4,
+         "loneliness": 8,
+         "friendliness": 3,
+         "cleverness": 5,
+         "combat ability": 8
+        }
+    },
+    "Chitose Yuma":
+    {"imageFile": "ChitoseYuma.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 3,
+         "stability": 5,
+         "forgiveness": 4,
+         "loyalty": 8,
+         "meanness": 3,
+         "ruthlessness": 9,
+         "aggression": 3,
+         "endurance": 6,
+         "survivalism": 6,
+         "loneliness": 4,
+         "friendliness": 3,
+         "cleverness": 10,
+         "combat ability": 6
+        }
+    },
+    "Miroko Mikuru":
+    {"imageFile": "MirokoMikuru.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 7,
+         "stability": 6,
+         "forgiveness": 3,
+         "loyalty": 7,
+         "meanness": 6,
+         "ruthlessness": 9,
+         "aggression": 4,
+         "endurance": 5,
+         "survivalism": 5,
+         "loneliness": 5,
+         "friendliness": 3,
+         "cleverness": 6,
+         "combat ability": 6
+        }
+    },
+    "Iwakura Lain":
+    {"imageFile": "Lain.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 0,
+         "stability": 2,
+         "forgiveness": 8,
+         "loyalty": 9,
+         "meanness": 4,
+         "ruthlessness": 4,
+         "aggression": 2,
+         "endurance": 5,
+         "survivalism": 5,
+         "loneliness": 8,
+         "friendliness": 5,
+         "cleverness": 10,
+         "combat ability": 5
+        }
     }
 }

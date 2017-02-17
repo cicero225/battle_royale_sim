@@ -81,8 +81,18 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
         return
     if len(eventOutputs)>3:
         killers = eventOutputs[3]
+        if isinstance(killers, dict):
+            # if killers is a dict, handle this differently
+            for x, y in killers.items():
+                state["callbackStore"]["killCounter"][x] += len(y)
+                state["callbackStore"]["KillThisTurnFlag"][x] = True
+                for deadPerson in y:
+                    # This is treated as if someone had done the worst possible thing to the dead person
+                    state["allRelationships"].IncreaseFriendLevel(state["contestants"][deadPerson], state["contestants"][x], -10)
+                    state["allRelationships"].IncreaseLoveLevel(state["contestants"][deadPerson], state["contestants"][x], -10)
+            return
     else:
-        killers = [str(x) for x in set([mainActor]+participants+victims) if str(x) not in eventOutputs[2]]
+        killers = [str(x) for x in set([mainActor]+participants+victims)]
     if not killers:
         return
     for dead in eventOutputs[2]:
@@ -90,12 +100,16 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
         killDict = {x:1.1**(state["allRelationships"].friendships[str(x)][str(dead)]+2*state["allRelationships"].loveships[str(x)][str(dead)]) for x in killers if str(x)!=str(dead)}
         trueKiller = weightedDictRandom(killDict)[0]
         state["callbackStore"]["killCounter"][str(trueKiller)] += 1
+        state["callbackStore"]["KillThisTurnFlag"][str(trueKiller)] = True  
         # This is treated as if someone had done the worst possible thing to the dead person
         state["allRelationships"].IncreaseFriendLevel(state["contestants"][str(dead)], state["contestants"][str(trueKiller)], -10)
         state["allRelationships"].IncreaseLoveLevel(state["contestants"][str(dead)], state["contestants"][str(trueKiller)], -10)
         
 def logContestants(liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state):
     state["callbackStore"]["contestantLog"][turnNumber[0]] = liveContestants
+    
+def resetKillFlag(liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state):
+     state["callbackStore"]["KillThisTurnFlag"] = collections.defaultdict(dict)
         
 def killWrite(state):
     #TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
@@ -107,7 +121,7 @@ def killWrite(state):
         if not descContestant.alive:
             desc += ' - DEAD'
         killWriter.addEvent(desc, [descContestant])
-    killWriter.finalWrite(os.path.join("Assets",str(state["turnNumber"][0])+" Kills.html"))
+    killWriter.finalWrite(os.path.join("Assets",str(state["turnNumber"][0])+" Kills.html"), state)
     return False
     
 def endHypothermiaIfDayHasPassed(state):

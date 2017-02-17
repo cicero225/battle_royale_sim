@@ -116,7 +116,7 @@
      },
  "ThreeWayFight":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0.75,
+     "mainWeight": 0.25,
      "mainModifiers": {"aggression": 1.0},
      "participantWeight": 1,
      "numParticipants": 2,
@@ -405,5 +405,31 @@
      "loveEffectParticipant": 0,
      "unique": false,
      "itemRequired": false
+     },
+     "GangUpFight":
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.25,
+     "mainModifiers": {"aggression": 1.0,
+                       "ruthlessness": 1.0},
+     "participantWeight": 1,
+     "numParticipants": 1,
+     "numParticipantsExtra": 2,
+     "participantModifiers": {"aggression": 1.0,
+                              "ruthlessness": 1.0},
+     "victimWeight": 1,
+     "numVictims": 1,
+     "victimModifiers": {"combat ability": 1.5,
+                         "cleverness": -0.5},
+     "unique": false,
+     "itemRequired": false,
+     "friendEffectParticipant": 0.5,
+     "loveEffectParticipant": 1.0,
+     "friendEffectVictim": -0.5,
+     "loveEffectVictim": -1.0,
+     "friendRequiredVictim": true,
+     "neededFriendLevelVictim": {"relation": false, "value": 4},
+     "loveRequiredVictim": true,
+     "neededLoveLevelVictim": {"relation": false, "value": 3},
+     "murder": true
      }
  }

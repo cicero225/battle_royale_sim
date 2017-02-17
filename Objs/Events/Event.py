@@ -5,7 +5,10 @@
 # Note that it is very likely feasible to define some helper methods (like kill_player) here that events can call for common
 # shared events.
 
+from __future__ import division
+
 import random
+from collections import defaultdict
 from ..Utilities.ArenaUtils import weightedDictRandom
 from functools import partial
 
@@ -177,7 +180,6 @@ class Event(object): #Python 2.x compatibility
             defenseStat = person2.stats['combat ability']
         return 1/(1+(1+settings['combatAbilityEffect'])**(attackStat-defenseStat)) # probability of kill
         
-    
     @staticmethod
     def fight(people, relationships, settings):
         # Relationship changes
@@ -222,8 +224,9 @@ class Event(object): #Python 2.x compatibility
         desc = 'and '
         descList = []
         if len(deadList) < len(people):
+            lootList = []
             for theDead in deadList:
-                lootList = Event.lootRandom(liveList, theDead)
+                lootList += Event.lootRandom(liveList, theDead)
             if len(deadList) == 1:
                 desc += deadList[0].name+' was killed!'
             else:
@@ -234,6 +237,85 @@ class Event(object): #Python 2.x compatibility
         elif len(deadList) == len(people):
             desc += 'everyone died in the fighting!'
         return(desc, descList, deadList)
+    
+    @staticmethod
+    def factionFight(faction1, faction2, relationships, settings):
+        # Relationship changes
+        for person1 in faction1:
+            for person2 in faction2:
+                relationships.IncreaseFriendLevel(person1, person2, random.randint(-4,-3))
+                relationships.IncreaseLoveLevel(person1, person2, random.randint(-6,-4))
+                relationships.IncreaseFriendLevel(person2, person1, random.randint(-4,-3))
+                relationships.IncreaseLoveLevel(person2, person1, random.randint(-6,-4))  
+        # Actual fight
+        faction1Power = 0
+        for person1 in faction1:
+            faction1Power += person1.stats['combat ability']*(1+((person1.stats['aggression']*2+person1.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
+        faction2Power = 0
+        for person2 in faction2:
+            faction2Power += person2.stats['combat ability']*(1+((person2.stats['aggression']*2+person2.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
+        
+        meanPower = (faction1Power+faction2Power)/2
+        faction1ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**((faction1Power-faction2Power)/meanPower))
+        faction2ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**((faction2Power-faction1Power)/meanPower))
+        faction1DeadList = []
+        faction1LiveList =[]
+        faction2DeadList = []
+        faction2LiveList =[]
+        for person1 in faction1:
+            # Sigmoid probability! woo...
+            if random.random()<faction1ProbDeath:
+                faction1DeadList.append(person1)
+                person1.alive = False
+            else:
+                faction1LiveList.append(person1)
+        for person2 in faction2:
+            # Sigmoid probability! woo...
+            if random.random()<faction2ProbDeath:
+                faction2DeadList.append(person2)
+                person2.alive = False
+            else:
+                faction2LiveList.append(person2)
+                
+        if not faction1DeadList and not faction2DeadList:
+            desc = 'but no one was hurt.'
+            return(desc, [], [], {})
+        desc = 'and '
+        descList = []
+        deadList = faction1DeadList + faction2DeadList
+        if len(deadList) < len(faction1) + len(faction2):
+            # We have to do the looting carefully
+            lootList1 = []
+            for theDead in faction1DeadList:
+                if not faction2LiveList: # If the entire other faction is dead, this faction gets their own dead teammate's stuff
+                    lootList1 += Event.lootRandom(faction1LiveList, theDead)
+                else:
+                    lootList1 += Event.lootRandom(faction2LiveList, theDead)
+            lootList2 = []
+            for theDead in faction2DeadList:
+                if not faction1LiveList:
+                    lootList2 += Event.lootRandom(faction2LiveList, theDead)
+                else:
+                    lootList2 += Event.lootRandom(faction1LiveList, theDead)
+            lootList = lootList1 + lootList2
+            if len(deadList) == 1:
+                desc += deadList[0].name+' was killed!'
+            else:
+                desc += Event.englishList(deadList)+' were killed!'
+            if lootList:
+                desc += ' '+Event.englishList(lootList)+' was looted.'
+            descList.extend(lootList)
+        elif not faction2LiveList and not faction1LiveList:
+            desc += 'everyone died in the fighting!'
+        # decide a killer for anyone killed. This is unusual and needs to be handled here
+        allKillers = defaultdict(list)
+        for dead in faction1DeadList:
+            killDict = {x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction2}
+            allKillers[str(weightedDictRandom(killDict)[0])].append(str(dead))
+        for dead in faction2DeadList:
+            killDict = {x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction1}
+            allKillers[str(weightedDictRandom(killDict)[0])].append(str(dead))
+        return(desc, descList, deadList, allKillers)
     
     @staticmethod
     def getFriendlyIfPossible(namedObject):
