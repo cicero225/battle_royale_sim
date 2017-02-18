@@ -3,7 +3,6 @@ from Objs.Events.Event import Event
 import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-    print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
     attackers = [mainActor] + participants
     desc = Event.englishList(attackers) + " worked together to ambush and attack "+victims[0].name+", "
     descList = attackers + victims

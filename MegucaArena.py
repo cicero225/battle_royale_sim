@@ -367,27 +367,33 @@ def main():
                     # and not-statistically accurate.
                     while(True):
                         #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
+                        print(indivProb)
                         eventName = ArenaUtils.weightedDictRandom(indivProb)[0]     
-                        if DEBUG:
-                           STATSDEBUG["state"] = state
-                           STATSDEBUG["indivProb"] = indivProb
                         # Handle event overrides, if any
                         #Determine participants, victims, if any.
                         thisevent = events[eventName]
                         victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims) 
-                        possibleParticipantEventWeights = eventParticipantWeights.copy() # Can't be both a participant and a victim... (this creates a bit of bias, but oh well)
+                        possibleParticipantEventWeights = copy.deepcopy(eventParticipantWeights) # Can't be both a participant and a victim... (this creates a bit of bias, but oh well)
                         for x in victims:
                             possibleParticipantEventWeights[eventName][x.name] = 0
                         aborted = allRelationships.reprocessParticipantWeightsForVictims(possibleParticipantEventWeights, victims, events[eventName]) # some participants need adjustment based on the chosen victim(s)
                         # check if enough possible participants are left to satisfy the event, presuming it has participants
                         if "numParticipants" in event.baseProps:
-                            if len(eventParticipantWeights[eventName]) - list(eventParticipantWeights[eventName].values()).count(0) < trueNumParticipants[eventName]:
+                            print(possibleParticipantEventWeights[eventName])
+                            print(len(possibleParticipantEventWeights[eventName]))
+                            print(list(possibleParticipantEventWeights[eventName].values()).count(0))
+                            if len(possibleParticipantEventWeights[eventName]) - list(possibleParticipantEventWeights[eventName].values()).count(0) < trueNumParticipants[eventName]:
                                 # abort event
-                                continue       
+                                continue
+                        print(possibleParticipantEventWeights[eventName])
                         participants = selectRoles(baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
                         sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
                         proceedAsUsual = True
                         resetEvent = False
+                        if DEBUG:
+                           STATSDEBUG["state"] = state
+                           STATSDEBUG["indivProb"] = indivProb
+                           STATSDEBUG["eventParticipantWeights"] = eventParticipantWeights[eventName]
                         for override in callbacks["overrideContestantEvent"]:
                             # Be very careful of modifying state here.
                             proceedAsUsual, resetEvent = override(contestantKey, thisevent, state, participants, victims, sponsorsHere)
