@@ -210,9 +210,7 @@ def main():
     # Nested functions that need access to variables in main
     
     def modifyWeightForMultipleActors(trueNumRoles, baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
-        trueNumRoles[eventName] = 0
         if eventName in baseWeights:
-            trueNumRoles[eventName] = event.baseProps[numRoles]+(random.randint(0, event.baseProps[numRoles+"Extra"]) if numRoles+"Extra" in event.baseProps else 0)
             if not trueNumRoles[eventName]:
                 return
             if not origIndivWeight: # this causes numerical issues and shoudl end up 0 anyway
@@ -245,7 +243,8 @@ def main():
                 return
             correctionRoleWeight = sum(weights[eventName].values())/len(weights)
             indivProb[eventName] *= min(correctionRoleWeight/origIndivWeight, settings["maxParticipantEffect"])
-            
+                
+     
     def selectRoles(baseWeights, weights, trueNumRoles, people=contestants):
         if eventName in baseWeights and trueNumRoles[eventName]>0:
             rolekeys = ArenaUtils.weightedDictRandom(weights[eventName], trueNumRoles[eventName])
@@ -317,9 +316,9 @@ def main():
                     eventParticipantWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
                     eventVictimWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
                     eventSponsorWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-                    trueNumParticipants = {}
-                    trueNumVictims = {}
-                    trueNumSponsors = {}
+                    trueNumParticipants = collections.defaultdict(int)
+                    trueNumVictims = collections.defaultdict(int)
+                    trueNumSponsors = collections.defaultdict(int)
                     for eventName, event in events.items():
                         indivProb[eventName] = baseEventActorWeights[eventName]                
                         eventMayProceed = True
@@ -330,13 +329,37 @@ def main():
                         if not eventMayProceed:
                             continue
                         origIndivWeight = indivProb[eventName]
+                        
+                        # Predetermine number of participants/victims
+                        numExtraAllowed = len(liveContestants) - (event.baseProps["numParticipants"] if "numParticipants" in event.baseProps else 0) - (event.baseProps["numVictims"] if "numVictims" in event.baseProps else 0) - 1
+                        if numExtraAllowed < 0:
+                            indivProb[eventName] = 0
+                            continue
+                        # Set initial values based on eventName in base props (do sponsors as well here)
+                        if "numParticipants" in event.baseProps:
+                            trueNumParticipants[eventName] = event.baseProps["numParticipants"]
+                        if "numVictims" in event.baseProps:
+                            trueNumVictims[eventName] = event.baseProps["numVictims"]
+                        if "numSponsors" in event.baseProps:
+                            trueNumSponsors[eventName] = event.baseProps["numSponsors"]
+                        if "numVictimsExtra" in event.baseProps and "numParticipantsExtra" in event.baseProps:
+                            numExtraParticipants = round(event.baseProps["numParticipantsExtra"]/(event.baseProps["numParticipantsExtra"]+event.baseProps["numVictimsExtra"])) * numExtraAllowed
+                            numExtraVictims = numExtraAllowed - numExtraParticipants
+                            trueNumParticipants[eventName] += random.randint(0, min(event.baseProps["numParticipantsExtra"], numExtraParticipants))
+                            trueNumVictims[eventName] += random.randint(0, min(event.baseProps["numVictimsExtra"], numExtraVictims))        
+                        elif "numVictimsExtra" in event.baseProps:
+                            trueNumVictims[eventName] += random.randint(0, min(event.baseProps["numVictimsExtra"], numExtraAllowed)) 
+                        elif "numParticipantsExtra" in event.baseProps:
+                            trueNumParticipants[eventName] += random.randint(0, min(event.baseProps["numParticipantsExtra"], numExtraAllowed)) 
+                        
                         # Probability correction for multi-contestant events, if necessary
                         # this feels silly but is very useful
                         modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
                         modifyWeightForMultipleActors(trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
                         modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
-                        if trueNumParticipants[eventName] + trueNumVictims[eventName] + list(eventVictimWeights[eventName].values()).count(0) > len(eventVictimWeights):
-                            indivProb[eventName] = 0
+                        if eventVictimWeights[eventName] and eventParticipantWeights[eventName]: # the above precalculation fails if some victims or participants are invalid, so an addition check is necessary; Unfortunately this distorts the statistics a little.
+                            if trueNumParticipants[eventName] + trueNumVictims[eventName] + list(eventVictimWeights[eventName].values()).count(0) +list(eventParticipantWeights[eventName].values()).count(0) > len(set(list(eventVictimWeights[eventName]) + list(eventParticipantWeights[eventName]))):
+                                indivProb[eventName] = 0
                     # It is occasionally useful for an event to be able to force a new event to be chosen.
                     # While computationally wasteful, this prevents us from needing to make a special callback for
                     # events with unique trigger conditions. Events may signal for a reselection by returning None or []
@@ -351,11 +374,17 @@ def main():
                         # Handle event overrides, if any
                         #Determine participants, victims, if any.
                         thisevent = events[eventName]
-                        participants = selectRoles(baseEventParticipantWeights, eventParticipantWeights, trueNumParticipants)
-                        possibleVictimWeights = eventVictimWeights.copy() # Can't be both a participant and a victim... (this creates a bit of bias, but oh well)
-                        for x in participants:
-                            possibleVictimWeights[eventName][x.name] = 0
-                        victims = selectRoles(baseEventVictimWeights, possibleVictimWeights, trueNumVictims) 
+                        victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims) 
+                        possibleParticipantEventWeights = eventParticipantWeights.copy() # Can't be both a participant and a victim... (this creates a bit of bias, but oh well)
+                        for x in victims:
+                            possibleParticipantEventWeights[eventName][x.name] = 0
+                        aborted = allRelationships.reprocessParticipantWeightsForVictims(possibleParticipantEventWeights, victims, events[eventName]) # some participants need adjustment based on the chosen victim(s)
+                        # check if enough possible participants are left to satisfy the event, presuming it has participants
+                        if "numParticipants" in event.baseProps:
+                            if len(eventParticipantWeights[eventName]) - list(eventParticipantWeights[eventName].values()).count(0) < trueNumParticipants[eventName]:
+                                # abort event
+                                continue       
+                        participants = selectRoles(baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
                         sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
                         proceedAsUsual = True
                         resetEvent = False
@@ -440,7 +469,7 @@ def statCollection(): # expand to count number of days, and fun stuff like epiph
     days = []
     global PRINTHTML
     PRINTHTML = False
-    for _ in range(0,100):
+    for _ in range(0,1000):
         printtrace = True
         try:
             winner, day = main()

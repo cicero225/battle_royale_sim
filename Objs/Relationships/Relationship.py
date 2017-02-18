@@ -133,3 +133,25 @@ class Relationship(object):
               (1+self.settings["relationInfluence"])**(friendlevel*event.baseProps["friendEffect"+roleName])*
               (1+self.settings["relationInfluence"])**(lovelevel*event.baseProps["loveEffect"+roleName]),
               True)
+              
+    def reprocessParticipantWeightsForVictims(self, possibleParticipantEventWeights, victims, event):
+        possibleParticipantWeights = possibleParticipantEventWeights[event.name]
+        for participantName, weight in possibleParticipantWeights.items():
+            if not weight:
+                continue
+            for victim in victims:
+                if "participantFriendRequiredVictim" in event.baseProps and event.baseProps["participantFriendRequiredVictim"]: 
+                    negOrPos = 1 if event.baseProps["participantNeededFriendLevelVictim"]["relation"] else -1
+                    if negOrPos*self.friendships[participantName][str(victim)]<negOrPos*event.baseProps["participantNeededFriendLevelVictim"]["value"]:
+                        possibleParticipantWeights[participantName] = 0
+                        break
+                if "participantLoveRequiredVictim" in event.baseProps and event.baseProps["participantLoveRequiredVictim"]:
+                    negOrPos = 1 if event.baseProps["participantNeededLoveLevelVictim"]["relation"] else -1
+                    if negOrPos*self.loveships[participantName][str(victim)]<negOrPos*event.baseProps["participantNeededLoveLevelVictim"]["value"]:
+                        possibleParticipantWeights[participantName] = 0
+                        break
+                friendlevel = self.friendships[participantName][str(victim)]
+                lovelevel = self.loveships[participantName][str(victim)]
+                possibleParticipantWeights[participantName] *= (
+                      (1+self.settings["relationInfluence"])**(friendlevel*event.baseProps["participantFriendEffectVictim"] if "participantFriendEffectVictim" in event.baseProps else 1)*
+                      (1+self.settings["relationInfluence"])**(lovelevel*event.baseProps["participantLoveEffectVictim"] if "participantLoveEffectVictim" in event.baseProps else 1))

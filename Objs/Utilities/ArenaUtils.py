@@ -13,6 +13,8 @@ import html
 def weightedDictRandom(inDict, num_sel=1):
     """Given an input dictionary with weights as values, picks num_sel uniformly weighted random selection from the keys"""
     # Selection is without replacement (important for use when picking participants etc.)
+    if not inDict:
+        return ()
     if num_sel > len(inDict):
         raise IndexError
     if not num_sel:
@@ -98,6 +100,8 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
     for dead in eventOutputs[2]:
         # This dict uses relationship levels to give a weight to how likely it is that someone is the killer
         killDict = {x:1.1**(state["allRelationships"].friendships[str(x)][str(dead)]+2*state["allRelationships"].loveships[str(x)][str(dead)]) for x in killers if str(x)!=str(dead)}
+        if not killDict: # This can happen if the only potential killer is also someone who died in the event.
+            continue
         trueKiller = weightedDictRandom(killDict)[0]
         state["callbackStore"]["killCounter"][str(trueKiller)] += 1
         state["callbackStore"]["KillThisTurnFlag"][str(trueKiller)] = True  

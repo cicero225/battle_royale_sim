@@ -33,7 +33,7 @@
      },
 "Dysentary":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0.5,
+     "mainWeight": 0.25,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
@@ -408,7 +408,7 @@
      },
      "GangUpFight":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0.25,
+     "mainWeight": 0.1,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0},
      "participantWeight": 1,
@@ -430,6 +430,12 @@
      "neededFriendLevelVictim": {"relation": false, "value": 4},
      "loveRequiredVictim": true,
      "neededLoveLevelVictim": {"relation": false, "value": 3},
+     "participantFriendEffectVictim": -0.5,
+     "participantLoveEffectVictim": -1.0,
+     "participantFriendRequiredVictim": true,
+     "participantNeededFriendLevelVictim": {"relation": false, "value": 3},
+     "participantLoveRequiredVictim": true,
+     "participantNeededLoveLevelVictim": {"relation": false, "value": 2},
      "murder": true
      }
  }

@@ -43,6 +43,8 @@ class Event(object): #Python 2.x compatibility
         # float loveEffectVictim
         # float friendEffectSponsor
         # float loveEffectSponsor
+        # float participantFriendEffectVictim -> Effect a friendship between participant and victim has on chance for participant to bail
+        # float loveFriendEffectVictim
         # If first bool is true, then you need friendship level > (or if bool false, <) the specified needed level
         # bool optional friendRequiredParticipant, (relation: bool, value:int) optional neededFriendLevelParticipant 
         # bool optional loveRequiredParticipant, (relation: bool, value:int) optional, neededLoveLevelParticipant
@@ -50,6 +52,8 @@ class Event(object): #Python 2.x compatibility
         # bool optional loveRequiredVictim, (relation: bool, value:int) optional, neededLoveLevelVictim
         # bool optional friendRequiredSponsor, (relation: bool, value:int) optional neededFriendLevelSponsor
         # bool optional loveRequiredSponsor, (relation: bool, value:int) optional, neededLoveLevelSponsor
+        # bool optional participantFriendRequiredVictim, (relation: bool, value:int) optional, ParticipantNeededFriendLevelVictim
+        # bool optional participantLoveRequiredVictim, (relation: bool, value:int) optional, ParticipantNeededLoveLevelVictim
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
@@ -255,9 +259,8 @@ class Event(object): #Python 2.x compatibility
         for person2 in faction2:
             faction2Power += person2.stats['combat ability']*(1+((person2.stats['aggression']*2+person2.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
         
-        meanPower = (faction1Power+faction2Power)/2
-        faction1ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**((faction1Power-faction2Power)/meanPower))
-        faction2ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**((faction2Power-faction1Power)/meanPower))
+        faction1ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**(faction1Power-faction2Power))
+        faction2ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**(faction2Power-faction1Power))
         faction1DeadList = []
         faction1LiveList =[]
         faction2DeadList = []
@@ -270,7 +273,6 @@ class Event(object): #Python 2.x compatibility
             else:
                 faction1LiveList.append(person1)
         for person2 in faction2:
-            # Sigmoid probability! woo...
             if random.random()<faction2ProbDeath:
                 faction2DeadList.append(person2)
                 person2.alive = False
