@@ -390,7 +390,7 @@
      "neededFriendLevelParticipant": {"relation": true, "value": 1}
      },
      "MakeCampfire":
-    {"phase": ["Night"],
+    {"phase": ["Evening"],
      "mainWeight": 3,
      "unique": false,
      "itemRequired": false,

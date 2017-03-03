@@ -27,11 +27,11 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         weight = 20
     if confused:
         eventHandler = IndividualEventHandler(state)
-        eventHandler.banEventForSingleContestant("ShareIntimateConversation", mainActor.name)
-        eventHandler.banEventForSingleContestant("ShareIntimateConversation", participants[0].name)
+        eventHandler.banEventForSingleContestant("ShareIntimateConversation", mainActor.name, state)
+        eventHandler.banEventForSingleContestant("ShareIntimateConversation", participants[0].name, state)
         for person in confused:
             eventHandler.bindRoleForContestantAndEvent("participants", [mainActor if person != mainActor else participants[0]], person, "ResolvesFeelingConfusion")
-            eventHandler.setEventWeightForSingleContestant("ResolvesFeelingConfusion", person.name, weight)
+            eventHandler.setEventWeightForSingleContestant("ResolvesFeelingConfusion", person.name, weight, state)
         self.eventStore[mainActor.name] = eventHandler
         self.eventStore[participants[0].name] = eventHandler # Yes, two copies
     return (desc, [mainActor, participants[0]], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings. 

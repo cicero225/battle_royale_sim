@@ -31,7 +31,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             descList = [mainActor, state["items"]["Clean Water"]]
             return (desc, descList, [])
     
-    # 50% chance here that nothing happens, unless it just ain't possible for something to happen (other participant must not have already done this event this turn)
+    # 50% chance here that nothing happens, unless it just ain't possible for something to happen (other participant must not have already done this event this turn or already have a fire)
     possibleFireSharers = [x for x in state["contestants"].values() if x.alive and not self.eventStore["turnRecord"][x.name]==state["turnNumber"][0]]
     if not possibleFireSharers or random.random()>0.5: 
         desc += ' '+Event.parseGenderSubject(mainActor)+' was able to spend the night in comfort.'
@@ -49,6 +49,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         or (state["allRelationships"].friendships[str(mainActor)][str(contestant)]>-3 and state["allRelationships"].loveships[str(mainActor)][str(contestant)]>-3
         and random.random()<((min(state["allRelationships"].friendships[str(mainActor)][str(contestant)], state["allRelationships"].loveships[str(mainActor)][str(contestant)])+3)/3-mainActor.stats["ruthlessness"]/15))):
         desc += ', and they agreed to share the fire together.'
+        self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
+        contestant.SetUnhypothermic()
         state["allRelationships"].IncreaseFriendLevel(mainActor, contestant, random.randint(0,1))
         state["allRelationships"].IncreaseLoveLevel(mainActor, contestant, random.randint(0,1))
         state["allRelationships"].IncreaseFriendLevel(contestant, mainActor, random.randint(1,3))
@@ -61,10 +63,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     if ((state["allRelationships"].friendships[str(contestant)][str(mainActor)]>0 and state["allRelationships"].loveships[str(contestant)][str(mainActor)]>0)
         or random.random()>(contestant.stats["aggression"]*2+contestant.stats["ruthlessness"])*abs(state["allRelationships"].friendships[str(contestant)][str(mainActor)]+2*state["allRelationships"].loveships[str(contestant)][str(mainActor)])/450):
         desc += ' After a moment, '+contestant.name+' left.'
-        # If guy leaving hasn't successfully started a fire yet, hypothermia.
-        if str(contestant) not in self.eventStore or not self.eventStore[str(contestant)]:
-            contestant.SetHypothermic(state["turnNumber"][0])
-        return (desc, descList, [])
+        return (desc, descList, [], [], [mainActor])
     
     desc += ' After a moment, '+contestant.name+' attacked. A fight started, '
     (fightDesc, fightDescList, fightDeadList) = Event.fight(descList, state["allRelationships"], state["settings"])
@@ -74,11 +73,15 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         fightDeadList[0].alive = True
         fightDeadList[0].SetInjured()
         if fightDeadList[0]==mainActor:
+            self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
             desc += ' and '+mainActor.name+' was injured and forced to flee.'
+            mainActor.SetHypothermic(state["turnNumber"][0])
+            contestant.SetUnhypothermic()
             if fightDescList:
                 desc += Event.parseGenderSubject(mainActor)+' left behind '+Event.englishList(fightDescList)+'.'
         else:
             desc += ' but '+contestant.name+' was injured and forced to flee.'
+            contestant.SetHypothermic(state["turnNumber"][0])
             if fightDescList:
                 desc += Event.parseGenderSubject(contestant)+' left behind '+Event.englishList(fightDescList)+'.'
         descList.extend(fightDescList)
@@ -86,6 +89,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         
     # If nobody was hurt, they just give up and use the fire together.
     if not fightDeadList:
+        self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
+        contestant.SetUnhypothermic()
         desc += ' but in the end both sides got tired and gave up, agreeing to use the fire together for one night. Neither side slept well.'
         return (desc, descList, [])
     

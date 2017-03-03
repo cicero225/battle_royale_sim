@@ -182,11 +182,16 @@ def main():
     ]
     
     postDayCallbacks = [ # Things that happen after each day
-    ArenaUtils.endHypothermiaIfDayHasPassed
     ]
     
     if PRINTHTML:
         postDayCallbacks.insert(0, ArenaUtils.killWrite)
+        
+    postGameCallbacks =[
+    ]
+    
+    if PRINTHTML:
+        postGameCallbacks.insert(0, ArenaUtils.killWrite)
     
     callbacks = {"startup": startup,
                  "modifyBaseWeights": modifyBaseWeights,
@@ -198,7 +203,8 @@ def main():
                  "overrideContestantEvent": overrideContestantEvent,
                  "postEventCallbacks": postEventCallbacks,
                  "endGameConditions": endGameConditions,
-                 "postDayCallbacks": postDayCallbacks
+                 "postDayCallbacks": postDayCallbacks,
+                 "postGameCallbacks": postGameCallbacks,
     }
     
     # loophole that allows event-defining files to slip callbacks in
@@ -319,47 +325,56 @@ def main():
                     trueNumParticipants = collections.defaultdict(int)
                     trueNumVictims = collections.defaultdict(int)
                     trueNumSponsors = collections.defaultdict(int)
-                    for eventName, event in events.items():
-                        indivProb[eventName] = baseEventActorWeights[eventName]                
-                        eventMayProceed = True
-                        for callback in callbacks["modifyIndivActorWeights"]:
-                            indivProb[eventName], eventMayProceed = callback(actor, indivProb[eventName], event)
-                            if not eventMayProceed: # If one returns false, it signals that the event has been blocked
-                                break
-                        if not eventMayProceed:
-                            continue
-                        origIndivWeight = indivProb[eventName]
-                        
-                        # Predetermine number of participants/victims
-                        numExtraAllowed = len(liveContestants) - (event.baseProps["numParticipants"] if "numParticipants" in event.baseProps else 0) - (event.baseProps["numVictims"] if "numVictims" in event.baseProps else 0) - 1
-                        if numExtraAllowed < 0:
-                            indivProb[eventName] = 0
-                            continue
-                        # Set initial values based on eventName in base props (do sponsors as well here)
-                        if "numParticipants" in event.baseProps:
-                            trueNumParticipants[eventName] = event.baseProps["numParticipants"]
-                        if "numVictims" in event.baseProps:
-                            trueNumVictims[eventName] = event.baseProps["numVictims"]
-                        if "numSponsors" in event.baseProps:
-                            trueNumSponsors[eventName] = event.baseProps["numSponsors"]
-                        if "numVictimsExtra" in event.baseProps and "numParticipantsExtra" in event.baseProps:
-                            numExtraParticipants = round(event.baseProps["numParticipantsExtra"]/(event.baseProps["numParticipantsExtra"]+event.baseProps["numVictimsExtra"])) * numExtraAllowed
-                            numExtraVictims = numExtraAllowed - numExtraParticipants
-                            trueNumParticipants[eventName] += random.randint(0, min(event.baseProps["numParticipantsExtra"], numExtraParticipants))
-                            trueNumVictims[eventName] += random.randint(0, min(event.baseProps["numVictimsExtra"], numExtraVictims))        
-                        elif "numVictimsExtra" in event.baseProps:
-                            trueNumVictims[eventName] += random.randint(0, min(event.baseProps["numVictimsExtra"], numExtraAllowed)) 
-                        elif "numParticipantsExtra" in event.baseProps:
-                            trueNumParticipants[eventName] += random.randint(0, min(event.baseProps["numParticipantsExtra"], numExtraAllowed)) 
-                        
-                        # Probability correction for multi-contestant events, if necessary
-                        # this feels silly but is very useful
-                        modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
-                        modifyWeightForMultipleActors(trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
-                        modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
-                        if eventVictimWeights[eventName] and eventParticipantWeights[eventName]: # the above precalculation fails if some victims or participants are invalid, so an addition check is necessary; Unfortunately this distorts the statistics a little.
-                            if trueNumParticipants[eventName] + trueNumVictims[eventName] + list(eventVictimWeights[eventName].values()).count(0) +list(eventParticipantWeights[eventName].values()).count(0) > len(set(list(eventVictimWeights[eventName]) + list(eventParticipantWeights[eventName]))):
+                    itcounter = 0
+                    while True:
+                        for eventName, event in events.items():
+                            indivProb[eventName] = baseEventActorWeights[eventName]  
+                            eventMayProceed = True
+                            for callback in callbacks["modifyIndivActorWeights"]:
+                                indivProb[eventName], eventMayProceed = callback(actor, indivProb[eventName], event)
+                                if not eventMayProceed: # If one returns false, it signals that the event has been blocked
+                                    break
+                            if not eventMayProceed:
+                                continue
+                            origIndivWeight = indivProb[eventName]
+                            # Predetermine number of participants/victims
+                            numExtraAllowed = len(liveContestants) - (event.baseProps["numParticipants"] if "numParticipants" in event.baseProps else 0) - (event.baseProps["numVictims"] if "numVictims" in event.baseProps else 0) - 1
+                            if numExtraAllowed < 0:
                                 indivProb[eventName] = 0
+                                continue
+                            # Set initial values based on eventName in base props (do sponsors as well here)
+                            if "numParticipants" in event.baseProps:
+                                trueNumParticipants[eventName] = event.baseProps["numParticipants"]
+                            if "numVictims" in event.baseProps:
+                                trueNumVictims[eventName] = event.baseProps["numVictims"]
+                            if "numSponsors" in event.baseProps:
+                                trueNumSponsors[eventName] = event.baseProps["numSponsors"]
+                            if "numVictimsExtra" in event.baseProps and "numParticipantsExtra" in event.baseProps:
+                                numExtraParticipants = round(event.baseProps["numParticipantsExtra"]/(event.baseProps["numParticipantsExtra"]+event.baseProps["numVictimsExtra"])) * numExtraAllowed
+                                numExtraVictims = numExtraAllowed - numExtraParticipants
+                                trueNumParticipants[eventName] += random.randint(0, min(event.baseProps["numParticipantsExtra"], numExtraParticipants))
+                                trueNumVictims[eventName] += random.randint(0, min(event.baseProps["numVictimsExtra"], numExtraVictims))        
+                            elif "numVictimsExtra" in event.baseProps:
+                                trueNumVictims[eventName] += random.randint(0, min(event.baseProps["numVictimsExtra"], numExtraAllowed)) 
+                            elif "numParticipantsExtra" in event.baseProps:
+                                trueNumParticipants[eventName] += random.randint(0, min(event.baseProps["numParticipantsExtra"], numExtraAllowed)) 
+                            
+                            # Probability correction for multi-contestant events, if necessary
+                            # this feels silly but is very useful
+                            modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights, "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
+                            modifyWeightForMultipleActors(trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
+                            modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights, "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
+                            if eventVictimWeights[eventName] and eventParticipantWeights[eventName]: # the above precalculation fails if some victims or participants are invalid, so an addition check is necessary; Unfortunately this distorts the statistics a little.
+                                if trueNumParticipants[eventName] + trueNumVictims[eventName] + list(eventVictimWeights[eventName].values()).count(0) +list(eventParticipantWeights[eventName].values()).count(0) > len(set(list(eventVictimWeights[eventName]) + list(eventParticipantWeights[eventName]))):
+                                    indivProb[eventName] = 0
+                        # If ALL events are banned, rerun this until a working combination appears
+                        if sum(indivProb.values()):
+                           break 
+                        # There's a few edge cases where it's really hard to keep infinite loop from happening, so if that happens, just give up
+                        if itcounter > 4:
+                            indivProb = baseEventActorWeights
+                            break
+                        itcounter += 1
                     # It is occasionally useful for an event to be able to force a new event to be chosen.
                     # While computationally wasteful, this prevents us from needing to make a special callback for
                     # events with unique trigger conditions. Events may signal for a reselection by returning None or []
@@ -367,7 +382,7 @@ def main():
                     # and not-statistically accurate.
                     while(True):
                         #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
-                        print(indivProb)
+                        # print(indivProb)
                         eventName = ArenaUtils.weightedDictRandom(indivProb)[0]     
                         # Handle event overrides, if any
                         #Determine participants, victims, if any.
@@ -379,13 +394,13 @@ def main():
                         aborted = allRelationships.reprocessParticipantWeightsForVictims(possibleParticipantEventWeights, victims, events[eventName]) # some participants need adjustment based on the chosen victim(s)
                         # check if enough possible participants are left to satisfy the event, presuming it has participants
                         if "numParticipants" in event.baseProps:
-                            print(possibleParticipantEventWeights[eventName])
-                            print(len(possibleParticipantEventWeights[eventName]))
-                            print(list(possibleParticipantEventWeights[eventName].values()).count(0))
+                            #print(possibleParticipantEventWeights[eventName])
+                            #print(len(possibleParticipantEventWeights[eventName]))
+                            #print(list(possibleParticipantEventWeights[eventName].values()).count(0))
                             if len(possibleParticipantEventWeights[eventName]) - list(possibleParticipantEventWeights[eventName].values()).count(0) < trueNumParticipants[eventName]:
                                 # abort event
                                 continue
-                        print(possibleParticipantEventWeights[eventName])
+                        #print(possibleParticipantEventWeights[eventName])
                         participants = selectRoles(baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
                         sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
                         proceedAsUsual = True
@@ -394,6 +409,7 @@ def main():
                            STATSDEBUG["state"] = state
                            STATSDEBUG["indivProb"] = indivProb
                            STATSDEBUG["eventParticipantWeights"] = eventParticipantWeights[eventName]
+                           STATSDEBUG["participants"] = (baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
                         for override in callbacks["overrideContestantEvent"]:
                             # Be very careful of modifying state here.
                             proceedAsUsual, resetEvent = override(contestantKey, thisevent, state, participants, victims, sponsorsHere)
@@ -441,7 +457,10 @@ def main():
                     # Remove the dead contestants from the live list. Add the contestants involved to alreadyUsed.
                     for dead in theDead:
                         del liveContestants[dead]
-                    alreadyUsed.update([x.name for x in descContestants])   
+                    if len(eventOutputs)>4 and eventOutputs[4]:
+                        alreadyUsed.update([x.name for x in eventOutputs[4]])
+                    else:
+                        alreadyUsed.update([x.name for x in descContestants])   
             
                 if not restartTurn:    
                     for callback in callbacks["endGameConditions"]: # conditions for ending the game
@@ -453,6 +472,8 @@ def main():
                                 print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
 
                             # TODO: Do any additional end of simulation stuff here
+                            for callback in callbacks["postGameCallbacks"]:
+                                callback(state)
                             return list(liveContestants.values())[0].name, turnNumber[0]
                     if PRINTHTML:
                         if phaseNum == len(thisDay["phases"])-1:

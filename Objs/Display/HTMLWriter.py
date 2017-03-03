@@ -76,9 +76,16 @@ img {
     def addEvent(self, desc, descContestants, state=None):
         tempStringList = []
         for contestant in descContestants:
-            if state is not None and state["callbackStore"]["KillThisTurnFlag"][str(contestant)]:
+            if state is not None:
                 tempList = desc.split(str(contestant))
-                desc = (str(contestant)+' ['+str(state["callbackStore"]["killCounter"][str(contestant)])+']').join(tempList)
+                insertionString = str(contestant)
+                if state["callbackStore"]["KillThisTurnFlag"][str(contestant)]:
+                    insertionString += ' ['+str(state["callbackStore"]["killCounter"][str(contestant)])+']'
+                if hasattr(contestant, "injured") and contestant.injured:
+                    insertionString += ' (Injured)'
+                if hasattr(contestant, "hypothermic") and contestant.hypothermic is not None:
+                    insertionString += ' (Hypothermic)'
+                desc = insertionString.join(tempList)
             tempStringList.append("<img src='"+contestant.imageFile+"'>")
         tempStringList.append("<br>")
         tempStringList.append(self.wrap(desc, "eventnormal"))

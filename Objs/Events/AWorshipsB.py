@@ -21,16 +21,16 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     mainActor.permStatChange({'stability': 2})
     eventHandler = IndividualEventHandler(state)
     eventHandler.banMurderEventsAtoB(mainActor.name, chosen)
-    eventHandler.banEventForSingleContestant("AWorshipsB", mainActor.name)
+    eventHandler.banEventForSingleContestant("AWorshipsB", mainActor.name, state)
     self.eventStore.setdefault("permanent", {})[mainActor.name] = eventHandler
     if chosen == "Kaname Madoka":
         eventHandler = IndividualEventHandler(state)
-        eventHandler.setEventWeightForSingleContestant("HomuciferKillsBadWorshipper", mainActor.name, 10)
+        eventHandler.setEventWeightForSingleContestant("HomuciferKillsBadWorshipper", mainActor.name, 10, state)
         state["allRelationships"].IncreaseFriendLevel(state["sponsors"]["Madokami"], mainActor, 10)
         self.eventStore[mainActor.name] = eventHandler
     elif chosen == "Akemi Homura":
         eventHandler = IndividualEventHandler(state)
-        eventHandler.setEventWeightForSingleContestant("MadokamiKillsBadWorshipper", mainActor.name, 10)
+        eventHandler.setEventWeightForSingleContestant("MadokamiKillsBadWorshipper", mainActor.name, 10, state)
         state["allRelationships"].IncreaseFriendLevel(state["sponsors"]["Akuma Homura"], mainActor, 10)
         self.eventStore[mainActor.name] = eventHandler
     desc = 'In a delirious state, '+mainActor.name+' had a religious epiphany, realizing that '+chosen+' is the avatar of a divine being.'

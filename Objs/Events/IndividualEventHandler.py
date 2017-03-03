@@ -30,8 +30,11 @@ class IndividualEventHandler(object):
             self.state["callbacks"][locationListName].append(func)
         self.callbackReferences.append((locationListName, func))
     
-    def setEventWeightForSingleContestant(self, eventName, contestantName, weight):
+    def setEventWeightForSingleContestant(self, eventName, contestantName, weight, state):
         def func(actor, origWeight, event):
+            # if we're trying to set a weight to positive but it's the wrong phase
+            if weight and "phase" in event.baseProps and state["curPhase"] not in event.baseProps["phase"]:
+                return (origWeight, True)
             if event.name == eventName and actor.name == contestantName:
                 return (weight, bool(weight))  # if weight is 0, we almost always want this to return False and block the event entirely
             else:
@@ -71,8 +74,8 @@ class IndividualEventHandler(object):
             roleDict[roleName].extend(fixedRoleList)
         return True, False
         
-    def banEventForSingleContestant(self, eventName, contestantName):
-        self.setEventWeightForSingleContestant(eventName, contestantName, 0)
+    def banEventForSingleContestant(self, eventName, contestantName, state):
+        self.setEventWeightForSingleContestant(eventName, contestantName, 0, state)
         
     def banMurderEventsAtoB(self, cannotKill, cannotBeVictim):
         def func(contestantKey, thisevent, state, participants, victims, sponsorsHere):

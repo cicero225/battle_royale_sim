@@ -81,7 +81,7 @@ def logEventsByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, st
 def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
     if not eventOutputs[2] or "murder" not in thisevent.baseProps or not thisevent.baseProps["murder"]:
         return
-    if len(eventOutputs)>3:
+    if len(eventOutputs)>3 and eventOutputs[3]:
         killers = eventOutputs[3]
         if isinstance(killers, dict):
             # if killers is a dict, handle this differently
@@ -128,13 +128,11 @@ def killWrite(state):
     killWriter.finalWrite(os.path.join("Assets",str(state["turnNumber"][0])+" Kills.html"), state)
     return False
     
-def endHypothermiaIfDayHasPassed(state):
-    for contestant in state["contestants"].values():
-        if contestant.hypothermic and contestant.hypothermic<=state["turnNumber"][0]-1:
-            contestant.SetUnhypothermic()
-    
 # Rig it so the same event never happens twice to the same person in consecutive turns (makes game feel better)
 def eventMayNotRepeat(actor, origProb, event, state):
+    # in case a phase only has one event (special phases, among other things)
+    if sum(1 for x in state['events'].values() if "phase" not in x.baseProps or state["curPhase"] in x.baseProps["phase"]) == 1:
+        return origProb, True
     if state["turnNumber"][0]>1: # Since defaultdict, this would work fine even without this check, but this makes it more explicit (and is more robust to future changes)
         for x in state["callbackStore"]["eventLog"][state["turnNumber"][0]-1].values():
             if x[actor.name] == event.name: 

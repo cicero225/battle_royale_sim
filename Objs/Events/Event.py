@@ -208,7 +208,8 @@ class Event(object): #Python 2.x compatibility
             fightDict[i]=baseCombatAbility
         probDict = {}
         deadList = []
-        liveList =[]
+        liveList = []
+        injuredList = []
         for i, person1 in enumerate(people):
             meanAbilityTot = 0
             for ii, person2 in enumerate(people):
@@ -217,13 +218,20 @@ class Event(object): #Python 2.x compatibility
                 meanAbilityTot += fightDict[ii]
             # Sigmoid probability! woo...
             probDeath = 1/(1+(1+settings['combatAbilityEffect'])**(fightDict[i]-meanAbilityTot/(len(people)-1)))
+            # Yes the exact same formula... because it makes sense.
+            probInjury = 1/(1+(1+settings['combatAbilityEffect'])**(fightDict[i]-meanAbilityTot/(len(people)-1)))
             if random.random()<probDeath:
                 deadList.append(person1)
                 person1.alive = False
             else:
                 liveList.append(person1)
+                if random.random()<probInjury:
+                    injuredList.append(person1)
+                    person1.SetInjured()
         if not deadList:
-            desc = 'but no one was hurt.'
+            desc = 'but no one was killed.'
+            if injuredList:
+                desc += ' (Injured: '+Event.englishList(injuredList)+')'
             return(desc, [], [])
         desc = 'and '
         descList = []
@@ -240,6 +248,8 @@ class Event(object): #Python 2.x compatibility
             descList.extend(lootList)
         elif len(deadList) == len(people):
             desc += 'everyone died in the fighting!'
+        if injuredList:
+            desc += ' (Injured: '+Event.englishList(injuredList)+')'
         return(desc, descList, deadList)
     
     @staticmethod
@@ -260,11 +270,14 @@ class Event(object): #Python 2.x compatibility
             faction2Power += person2.stats['combat ability']*(1+((person2.stats['aggression']*2+person2.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
         
         faction1ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**(faction1Power-faction2Power))
+        faction1ProbInjury = 1/(1+(1+settings['combatAbilityEffect'])**(faction1Power-faction2Power))
         faction2ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**(faction2Power-faction1Power))
+        faction2ProbInjury = 1/(1+(1+settings['combatAbilityEffect'])**(faction1Power-faction2Power))
         faction1DeadList = []
-        faction1LiveList =[]
+        faction1LiveList = []
         faction2DeadList = []
-        faction2LiveList =[]
+        faction2LiveList = []
+        injuredList = []
         for person1 in faction1:
             # Sigmoid probability! woo...
             if random.random()<faction1ProbDeath:
@@ -272,15 +285,23 @@ class Event(object): #Python 2.x compatibility
                 person1.alive = False
             else:
                 faction1LiveList.append(person1)
+                if random.random()<faction1ProbInjury:
+                    injuredList.append(person1)
+                    person1.SetInjured()
         for person2 in faction2:
             if random.random()<faction2ProbDeath:
                 faction2DeadList.append(person2)
                 person2.alive = False
             else:
                 faction2LiveList.append(person2)
+                if random.random()<faction2ProbInjury:
+                    injuredList.append(person2)
+                    person2.SetInjured()
                 
         if not faction1DeadList and not faction2DeadList:
-            desc = 'but no one was hurt.'
+            desc = 'but no one was killed.'
+            if injuredList:
+                desc += ' (Injured: '+Event.englishList(injuredList)+')'
             return(desc, [], [], {})
         desc = 'and '
         descList = []
@@ -317,6 +338,8 @@ class Event(object): #Python 2.x compatibility
         for dead in faction2DeadList:
             killDict = {x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction1}
             allKillers[str(weightedDictRandom(killDict)[0])].append(str(dead))
+        if injuredList:
+            desc += ' (Injured: '+Event.englishList(injuredList)+')'
         return(desc, descList, deadList, allKillers)
     
     @staticmethod
