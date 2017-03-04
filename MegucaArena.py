@@ -393,23 +393,25 @@ def main():
                             possibleParticipantEventWeights[eventName][x.name] = 0
                         aborted = allRelationships.reprocessParticipantWeightsForVictims(possibleParticipantEventWeights, victims, events[eventName]) # some participants need adjustment based on the chosen victim(s)
                         # check if enough possible participants are left to satisfy the event, presuming it has participants
-                        if "numParticipants" in event.baseProps:
+                        if "numParticipants" in thisevent.baseProps:
                             #print(possibleParticipantEventWeights[eventName])
                             #print(len(possibleParticipantEventWeights[eventName]))
                             #print(list(possibleParticipantEventWeights[eventName].values()).count(0))
                             if len(possibleParticipantEventWeights[eventName]) - list(possibleParticipantEventWeights[eventName].values()).count(0) < trueNumParticipants[eventName]:
                                 # abort event
                                 continue
-                        #print(possibleParticipantEventWeights[eventName])
-                        participants = selectRoles(baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
-                        sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
-                        proceedAsUsual = True
-                        resetEvent = False
                         if DEBUG:
                            STATSDEBUG["state"] = state
                            STATSDEBUG["indivProb"] = indivProb
                            STATSDEBUG["eventParticipantWeights"] = eventParticipantWeights[eventName]
                            STATSDEBUG["participants"] = (baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
+                           STATSDEBUG["mainActor"] = contestantKey
+                           STATSDEBUG["eventName"] = eventName
+                        #print(possibleParticipantEventWeights[eventName])
+                        participants = selectRoles(baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
+                        sponsorsHere = selectRoles(baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
+                        proceedAsUsual = True
+                        resetEvent = False
                         for override in callbacks["overrideContestantEvent"]:
                             # Be very careful of modifying state here.
                             proceedAsUsual, resetEvent = override(contestantKey, thisevent, state, participants, victims, sponsorsHere)
