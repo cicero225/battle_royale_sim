@@ -11,6 +11,8 @@
  "friendCombatEffect": 0.25,
  "combatAbilityEffect": 0.1,
  "relationshipPropagation": 0.5,
- "statNormalization": true,
- "normalizationRange": 0.1
+ "statNormalization": false,
+ "normalizationRange": 0.1,
+ "relationshipDecay": 1.0,
+ "relationshipRandomizer": 0.5
 }

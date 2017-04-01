@@ -134,6 +134,9 @@ def main():
     startup = [
     ArenaUtils.loggingStartup,]
     
+    if PRINTHTML:
+        startup.insert(0, ArenaUtils.relationshipWrite)
+    
     # modifyBaseWeights: Expected args: liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state. Modify in place.
         # Also a good time to do any beginning of turn stuff
     modifyBaseWeights = [
@@ -182,16 +185,19 @@ def main():
     ]
     
     postDayCallbacks = [ # Things that happen after each day
+    allRelationships.decay
     ]
     
     if PRINTHTML:
         postDayCallbacks.insert(0, ArenaUtils.killWrite)
+        postDayCallbacks.insert(0, ArenaUtils.relationshipWrite)
         
     postGameCallbacks =[
     ]
     
     if PRINTHTML:
         postGameCallbacks.insert(0, ArenaUtils.killWrite)
+        postGameCallbacks.insert(0, ArenaUtils.relationshipWrite)
     
     callbacks = {"startup": startup,
                  "modifyBaseWeights": modifyBaseWeights,
@@ -277,7 +283,7 @@ def main():
     #Startup callbacks
     for callback in callbacks["startup"]:
         callback(state)
-        
+
     # Main loop of DEATH
     lastEvents = {}
     while True:

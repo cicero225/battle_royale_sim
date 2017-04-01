@@ -123,7 +123,8 @@ class Event(object): #Python 2.x compatibility
             return "his"
         else:
             return "its"
-            
+    
+    @staticmethod
     def parseGenderReflexive(contestantObj):
         genString = contestantObj.gender
         if genString == "F":
@@ -350,13 +351,20 @@ class Event(object): #Python 2.x compatibility
             return namedObject.name
     
     @staticmethod
-    def englishList(thingList):
+    def englishList(thingList, isObjs=True, customStringGetter=None):
+        if customStringGetter:
+            stringGetter = customStringGetter
+        else:
+            if isObjs:
+                stringGetter = Event.getFriendlyIfPossible
+            else:
+                stringGetter = lambda x: x
         if not thingList:
             return ''
         thingList = list(thingList)
         if len(thingList) == 1:
-            return Event.getFriendlyIfPossible(thingList[0])
+            return stringGetter(thingList[0])
         elif len(thingList) == 2:
-            return Event.getFriendlyIfPossible(thingList[0]) + ' and ' + Event.getFriendlyIfPossible(thingList[1])
+            return stringGetter(thingList[0]) + ' and ' + stringGetter(thingList[1])
         else:
-            return ', '.join(Event.getFriendlyIfPossible(x) for x in thingList[:-1])+' and '+Event.getFriendlyIfPossible(thingList[-1])
+            return ', '.join(stringGetter(x) for x in thingList[:-1])+' and '+stringGetter(thingList[-1])

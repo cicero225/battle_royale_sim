@@ -34,5 +34,41 @@
          "friendliness": 0,
          "meanness": 7
          }
+    },
+"Sheev Palpatine":
+    {"imageFile": "Palpatine.jpg",
+    "gender": "M",
+    "stats": 
+        {"gregariousness": 10,
+         "forgiveness": 0,
+         "loyalty": 0,
+         "loneliness": 0,
+         "friendliness": 0,
+         "meanness": 10
+         }
+    },
+"Barack Obama":
+    {"imageFile": "Obama.jpg",
+    "gender": "M",
+    "stats": 
+        {"gregariousness": 10,
+         "forgiveness": 6,
+         "loyalty": 7,
+         "loneliness": 3,
+         "friendliness": 7,
+         "meanness": 4
+         }
+    },
+"Lain, God of the Wired":
+    {"imageFile": "Lain.gif",
+    "gender": "F",
+    "stats": 
+        {"gregariousness": 2,
+         "forgiveness": 4,
+         "loyalty": 10,
+         "loneliness": 7,
+         "friendliness": 4,
+         "meanness": 4
+         }
     }
 }

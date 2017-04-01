@@ -437,5 +437,44 @@
      "participantLoveRequiredVictim": true,
      "participantNeededLoveLevelVictim": {"relation": false, "value": 2},
      "murder": true
+     },
+    "SetTrap":
+    {"phase": ["Day"],
+     "mainWeight": 0.5,
+     "mainModifiers": {"cleverness": 0.3,
+                       "stability": -0.2,
+                       "meanness": 0.3,
+                       "survivalism": 0.3,
+                       "ruthlessness": 0.3,
+                       "aggression":0.2},
+     "unique": false,
+     "itemRequired": false,
+     "murder": false
+     },
+     "DiesFromTrap":
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.1,
+     "mainModifiers": {"cleverness": -0.2,
+                       "survivalism": -0.2},
+     "unique": false,
+     "itemRequired": false,
+     "murder": true
+     },
+    "BetrayPushOffCliff":
+    {"phase": ["Day", "Night"],
+    "mainWeight": 0.5,
+     "mainModifiers": {"stability": -0.5,
+                       "ruthlessness": 2.0,
+                       "loyalty": -2.0},
+     "victimWeight": 1,
+     "numVictims": 1,
+     "victimModifiers": {"loneliness": 0.5,
+                         "friendliness": 0.5},
+     "unique": false,
+     "itemRequired": false,
+     "reverse": true,
+     "friendEffectVictim": 1.0,
+     "loveEffectVictim": 2.0,
+     "murder": true
      }
  }

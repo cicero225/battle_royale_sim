@@ -9,7 +9,8 @@ import random
 import bisect
 import collections
 import html
-    
+
+   
 def weightedDictRandom(inDict, num_sel=1):
     """Given an input dictionary with weights as values, picks num_sel uniformly weighted random selection from the keys"""
     # Selection is without replacement (important for use when picking participants etc.)
@@ -127,6 +128,45 @@ def killWrite(state):
         killWriter.addEvent(desc, [descContestant])
     killWriter.finalWrite(os.path.join("Assets",str(state["turnNumber"][0])+" Kills.html"), state)
     return False
+    
+def relationshipWrite(state):
+    relationshipWriter = HTMLWriter()
+    relationshipWriter.addTitle("Day "+str(state["turnNumber"][0])+" Relationships")
+    relationships = state["allRelationships"]
+    anyEvent = next(iter(state["events"].values()))  # A hack to get around importing Events
+    for person in list(state["contestants"].values())+list(state["sponsors"].values()):
+        if not person.alive:
+            continue
+        relationshipLine = str(person)
+        friendList = []
+        liveFriends = {x:y for x,y in relationships.friendships[str(person)].items() if x in state["contestants"] and state["contestants"][x].alive}
+        topFiveFriends = {x:liveFriends[x] for x in sorted(liveFriends, key=liveFriends.get, reverse=True)[:5]}
+        topFiveFriends.update({x:y for x,y in relationships.friendships[str(person)].items() if x in state["sponsors"]})
+        for key, value in topFiveFriends.items():
+            if value >= 4:
+                if relationships.friendships[key][str(person)] >=4:
+                    friendList.append(key)
+                else:
+                    friendList.append(key+' (Not Mutual)')
+        if friendList:
+            relationshipLine += ":<br> Friendships: "
+            relationshipLine += anyEvent.englishList(friendList, False)
+        loveList = []
+        liveLoves = {x:y for x,y in relationships.loveships[str(person)].items() if x in state["contestants"] and state["contestants"][x].alive}
+        topFiveLoves = {x:liveLoves[x] for x in sorted(liveLoves, key=liveLoves.get, reverse=True)[:5]}
+        topFiveLoves.update({x:y for x,y in relationships.loveships[str(person)].items() if x in state["sponsors"]})
+        for key, value in topFiveLoves.items():
+            if value >= 4:
+                if relationships.loveships[key][str(person)] >=4:
+                    loveList.append(key)
+                else:
+                    loveList.append(key+' (Not Mutual)')
+        if loveList:
+            relationshipLine +="<br> Romances: "
+            relationshipLine += anyEvent.englishList(loveList, False)
+        if friendList or loveList:
+            relationshipWriter.addEvent(relationshipLine, [person])
+    relationshipWriter.finalWrite(os.path.join("Assets", str(state["turnNumber"][0])+" Relationships.html"), state)
     
 # Rig it so the same event never happens twice to the same person in consecutive turns (makes game feel better)
 def eventMayNotRepeat(actor, origProb, event, state):

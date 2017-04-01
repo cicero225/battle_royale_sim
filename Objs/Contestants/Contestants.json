@@ -720,5 +720,24 @@
          "cleverness": 10,
          "combat ability": 5
         }
+    },
+    "Polos":
+    {"imageFile": "Polos.jpg",
+    "gender": "M",
+    "stats":
+        {"gregariousness": 5,
+         "stability": 7,
+         "forgiveness": 6,
+         "loyalty": 8,
+         "meanness": 4,
+         "ruthlessness": 2,
+         "aggression": 3,
+         "endurance": 8,
+         "survivalism": 7,
+         "loneliness": 7,
+         "friendliness": 8,
+         "cleverness": 9,
+         "combat ability": 7
+         }
     }
 }
