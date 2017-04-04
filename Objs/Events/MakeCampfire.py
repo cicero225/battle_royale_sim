@@ -34,7 +34,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     # 50% chance here that nothing happens, unless it just ain't possible for something to happen (other participant must not have already done this event this turn or already have a fire)
     possibleFireSharers = [x for x in state["contestants"].values() if x.alive and not self.eventStore["turnRecord"][x.name]==state["turnNumber"][0]]
     if not possibleFireSharers or random.random()>0.5: 
-        desc += ' '+Event.parseGenderSubject(mainActor)+' was able to spend the night in comfort.'
+        desc += ' '+Event.parseGenderSubject(mainActor).capitalize()+' was able to spend the night in comfort.'
         descList = [mainActor]
         return (desc, descList, [])
         
