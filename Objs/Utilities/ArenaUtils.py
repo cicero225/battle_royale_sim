@@ -9,6 +9,7 @@ import random
 import bisect
 import collections
 import html
+import copy
 
    
 def weightedDictRandom(inDict, num_sel=1):
@@ -130,43 +131,123 @@ def killWrite(state):
     return False
     
 def relationshipWrite(state):
-    relationshipWriter = HTMLWriter()
-    relationshipWriter.addTitle("Day "+str(state["turnNumber"][0])+" Relationships")
     relationships = state["allRelationships"]
+    firstTurn = ("relationshipLastTurn" not in state["callbackStore"])
+    if not firstTurn:
+        oldRelationships = state["callbackStore"]["relationshipLastTurn"]
+    state["callbackStore"]["relationshipLastTurn"] = copy.deepcopy(relationships)
+    
+    friendWriter = HTMLWriter()
+    friendWriter.addTitle("Day "+str(state["turnNumber"][0])+" Friendships")
+    loveWriter = HTMLWriter()
+    loveWriter.addTitle("Day "+str(state["turnNumber"][0])+" Romances")
     anyEvent = next(iter(state["events"].values()))  # A hack to get around importing Events
     for person in list(state["contestants"].values())+list(state["sponsors"].values()):
         if not person.alive:
             continue
-        relationshipLine = str(person)
+        friendLine = str(person)
         friendList = []
+        lostFriendList = []
+        enemyList = []
+        lostEnemyList = []
         liveFriends = {x:y for x,y in relationships.friendships[str(person)].items() if x in state["contestants"] and state["contestants"][x].alive}
-        topFiveFriends = {x:liveFriends[x] for x in sorted(liveFriends, key=liveFriends.get, reverse=True)[:5]}
-        topFiveFriends.update({x:y for x,y in relationships.friendships[str(person)].items() if x in state["sponsors"]})
-        for key, value in topFiveFriends.items():
+        sortFriends = {x:liveFriends[x] for x in sorted(liveFriends, key=liveFriends.get, reverse=True)}
+        sortFriends.update({x:y for x,y in relationships.friendships[str(person)].items() if x in state["sponsors"]})
+        for key, value in sortFriends.items():
             if value >= 4:
+                writeString = key
+                if not firstTurn:
+                    if oldRelationships.friendships[str(person)][key] < 4:
+                        writeString += ' (New!) '
                 if relationships.friendships[key][str(person)] >=4:
-                    friendList.append(key)
+                    friendList.append(writeString)
                 else:
-                    friendList.append(key+' (Not Mutual)')
+                    friendList.append(writeString+' (Not Mutual)')
+            else:
+                if not firstTurn:
+                    if oldRelationships.friendships[str(person)][key] >=4:
+                        lostFriendList.append(key)
+            if value <= -4:
+                writeString = key
+                if not firstTurn:
+                    if oldRelationships.friendships[str(person)][key] > -4:
+                        writeString += ' (New!) '
+                if relationships.friendships[key][str(person)] <= -4:
+                    enemyList.append(writeString)
+                else:
+                    enemyList.append(writeString+' (Not Mutual)')
+            else:
+                if not firstTurn:
+                    if oldRelationships.friendships[str(person)][key] <= -4:
+                        lostEnemyList.append(key)
         if friendList:
-            relationshipLine += ":<br> Friendships: "
-            relationshipLine += anyEvent.englishList(friendList, False)
+            friendLine += "<br> Friend: "
+            friendLine += anyEvent.englishList(friendList, False)
+        if lostFriendList:
+            friendLine += "<br> No Longer Friends: "
+            friendLine += anyEvent.englishList(lostFriendList, False)
+        if enemyList:
+            friendLine += "<br> Enemies: "
+            friendLine += anyEvent.englishList(enemyList, False)
+        if lostEnemyList:
+            friendLine += "<br> No Longer Enemies: "
+            friendLine += anyEvent.englishList(lostEnemyList, False)
+        if friendList or lostFriendList:
+            friendWriter.addEvent(friendLine, [person])
+
+        loveLine = str(person)
         loveList = []
+        lostLoveList = []
+        loveEnemyList = []
+        lostLoveEnemyList = []
         liveLoves = {x:y for x,y in relationships.loveships[str(person)].items() if x in state["contestants"] and state["contestants"][x].alive}
-        topFiveLoves = {x:liveLoves[x] for x in sorted(liveLoves, key=liveLoves.get, reverse=True)[:5]}
-        topFiveLoves.update({x:y for x,y in relationships.loveships[str(person)].items() if x in state["sponsors"]})
-        for key, value in topFiveLoves.items():
+        sortLoves = {x:liveLoves[x] for x in sorted(liveLoves, key=liveLoves.get, reverse=True)}
+        sortLoves.update({x:y for x,y in relationships.loveships[str(person)].items() if x in state["sponsors"]})
+        for key, value in sortLoves.items():
             if value >= 4:
+                writeString = key
+                if not firstTurn:
+                    if oldRelationships.loveships[str(person)][key] < 4:
+                        writeString += ' (New!) '
                 if relationships.loveships[key][str(person)] >=4:
-                    loveList.append(key)
+                    loveList.append(writeString)
                 else:
-                    loveList.append(key+' (Not Mutual)')
+                    loveList.append(writeString+' (Not Mutual)')
+            else:
+                if not firstTurn:
+                    if oldRelationships.loveships[str(person)][key] >=4:
+                        lostLoveList.append(key)
+            if value <= -4:
+                writeString = key
+                if not firstTurn:
+                    if oldRelationships.loveships[str(person)][key] > -4:
+                        writeString += ' (New!) '
+                if relationships.loveships[key][str(person)] <= -4:
+                    loveEnemyList.append(writeString)
+                else:
+                    loveEnemyList.append(writeString+' (Not Mutual)')
+            else:
+                if not firstTurn:
+                    if oldRelationships.loveships[str(person)][key] <= -4:
+                        lostLoveEnemyList.append(key)
         if loveList:
-            relationshipLine +="<br> Romances: "
-            relationshipLine += anyEvent.englishList(loveList, False)
-        if friendList or loveList:
-            relationshipWriter.addEvent(relationshipLine, [person])
-    relationshipWriter.finalWrite(os.path.join("Assets", str(state["turnNumber"][0])+" Relationships.html"), state)
+            loveLine +="<br> Romances: "
+            loveLine += anyEvent.englishList(loveList, False)
+        if lostLoveList:
+            loveLine += "<br> No Longer Lovers: "
+            loveLine += anyEvent.englishList(lostLoveList, False)
+        if loveEnemyList:
+            loveLine += "<br> Romantic Enemies: "
+            loveLine += anyEvent.englishList(loveEnemyList, False)
+        if lostLoveEnemyList:
+            loveLine += "<br> No Longer Romantic Enemies: "
+            loveLine += anyEvent.englishList(lostLoveEnemyList, False)
+            
+        if loveList or lostLoveList:
+            loveWriter.addEvent(loveLine, [person])
+
+    friendWriter.finalWrite(os.path.join("Assets", str(state["turnNumber"][0])+" Friendships.html"), state)
+    loveWriter.finalWrite(os.path.join("Assets", str(state["turnNumber"][0])+" Romances.html"), state)
     
 # Rig it so the same event never happens twice to the same person in consecutive turns (makes game feel better)
 def eventMayNotRepeat(actor, origProb, event, state):

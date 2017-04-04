@@ -78,12 +78,12 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             mainActor.SetHypothermic(state["turnNumber"][0])
             contestant.SetUnhypothermic()
             if fightDescList:
-                desc += Event.parseGenderSubject(mainActor)+' left behind '+Event.englishList(fightDescList)+'.'
+                desc += ' '+Event.parseGenderSubject(mainActor).capitalize()+' left behind '+Event.englishList(fightDescList)+'.'
         else:
             desc += ' but '+contestant.name+' was injured and forced to flee.'
             contestant.SetHypothermic(state["turnNumber"][0])
             if fightDescList:
-                desc += Event.parseGenderSubject(contestant)+' left behind '+Event.englishList(fightDescList)+'.'
+                desc += ' '+Event.parseGenderSubject(contestant).capitalize()+' left behind '+Event.englishList(fightDescList)+'.'
         descList.extend(fightDescList)
         return (desc, descList, [])
         
