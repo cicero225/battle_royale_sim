@@ -134,8 +134,11 @@ def relationshipWrite(state):
     relationships = state["allRelationships"]
     firstTurn = ("relationshipLastTurn" not in state["callbackStore"])
     if not firstTurn:
-        oldRelationships = state["callbackStore"]["relationshipLastTurn"]
-    state["callbackStore"]["relationshipLastTurn"] = copy.deepcopy(relationships)
+        oldRelationshipsFriendships = state["callbackStore"]["relationshipLastTurn"]["friendships"]
+        oldRelationshipsLoveships = state["callbackStore"]["relationshipLastTurn"]["loveships"]
+    state["callbackStore"]["relationshipLastTurn"] = {}
+    state["callbackStore"]["relationshipLastTurn"]["friendships"] = copy.deepcopy(relationships.friendships)
+    state["callbackStore"]["relationshipLastTurn"]["loveships"] = copy.deepcopy(relationships.loveships)
     
     friendWriter = HTMLWriter()
     friendWriter.addTitle("Day "+str(state["turnNumber"][0])+" Friendships")
@@ -157,7 +160,7 @@ def relationshipWrite(state):
             if value >= 4:
                 writeString = key
                 if not firstTurn:
-                    if oldRelationships.friendships[str(person)][key] < 4:
+                    if oldRelationshipsFriendships[str(person)][key] < 4:
                         writeString += ' (New!) '
                 if relationships.friendships[key][str(person)] >=4:
                     friendList.append(writeString)
@@ -165,12 +168,12 @@ def relationshipWrite(state):
                     friendList.append(writeString+' (Not Mutual)')
             else:
                 if not firstTurn:
-                    if oldRelationships.friendships[str(person)][key] >=4:
+                    if oldRelationshipsFriendships[str(person)][key] >=4:
                         lostFriendList.append(key)
             if value <= -4:
                 writeString = key
                 if not firstTurn:
-                    if oldRelationships.friendships[str(person)][key] > -4:
+                    if oldRelationshipsFriendships[str(person)][key] > -4:
                         writeString += ' (New!) '
                 if relationships.friendships[key][str(person)] <= -4:
                     enemyList.append(writeString)
@@ -178,7 +181,7 @@ def relationshipWrite(state):
                     enemyList.append(writeString+' (Not Mutual)')
             else:
                 if not firstTurn:
-                    if oldRelationships.friendships[str(person)][key] <= -4:
+                    if oldRelationshipsFriendships[str(person)][key] <= -4:
                         lostEnemyList.append(key)
         if friendList:
             friendLine += "<br> Friend: "
@@ -207,7 +210,7 @@ def relationshipWrite(state):
             if value >= 4:
                 writeString = key
                 if not firstTurn:
-                    if oldRelationships.loveships[str(person)][key] < 4:
+                    if oldRelationshipsLoveships[str(person)][key] < 4:
                         writeString += ' (New!) '
                 if relationships.loveships[key][str(person)] >=4:
                     loveList.append(writeString)
@@ -215,12 +218,12 @@ def relationshipWrite(state):
                     loveList.append(writeString+' (Not Mutual)')
             else:
                 if not firstTurn:
-                    if oldRelationships.loveships[str(person)][key] >=4:
+                    if oldRelationshipsLoveships[str(person)][key] >=4:
                         lostLoveList.append(key)
             if value <= -4:
                 writeString = key
                 if not firstTurn:
-                    if oldRelationships.loveships[str(person)][key] > -4:
+                    if oldRelationshipsLoveships[str(person)][key] > -4:
                         writeString += ' (New!) '
                 if relationships.loveships[key][str(person)] <= -4:
                     loveEnemyList.append(writeString)
@@ -228,7 +231,7 @@ def relationshipWrite(state):
                     loveEnemyList.append(writeString+' (Not Mutual)')
             else:
                 if not firstTurn:
-                    if oldRelationships.loveships[str(person)][key] <= -4:
+                    if oldRelationshipsLoveships[str(person)][key] <= -4:
                         lostLoveEnemyList.append(key)
         if loveList:
             loveLine +="<br> Romances: "

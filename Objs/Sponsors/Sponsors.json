@@ -2,6 +2,7 @@
 {"Akuma Homura":
     {"imageFile": "Akuma.jpg",
     "gender": "F",
+    "trait": "capricious",
     "stats": 
         {"gregariousness": 1,
          "forgiveness": 2,
@@ -14,6 +15,7 @@
 "Madokami":
     {"imageFile": "Madokami.png",
     "gender": "F",
+    "trait": "shipper",
     "stats": 
         {"gregariousness": 9,
          "forgiveness": 10,
