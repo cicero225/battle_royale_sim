@@ -123,6 +123,10 @@ def main():
     "phases": phases
     }) # Allows for convenient passing of the entire game state to anything that needs it (usually events)
     
+    # An unfortunate bit of split processing
+    for sponsor in sponsors.values():
+        sponsor.initializeTraits(state)
+    
     # CALLBACKS
     # As much as possible influence event processing from here. Note that these callbacks happen IN ORDER. It would be possible to do this in a more
     # modular manner by defining a callback object, defining a registering function, using decorators... but that provides effectively no control on
@@ -132,7 +136,8 @@ def main():
     
     # Run once before the start of the game. Expected args: state. Modify in place.
     startup = [
-    ArenaUtils.loggingStartup,]
+    ArenaUtils.loggingStartup,
+    ArenaUtils.sponsortTraitWrite]
     
     if PRINTHTML:
         startup.insert(0, ArenaUtils.relationshipWrite)
@@ -431,6 +436,7 @@ def main():
                                 indivProb[eventName] = 0 # Apparently this event is not valid for this contestant (participants etc. should not be considered)
                                 continue
                             desc, descContestants, theDead = eventOutputs[:3]
+                            allRelationships.processTraitEffect(thisevent, contestants[contestantKey], participants + victims)
                         for postEvent in callbacks["postEventCallbacks"]:
                             postEvent(proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere)
                         break

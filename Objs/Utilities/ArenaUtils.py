@@ -129,6 +129,13 @@ def killWrite(state):
         killWriter.addEvent(desc, [descContestant])
     killWriter.finalWrite(os.path.join("Assets",str(state["turnNumber"][0])+" Kills.html"), state)
     return False
+
+def sponsortTraitWrite(state):
+    sponsorWriter =HTMLWriter()
+    sponsorWriter.addTitle("Sponsor Traits")
+    for sponsor in state["sponsors"].values():
+        sponsorWriter.addEvent("Primary Trait: "+sponsor.primary_trait+"<br> Secondary Trait: "+sponsor.secondary_trait, [sponsor])
+    sponsorWriter.finalWrite(os.path.join("Assets", "Sponsor Traits.html"), state)
     
 def relationshipWrite(state):
     relationships = state["allRelationships"]

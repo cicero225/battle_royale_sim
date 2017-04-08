@@ -21,7 +21,8 @@
      "mainWeight": 1.0,
      "mainModifiers": {"survivalism": 1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Survivalist": {"value": 1.0}}
      },
 "OutOfCleanWater":
     {"phase": ["Day"],
@@ -29,7 +30,8 @@
      "mainModifiers": {"survivalism": -1.0},
      "unique": false,
      "itemRequired": true,
-     "necessaryItem": "Clean Water"
+     "necessaryItem": "Clean Water",
+     "Survivalist": {"value": -1.0}
      },
 "Dysentary":
     {"phase": ["Day", "Night"],
@@ -37,7 +39,9 @@
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Likes Weak": {"value": 1.0},
+                          "Survivalist": {"value": -1.0}}
      },
 "MamiDecap":
     {"phase": ["Day", "Night"],
@@ -48,7 +52,8 @@
      "mainFriendEffect": 1.0,
      "mainNeededFriendLevel": {"relation": true, "value": 5},
      "mainLoveEffect": 1.0,
-     "mainNeededLoveLevel": {"relation": true, "value": 4}
+     "mainNeededLoveLevel": {"relation": true, "value": 4},
+     "sponsorInfluence": {"Survivalist": {"value": -1.0}}
      },
 "ShareStoryofLife":
     {"phase": ["Night"],
@@ -67,7 +72,11 @@
      "friendEffectParticipant": 0.5,
      "loveEffectParticipant": 1.0,
      "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": true, "value": -2}
+     "neededFriendLevelParticipant": {"relation": true, "value": -2},
+     "sponsorInfluence": {"Shipper": {"value": 1.0},
+                          "Greater Good": {"value": 1.0},
+                          "Senate": {"value": 0.5},
+                          "Bloodthirsty": {"value": -0.5}}
      },
 "HuntsForOthers": 
     {"phase": ["Day"],
@@ -75,7 +84,11 @@
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Gladiatorial": {"value": 0.5},
+                          "Bloodthirsty": {"value": 0.5},
+                          "Senate": {"value": 0.5},
+                          "Pacifist": {"value": -0.5}}
      },
 "AAttacksB":
     {"phase": ["Day", "Night"],
@@ -93,7 +106,11 @@
      "neededFriendLevelVictim": {"relation": false, "value": 5},
      "loveRequiredVictim": true,
      "neededLoveLevelVictim": {"relation": false, "value": 4},
-     "murder": true
+     "murder": true,
+     "sponsorInfluence": {"Gladiatorial": {"value": 1.0},
+                          "Bloodthirsty": {"value": 1.0, "all": false},
+                          "Senate": {"value": 0.5, "all": false},
+                          "Pacifist": {"value": -1.0, "all": false}}
      },
 "QuestionsSanity": 
     {"phase": ["Night"],
@@ -105,14 +122,18 @@
      "mainfriendEffectParticipant": -1.0,
      "mainneededFriendLevelParticipant": {"relation": true, "value": 4},
      "mainloveEffectParticipant": -2.0,
-     "mainneededLoveLevelParticipant": {"relation": true, "value": 3}
+     "mainneededLoveLevelParticipant": {"relation": true, "value": 3},
+     "sponsorInfluence": {"Harvester": {"value": 1.0},
+                          "Capricious": {"value": 0.5},
+                          "Senate": {"value": 1.0}}
      },
 "GetsFruitFromTree": 
     {"phase": ["Day"],
      "mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Survivalist": {"value": 1.0}}
      },
  "ThreeWayFight":
     {"phase": ["Day", "Night"],
@@ -130,7 +151,12 @@
      "neededFriendLevelParticipant": {"relation": false, "value": 5},
      "loveRequiredParticipant": true,
      "neededLoveLevelParticipant": {"relation": false, "value": 4},
-     "murder": true
+     "murder": true,
+     "sponsorInfluence": {"Capricious": {"value": 1.0},
+                          "Gladiatorial": {"value": 1.0},
+                          "Bloodthirsty": {"value": 1.0},
+                          "Senate": {"value": 0.5},
+                          "Pacifist": {"value": -1.0}}
      },
  "SickWithFever":
     {"phase": ["Day", "Night"],
@@ -138,7 +164,8 @@
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Likes Weak": {"value": 1.0}}
      },
  "RecoversFromFever":
     {"phase": ["Day", "Night"],
@@ -146,7 +173,8 @@
      "mainModifiers": {"survivalism": 1.0,
                        "endurance": 1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Likes Strong": {"value": 1.0}}
      },
  "DiesFromFever":
     {"phase": ["Day", "Night"],
@@ -154,7 +182,8 @@
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Likes Weak": {"value": 1.0}}
      },
  "SponsorGivesItem":
     {"phase": ["Day", "Night"],
@@ -176,7 +205,11 @@
                        "aggression": 0.5,
                        "cleverness": 0.5},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Survivalist": {"value": 1.0},
+                          "Bloodthirsty": {"value": 0.5},
+                          "Gladiatorial": {"value": 0.5},
+                          "Pacifist": {"value": -0.5}}
      },
  "ThrowSpearKill":
     {"phase": ["Day"],
@@ -197,7 +230,12 @@
      "neededFriendLevelVictim": {"relation": false, "value": 5},
      "loveRequiredVictim": true,
      "neededLoveLevelVictim": {"relation": false, "value": 4},
-     "murder": true
+     "murder": true,
+     "sponsorInfluence": {"Survivalist": {"value": 0.5, "all": false},
+                          "Bloodthirsty": {"value": 1.0, "all": false},
+                          "Gladiatorial": {"value": 1.0},
+                          "Senate": {"value": 0.5},
+                          "Pacifist": {"value": -1.0, "all": false}}
      },
    "FindDeadBody":
      {"phase": ["Day"],
@@ -205,7 +243,9 @@
      "mainModifiers": {"survivalism": 1.0,
                        "cleverness": 1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Harvester": {"value": 1.0},
+                          "Capricious": {"value": 0.5}}
      },
    "FindAbandonedBuilding":
     {"phase": ["Day"],
@@ -222,14 +262,19 @@
      "mutual": true,
      "friendEffectParticipant": 0.5,
      "loveEffectParticipant": 1.0,
-     "murder": true
+     "murder": true,
+     "sponsorInfluence": {"Survivalist": {"value": 1.0},
+                          "Trickster": {"value": 1.0}}
     },
     "SelfFuneral":
      {"phase": ["Day"],
      "mainWeight": 0.25,
      "mainModifiers": {"stability": -1.5},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Capricious": {"value": 1.0},
+                          "Trickster": {"value": 1.0},
+                          "Harvester": {"value": 1.0}}
      },
     "SponsorGivesTips":
     {"phase": ["Day", "Night"],
@@ -257,7 +302,10 @@
      "friendEffectParticipant": 0.5,
      "loveEffectParticipant": 1.5,
      "loveRequiredParticipant": true,
-     "neededLoveLevelParticipant": {"relation": true, "value": 1}
+     "neededLoveLevelParticipant": {"relation": true, "value": 1},
+     "sponsorInfluence": {"Shipper": {"value": 1.0},
+                          "Harvester": {"value": 1.0},
+                          "Capricious": {"value": 1.0}}
      },
      "ResolvesFeelingConfusion":
     {"phase": ["Night"],
@@ -267,7 +315,10 @@
      "friendEffectParticipant": 0,
      "loveEffectParticipant": 0,
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Shipper": {"value": 2.5},
+                          "Harvester": {"value": 1.0},
+                          "Capricious": {"value": 1.0}}
      },
      "MakeMolotovCocktail":
     {"phase": ["Day", "Night"],
@@ -276,7 +327,11 @@
                        "ruthlessness": 1.0,
                        "meanness": 0.5},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Senate": {"value": 1.0},
+                          "Bloodthirsty": {"value": 1.0},
+                          "Pacifist": {"value": -1.0},
+                          "Greater Good": {"value": -1.0}}
      },
      "KillWithMolotovCocktail":
     {"phase": ["Day", "Night"],
@@ -296,7 +351,11 @@
      "neededFriendLevelVictim": {"relation": false, "value": 3},
      "loveRequiredVictim": true,
      "neededLoveLevelVictim": {"relation": false, "value": 2},
-     "murder": true
+     "murder": true,
+     "sponsorInfluence": {"Senate": {"value": 1.0, "all": false},
+                          "Bloodthirsty": {"value": 1.0, "all": false},
+                          "Pacifist": {"value": -1.0, "all": false},
+                          "Greater Good": {"value": -1.0, "all": false}}
      },
      "SponsorCheatKill":
     {"phase": ["Night"],
@@ -326,14 +385,18 @@
      "unique": false,
      "itemRequired": false,
      "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": true, "value": 3}
+     "neededFriendLevelParticipant": {"relation": true, "value": 3},
+     "sponsorInfluence": {"Shipper": {"value": 1.0},
+                          "Loyalist": {"value": 1.0},
+                          "Greater Good": {"value": 1.0}}
      },
      "AWorshipsB":
      {"phase": ["Night"],
      "mainWeight": 0.25,
      "mainModifiers": {"stability": -1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Capricious": {"value": 1.0}}
      },
      "MadokamiKillsBadWorshipper":
      {"phase": ["Day", "Night"],
@@ -371,7 +434,9 @@
      "mainModifiers": {"aggression": 1.0,
                        "survivalism": 1.0},
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "sponsorInfluence": {"Gladiatorial": {"value": 1.0},
+                          "Bloodthirsty": {"value": 0.5}}
      },
      "FriendHelpsInjury":
     {"phase": ["Day", "Night"],
@@ -387,7 +452,10 @@
      "unique": false,
      "itemRequired": false,
      "friendRequiredParticipant": true,
-     "neededFriendLevelParticipant": {"relation": true, "value": 1}
+     "neededFriendLevelParticipant": {"relation": true, "value": 1},
+     "sponsorInfluence": {"Shipper": {"value": 1.0},
+                          "Loyalist": {"value": 1.0},
+                          "Greater Good": {"value": 1.0}}
      },
      "MakeCampfire":
     {"phase": ["Evening"],
@@ -436,7 +504,13 @@
      "participantNeededFriendLevelVictim": {"relation": false, "value": 3},
      "participantLoveRequiredVictim": true,
      "participantNeededLoveLevelVictim": {"relation": false, "value": 2},
-     "murder": true
+     "murder": true,
+     "sponsorInfluence": {"Bloodthirsty": {"value": 1.0, "all": false},
+                          "Pacifist": {"value": -1.0, "all": false},
+                          "Capricious": {"value": 1.0},
+                          "Trickster": {"value": 1.0},
+                          "Senate": {"value": 1.0},
+                          "Harvester": {"value": 1.0}}
      },
     "SetTrap":
     {"phase": ["Day"],
@@ -449,7 +523,15 @@
                        "aggression":0.2},
      "unique": false,
      "itemRequired": false,
-     "murder": false
+     "murder": false,
+     "sponsorInfluence": {"Bloodthirsty": {"value": 0.5},
+                          "Pacifist": {"value": -1.0},
+                          "Capricious": {"value": 1.0},
+                          "Trickster": {"value": 1.0},
+                          "Senate": {"value": 1.0},
+                          "Gladiatorial": {"value": 1.0},
+                          "Survivalist": {"value": 0.5}
+                          }
      },
      "DiesFromTrap":
     {"phase": ["Day", "Night"],
@@ -458,7 +540,8 @@
                        "survivalism": -0.2},
      "unique": false,
      "itemRequired": false,
-     "murder": true
+     "murder": true,
+     "sponsorInfluence": {"Survivalist": {"value": -1.0}}
      },
     "BetrayPushOffCliff":
     {"phase": ["Day", "Night"],
@@ -475,6 +558,14 @@
      "reverse": true,
      "friendEffectVictim": 1.0,
      "loveEffectVictim": 2.0,
-     "murder": true
+     "murder": true,
+     "sponsorInfluence": {"Bloodthirsty": {"value": 0.5, "all": false},
+                          "Pacifist": {"value": -1.0, "all": false},
+                          "Capricious": {"value": 1.0},
+                          "Trickster": {"value": 1.0},
+                          "Senate": {"value": 1.5, "all": false},
+                          "Loyalist": {"value": -1.5, "all": false},
+                          "Gladiatorial": {"value": -1.0, "all": false}
+                          }
      }
  }

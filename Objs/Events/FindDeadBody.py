@@ -8,6 +8,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         return None
     body = random.choice(theDead)
     tempList = [mainActor, body]
+    mainActor.permStatChange({'stability': -1})
     if not body.inventory:
         desc = mainActor.name + ' found ' + body.name +"'s body, but didn't find anything of value."
     else:

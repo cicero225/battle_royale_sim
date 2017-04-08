@@ -2,7 +2,7 @@
 {"Akuma Homura":
     {"imageFile": "Akuma.jpg",
     "gender": "F",
-    "trait": "capricious",
+    "trait": "Capricious",
     "stats": 
         {"gregariousness": 1,
          "forgiveness": 2,
@@ -15,7 +15,7 @@
 "Madokami":
     {"imageFile": "Madokami.png",
     "gender": "F",
-    "trait": "shipper",
+    "trait": "Likes Weak",
     "stats": 
         {"gregariousness": 9,
          "forgiveness": 10,
@@ -28,6 +28,7 @@
 "Kyubey":
     {"imageFile": "Kyubey.png",
     "gender": "N",
+    "trait": "Harvester",
     "stats": 
         {"gregariousness": 6,
          "forgiveness": 3,
@@ -40,6 +41,7 @@
 "Sheev Palpatine":
     {"imageFile": "Palpatine.jpg",
     "gender": "M",
+    "trait": "Senate",
     "stats": 
         {"gregariousness": 10,
          "forgiveness": 0,
@@ -52,6 +54,7 @@
 "Barack Obama":
     {"imageFile": "Obama.jpg",
     "gender": "M",
+    "trait": "Greater Good",
     "stats": 
         {"gregariousness": 10,
          "forgiveness": 6,
@@ -64,6 +67,7 @@
 "Lain, God of the Wired":
     {"imageFile": "Lain.gif",
     "gender": "F",
+    "trait": "Trickster",
     "stats": 
         {"gregariousness": 2,
          "forgiveness": 4,

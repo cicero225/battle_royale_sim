@@ -1,6 +1,13 @@
 
 from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
 from ..Contestants.Contestant import Contestant
+import json
+import random
+from ..Sponsors.Traits import Traits
+
+TRAIT_FILE_PATH = 'Objs\Sponsors\Traits.json'
+with open(TRAIT_FILE_PATH) as TRAIT_FILE:
+    RANDOM_TRAITS = json.load(TRAIT_FILE)["Traits"]
 
 def contestantIndivActorWithSponsorsCallback(_, sponsor, baseEventSponsorWeight, event):
     try:
@@ -15,6 +22,20 @@ def contestantIndivActorWithSponsorsCallback(_, sponsor, baseEventSponsorWeight,
     return (baseEventSponsorWeight*multiplier+addition, True)
 
 class Sponsor(Contestant):  # sponsors are so similar to Contestants that it's easiest just to subclass. Really, though, they should both be inheriting from a more general parent class...
+    
+    traits = Traits()
+    
+    def __init__(self, name, inDict, settings):
+        super().__init__(name, inDict, settings)
+        self.primary_trait = inDict['trait']
+        self.secondary_trait = random.choice(RANDOM_TRAITS)
+        
+    def initializeTraits(self, state):
+        def startTrait(trait_name):
+            if trait_name in self.traits.starting_effects:
+                self.traits.starting_effects[trait_name](self, state)
+        startTrait(self.primary_trait)
+        startTrait(self.secondary_trait)
     
     # this is the main thing that needs overriding (mostly to be simpler)
     def InitializeEventModifiers(self, events): # Note that each event carries information about which stats affect them

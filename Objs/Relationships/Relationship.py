@@ -23,6 +23,19 @@ class Relationship(object):
             self.friendships[contestant2][contestant1] = self.friendships[contestant1][contestant2] # But start them off equal
             self.loveships[contestant1][contestant2] = min(max(random.gauss(0, 2),-5),5)
             self.loveships[contestant2][contestant1] = self.loveships[contestant1][contestant2]
+            
+    def processTraitEffect(self, event, actor, others):
+        if "sponsorInfluence" not in event.baseProps:
+            return
+        def processSingleTrait(trait_name, sponsor):
+            if trait_name in event.baseProps["sponsorInfluence"]:
+                self.IncreaseFriendLevel(sponsor, actor, event.baseProps["sponsorInfluence"][trait_name]["value"])
+                if "all" not in event.baseProps["sponsorInfluence"][trait_name] or event.baseProps["sponsorInfluence"][trait_name]["all"]:
+                    for contestant in others:
+                        self.IncreaseFriendLevel(sponsor, contestant, event.baseProps["sponsorInfluence"][trait_name]["value"])
+        for sponsor in self.sponsors.values():
+            processSingleTrait(sponsor.primary_trait, sponsor)
+            processSingleTrait(sponsor.secondary_trait, sponsor)
     
     def decay(self, unused_state):
         for contestant, contestantFriends in self.friendships.items():
