@@ -176,7 +176,10 @@ def relationshipWrite(state):
             else:
                 if not firstTurn:
                     if oldRelationshipsFriendships[str(person)][key] >=4:
-                        lostFriendList.append(key)
+                        tempString = key
+                        if oldRelationshipsFriendships[str(person)][key] < 4:
+                            tempString += ' (Not Mutual)'
+                        lostFriendList.append(tempString)
             if value <= -4:
                 writeString = key
                 if not firstTurn:
@@ -189,7 +192,10 @@ def relationshipWrite(state):
             else:
                 if not firstTurn:
                     if oldRelationshipsFriendships[str(person)][key] <= -4:
-                        lostEnemyList.append(key)
+                        tempString = key
+                        if oldRelationshipsFriendships[key][str(person)] > -4:
+                            tempString += ' (Not Mutual)'
+                        lostEnemyList.append(tempString)
         if friendList:
             friendLine += "<br> Friend: "
             friendLine += anyEvent.englishList(friendList, False)
@@ -226,7 +232,10 @@ def relationshipWrite(state):
             else:
                 if not firstTurn:
                     if oldRelationshipsLoveships[str(person)][key] >=4:
-                        lostLoveList.append(key)
+                        tempString = key
+                        if oldRelationshipsLoveships[key][str(person)] < 4:
+                            tempString += ' (Not Mutual)'
+                        lostLoveList.append(tempString)
             if value <= -4:
                 writeString = key
                 if not firstTurn:
@@ -239,6 +248,9 @@ def relationshipWrite(state):
             else:
                 if not firstTurn:
                     if oldRelationshipsLoveships[str(person)][key] <= -4:
+                        tempString = key
+                        if oldRelationshipsLoveships[key][str(person)] > -4:
+                            tempString += ' (Not Mutual)'
                         lostLoveEnemyList.append(key)
         if loveList:
             loveLine +="<br> Romances: "
