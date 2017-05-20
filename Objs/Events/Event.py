@@ -332,13 +332,13 @@ class Event(object): #Python 2.x compatibility
         elif not faction2LiveList and not faction1LiveList:
             desc += 'everyone died in the fighting!'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
-        allKillers = defaultdict(list)
+        allKillers = defaultdict(str)
         for dead in faction1DeadList:
             killDict = {x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction2}
-            allKillers[str(weightedDictRandom(killDict)[0])].append(str(dead))
+            allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         for dead in faction2DeadList:
             killDict = {x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction1}
-            allKillers[str(weightedDictRandom(killDict)[0])].append(str(dead))
+            allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         if injuredList:
             desc += ' (Injured: '+Event.englishList(injuredList)+')'
         return(desc, descList, deadList, allKillers)

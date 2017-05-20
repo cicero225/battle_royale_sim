@@ -73,15 +73,13 @@ img {
             desc = self.massInsertTag(desc, x.friendly, "item")
         return desc
         
-    def addEvent(self, desc, descContestants, state=None):
+    def addEvent(self, desc, descContestants, state=None, preEventInjuries=None):
         tempStringList = []
         for contestant in descContestants:
             if state is not None:
                 tempList = desc.split(str(contestant))
                 insertionString = str(contestant)
-                if state["callbackStore"]["KillThisTurnFlag"][str(contestant)]:
-                    insertionString += ' ['+str(state["callbackStore"]["killCounter"][str(contestant)])+']'
-                if hasattr(contestant, "injured") and contestant.injured:
+                if hasattr(contestant, "injured") and (str(contestant) not in preEventInjuries or preEventInjuries[str(contestant)]) and contestant.injured:
                     insertionString += ' (Injured)'
                 if hasattr(contestant, "hypothermic") and contestant.hypothermic is not None:
                     insertionString += ' (Hypothermic)'

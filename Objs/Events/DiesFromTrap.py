@@ -48,6 +48,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     self.eventStore["trapCounter"][chosen] -= 1
     self.eventStore["trapMakerCounter"][trapSource][chosen] -= 1
 
-    return (desc, [mainActor, state["contestants"][trapSource]], [str(mainActor)], [state["contestants"][trapSource]])
+    return (desc, [mainActor, state["contestants"][trapSource]], [str(mainActor)], {str(mainActor): trapSource})
 
 Event.registerEvent("DiesFromTrap", func)
