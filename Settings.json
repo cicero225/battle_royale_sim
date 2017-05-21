@@ -14,5 +14,6 @@
  "statNormalization": false,
  "normalizationRange": 0.1,
  "relationshipDecay": 1.0,
- "relationshipRandomizer": 0.5
+ "relationshipRandomizer": 0.5,
+ "deathImpactOnStability": 1
 }

@@ -91,7 +91,13 @@ class Relationship(object):
                 stat = 'meanness'    
         change *= (1+self.settings['statFriendEffect']**(person1.stats[stat]-5)/5)*change
         self.loveships[person1.name][person2.name] = max(min(curLevel+change, 5), -5)
-        
+    
+    def KillImpact(self, deadPerson):
+        for person in list(self.contestants.values()):
+            if str(person) == str(deadPerson):
+                continue
+            person.permStatChange({'stability': -self.settings["deathImpactOnStability"]*random.uniform(0.5, 1.5)/15*(max(0, self.friendships[str(person)][str(deadPerson)]) + 2*max(0, self.loveships[str(person)][str(deadPerson)]))})
+    
     def groupFriendLevel(self, names):
         totSum = 0
         for x in names:

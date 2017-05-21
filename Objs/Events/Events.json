@@ -545,7 +545,7 @@
      },
     "BetrayPushOffCliff":
     {"phase": ["Day", "Night"],
-    "mainWeight": 0.3,
+    "mainWeight": 0.15,
      "mainModifiers": {"stability": -0.5,
                        "ruthlessness": 2.0,
                        "loyalty": -2.0},
