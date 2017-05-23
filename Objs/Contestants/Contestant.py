@@ -82,6 +82,11 @@ class Contestant(object):
         for statName in self.stats:
             self.stats[statName] = min(max(self.stats[statName]+
                                            random.randint(-1*self.settings['traitRandomness'], self.settings['traitRandomness']), 0), 10)
+                                           
+    def contestantStatFill(self, statsTemplate):  # Fills in missing stats based on a template
+        for x in statsTemplate:
+            if x not in self.stats:
+                self.stats[x] = random.randint(0, 10)
 
     @classmethod
     def makeRandomContestant(cls, name, gender, imageFile, statstemplate, settings):

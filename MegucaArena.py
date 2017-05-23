@@ -63,6 +63,17 @@ def main():
 
     # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
     contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Contestants', 'Contestants.json'), settings, Contestant)
+    # Deduce stats from the union of all contestants - if there are any typos this is a problem.
+    statTemplate = set()
+    for x in contestants.values():
+        statTemplate |= set(list(x.stats.keys()))
+    # This is kind of dumb, but easiest: If we want pure random stats, any stats in the file are directly overwritten.
+    if settings['fullRandomStats']:
+        for key, value in contestants.items():
+            contestants[key] = Contestant.makeRandomContestant(value.name, value.gender, value.imageFile, statTemplate, settings)
+    else:  # fill in missing stats for any contestants
+        for value in contestants.values():
+            value.contestantStatFill(statTemplate)
     if not settings['matchContestantCount']:
         # If number of contestants in settings less than those found in the json, randomly remove some
         contestantNames = contestants.keys()
@@ -73,7 +84,7 @@ def main():
         # If number of contestants in settings more than those found in the json, add Rando Calrissians
         for i in range(len(contestantNames), settings['numContestants']):
             # Here contestants[0].stats is used as a template for making random stats
-            contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "M", "Rando.jpg", list(contestants.values())[0].stats, settings) # need Rando image to put here
+            contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant('Rando Calrissian ' + str(i), "M", "Rando.jpg", statTemplate, settings) # need Rando image to put here
         
         assert(len(contestants)==settings['numContestants'])
     else:

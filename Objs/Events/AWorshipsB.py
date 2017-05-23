@@ -34,6 +34,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         state["allRelationships"].IncreaseFriendLevel(state["sponsors"]["Akuma Homura"], mainActor, 10)
         self.eventStore[mainActor.name] = eventHandler
     desc = 'In a delirious state, '+mainActor.name+' had a religious epiphany, realizing that '+chosen+' is the avatar of a divine being.'
-    return (desc, [mainActor], [])
+    return (desc, [mainActor, state["contestants"][chosen]], [])
 
 Event.registerEvent("AWorshipsB", func)

@@ -1,4 +1,3 @@
-Add death propagation to relationship thing?
 Figure out html tables
 Change NeededFriendLevel/NeededLoveLevel to permit an "or" condition, then modify events accordingly.
 
