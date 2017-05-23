@@ -49,6 +49,24 @@
         "AAttacksB": {"main": true}
         }
     },
+"Bow and Arrow":
+    {"imageFile": "Bow and Arrow.png",
+    "friendly": "a Bow and Arrow set",
+    "statChanges": 
+        {"aggression": 1,
+         "combat ability": 2
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        "CraftBowAndArrow": {"main": true},
+        "AAttacksB": {"main": true}
+        }
+    },
 "MolotovCocktail":
     {"imageFile": "MolotovCocktail.jpg",
     "friendly": "a Molotov Cocktail",
