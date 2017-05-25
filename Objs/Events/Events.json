@@ -35,7 +35,7 @@
      },
 "Dysentary":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0.25,
+     "mainWeight": 0.5,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,

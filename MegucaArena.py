@@ -555,4 +555,21 @@ if __name__ == '__main__':
     if len(sys.argv)>1 and sys.argv[1] == '--stats':
         statCollection()
     else:
-        main()
+        if not DEBUG:
+            main()
+        else:   
+            printtrace = True
+            try:
+                main()
+            except Exception as e:
+                if printtrace:
+                    traceback.print_exc()
+                    printtrace = False
+                while True:
+                    y = input()
+                    if y.lower() == "q":
+                        break
+                    try:
+                        eval('print('+y+')')
+                    except Exception as e2:
+                        print(e2)
