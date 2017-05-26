@@ -11,7 +11,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     if participants[0].name in state["events"]["ShareIntimateConversation"].eventStore:
         participants[0].permStatChange({'stability': 3})
         del state["events"]["ShareIntimateConversation"].eventStore[participants[0].name]
-        desc += " and they resolve their confusion."
+        desc += " and they talk out their feelings."
     else:
         desc += " and resolves "+Event.parseGenderPossessive(mainActor)+" confusion"
     return (desc, [mainActor, participants[0]], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
