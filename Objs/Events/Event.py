@@ -22,7 +22,7 @@ class Event(object): #Python 2.x compatibility
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
         # Could also use setattr, but...
         # Should be: 
-        # list(string) phase <- sets which phases the event is valid for (day, night, etc.). If this is not set, it is assumed it is always valid.
+        # list(string) optional phase <- sets which phases the event is valid for (day, night, etc.). If this is not set, it is assumed it is always valid.
         # float mainWeight, float optional participantWeight, float optional victimWeight,
         # int optional numParticipants, int optional numVictims, dict (string: float) mainModifiers,
         # int optional numParticipantsExtra, int optional numVictimsExtra, int optional numSponsorsExtra <- if there is some squishiness to the number of participants/victims
@@ -54,6 +54,8 @@ class Event(object): #Python 2.x compatibility
         # bool optional loveRequiredSponsor, (relation: bool, value:int) optional, neededLoveLevelSponsor
         # bool optional participantFriendRequiredVictim, (relation: bool, value:int) optional, ParticipantNeededFriendLevelVictim
         # bool optional participantLoveRequiredVictim, (relation: bool, value:int) optional, ParticipantNeededLoveLevelVictim
+        # bool murder whether or not deaths in this event should be interpreted as homicide by the kill logger
+        # dict (string: dict(value: flout, all: bool)) - controls which sponsor traits respond to this event, and whether this applies to all participants or just the mainActor
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
