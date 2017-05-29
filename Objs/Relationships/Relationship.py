@@ -123,17 +123,17 @@ class Relationship(object):
                                (10-sum(person.stats['forgiveness'] for person in people)))/len(people)
         return groupCohesion
     
-    def relationsMainWeightCallback(self, actor, baseEventActorWeight, event):
+    def relationsMainWeightCallback(self, state, actor, baseEventActorWeight, event):
         if "mainFriendEffect" in event.baseProps and event.baseProps["mainFriendEffect"]:
             negOrPos = 1 if event.baseProps["mainNeededFriendLevel"]["relation"] else -1
-            for friendLevel in self.friendships[actor.name].values():
-                if negOrPos*friendLevel >= event.baseProps["mainNeededFriendLevel"]["value"]:
+            for friendName, friendLevel in self.friendships[actor.name].items():
+                if (friendName not in state["contestants"] or state["contestants"][friendName].alive) and negOrPos*friendLevel >= event.baseProps["mainNeededFriendLevel"]["value"]:
                     baseEventActorWeight *= (1+self.settings["relationInfluence"])**event.baseProps["mainFriendEffect"]
                     break
         if "mainLoveEffect" in event.baseProps and event.baseProps["mainLoveEffect"]:
             negOrPos = 1 if event.baseProps["mainNeededLoveLevel"]["relation"] else -1
-            for loveLevel in self.loveships[actor.name].values():
-                if negOrPos*loveLevel >= event.baseProps["mainNeededLoveLevel"]["value"]:
+            for loveName, loveLevel in self.loveships[actor.name].items():
+                if (loveName not in state["contestants"] or state["contestants"][loveName].alive) and negOrPos*loveLevel >= event.baseProps["mainNeededLoveLevel"]["value"]:
                     baseEventActorWeight *= (1+self.settings["relationInfluence"])**event.baseProps["mainLoveEffect"]
                     break
         return (baseEventActorWeight, True)

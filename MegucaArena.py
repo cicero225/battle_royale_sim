@@ -163,7 +163,7 @@ def main():
     modifyIndivActorWeights = [
     partial(ArenaUtils.eventMayNotRepeat, state=state),
     contestantIndivActorCallback,
-    allRelationships.relationsMainWeightCallback
+    partial(allRelationships.relationsMainWeightCallback, state)
     ]
     # modifyIndivActorWeightsWithParticipants: Expected args: actor, participant, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
     modifyIndivActorWeightsWithParticipants = [
