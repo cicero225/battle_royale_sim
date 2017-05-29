@@ -81,7 +81,7 @@ def logEventsByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, st
         state["callbackStore"]["eventLog"][state["turnNumber"][0]][state["curPhase"]][mainActor.name] = "overridden"
     
 def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
-    if not eventOutputs[2] or "murder" not in thisevent.baseProps or not thisevent.baseProps["murder"]:
+    if not eventOutputs[2] or (len(eventOutputs)<=3 and ("murder" not in thisevent.baseProps or not thisevent.baseProps["murder"])):
         return
     if len(eventOutputs)>3:
         killers = []
