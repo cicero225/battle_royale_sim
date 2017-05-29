@@ -46,7 +46,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         trapSourceDict[str(mainActor)] *= (1-notBeingStupidRatio)
     trapSource = weightedDictRandom(trapSourceDict, 1)[0]
     if trapSource == str(mainActor):
-        print("EWFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
         desc = "Delirious and confused, " + str(mainActor) + TRAP_RESULT_SELF[chosen].replace("VICTIM", Event.parseGenderObject(mainActor)).replace("VICTRE", Event.parseGenderReflexive(mainActor)).replace("SOURCE", Event.parseGenderPossessive(mainActor)).replace("VICTPOS", Event.parseGenderPossessive(mainActor))
         descList = [mainActor]
     else:
