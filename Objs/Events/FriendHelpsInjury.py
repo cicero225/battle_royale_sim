@@ -2,8 +2,7 @@ from Objs.Events.Event import Event
 from collections import defaultdict
 import random
 
-def checkActorInjured(actor, baseEventActorWeight, event, stateStore=Event.stateStore):
-    state = stateStore[0]
+def checkActorInjured(actor, baseEventActorWeight, event):
     if event.name == "FriendHelpsInjury":
         if not actor.injured:  # there is nothing to heal...
             return 0, False

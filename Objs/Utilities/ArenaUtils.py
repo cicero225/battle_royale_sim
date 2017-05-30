@@ -83,13 +83,9 @@ def logEventsByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, st
 def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
     if not eventOutputs[2] or (len(eventOutputs)<=3 and ("murder" not in thisevent.baseProps or not thisevent.baseProps["murder"])):
         return
-    if len(eventOutputs)>3:
+    if (len(eventOutputs)>3 and isinstance(eventOutputs[3], dict)):
         killers = []
-        if not eventOutputs[3]:
-            trueKillDict = {}
-        if isinstance(eventOutputs[3], dict):
-            # if killers is a dict, handle this differently
-            trueKillDict = eventOutputs[3]
+        trueKillDict = eventOutputs[3]
     else:
         killers = [str(x) for x in set([mainActor]+participants+victims)]
         trueKillDict = {}
