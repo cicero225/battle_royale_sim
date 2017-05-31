@@ -153,29 +153,37 @@ class Relationship(object):
      
     def relationsRoleWeightCallback(self, roleName, actor, role, baseEventRoleWeight, event): # the string roleName should be bound when this callback is registered
         assert not (("mutual" in event.baseProps and event.baseProps["mutual"]) and ("reverse" in event.baseProps and event.baseProps["reverse"]))
-        if "friendRequired"+roleName in event.baseProps and event.baseProps["friendRequired"+roleName]: 
+        if "friendRequired"+roleName in event.baseProps and event.baseProps["friendRequired"+roleName]:
             negOrPos = 1 if event.baseProps["neededFriendLevel"+roleName]["relation"] else -1
-            if not ("reverse" in event.baseProps and event.baseProps["reverse"]):
+            if roleName == "Victim":  # victims are only ever imposed upon
                 if negOrPos*self.friendships[actor.name][role.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
                     return (0, False)
-            if ("mutual" in event.baseProps and event.baseProps["mutual"]) or ("reverse" in event.baseProps and event.baseProps["reverse"]):
-                if negOrPos*self.friendships[role.name][actor.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
-                    return (0, False)
+            else:
+                if not ("reverse" in event.baseProps and event.baseProps["reverse"]):
+                    if negOrPos*self.friendships[actor.name][role.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
+                        return (0, False)
+                if ("mutual" in event.baseProps and event.baseProps["mutual"]) or ("reverse" in event.baseProps and event.baseProps["reverse"]):
+                    if negOrPos*self.friendships[role.name][actor.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
+                        return (0, False)
         if "loveRequired"+roleName in event.baseProps and event.baseProps["loveRequired"+roleName]:
             negOrPos = 1 if event.baseProps["neededLoveLevel"+roleName]["relation"] else -1
-            if not ("reverse" in event.baseProps and event.baseProps["reverse"]):
+            if roleName == "Victim":  # victims are only ever imposed upon
                 if negOrPos*self.loveships[actor.name][role.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
                     return (0, False)
-            if ("mutual" in event.baseProps and event.baseProps["mutual"]) or ("reverse" in event.baseProps and event.baseProps["reverse"]):
-                if negOrPos*self.loveships[role.name][actor.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
-                    return (0, False)
-        if "reverse" in event.baseProps and event.baseProps["reverse"]:
+            else:
+                if not ("reverse" in event.baseProps and event.baseProps["reverse"]):
+                    if negOrPos*self.loveships[actor.name][role.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
+                        return (0, False)
+                if ("mutual" in event.baseProps and event.baseProps["mutual"]) or ("reverse" in event.baseProps and event.baseProps["reverse"]):
+                    if negOrPos*self.loveships[role.name][actor.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
+                        return (0, False)
+        if roleName !="Victim" and "reverse" in event.baseProps and event.baseProps["reverse"]:
             friendlevel = self.friendships[role.name][actor.name]
             lovelevel = self.loveships[role.name][actor.name]
         else:
             friendlevel = self.friendships[actor.name][role.name]
             lovelevel = self.loveships[actor.name][role.name]
-            if "mutual" in event.baseProps and event.baseProps["mutual"]:
+            if roleName !="Victim" and "mutual" in event.baseProps and event.baseProps["mutual"]:
                 friendlevel = (friendlevel+self.friendships[role.name][actor.name])/2
                 lovelevel = (lovelevel+self.loveships[role.name][actor.name])/2
         return(baseEventRoleWeight*

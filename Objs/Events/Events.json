@@ -561,6 +561,7 @@
      "victimModifiers": {"combat ability": 1.5,
                          "cleverness": -0.5},
      "unique": false,
+     "mutual": true,
      "itemRequired": false,
      "friendEffectParticipant": 0.5,
      "loveEffectParticipant": 1.0,
