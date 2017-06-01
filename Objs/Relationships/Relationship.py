@@ -152,44 +152,60 @@ class Relationship(object):
         return (baseEventActorWeight, True)
      
     def relationsRoleWeightCallback(self, roleName, actor, role, baseEventRoleWeight, event): # the string roleName should be bound when this callback is registered
-        assert not (("mutual" in event.baseProps and event.baseProps["mutual"]) and ("reverse" in event.baseProps and event.baseProps["reverse"]))
+        roleNameLower = roleName.lower()
+        assert("friendEffect"+roleName in event.baseProps or roleNameLower+"HasFriendEffect" in event.baseProps)
+        assert("loveEffect"+roleName in event.baseProps or roleNameLower+"HasLoveEffect" in event.baseProps)        
+        def checkIfRequirementMetHelper(relationshipDict, propertyName, forwardOrBackward):
+            negOrPos = 1 if event.baseProps[propertyName]["relation"] else -1
+            relValue = relationshipDict[actor.name][role.name] if forwardOrBackward else relationshipDict[role.name][actor.name]
+            if negOrPos*relValue<negOrPos*event.baseProps[propertyName]["value"]:
+                return False
+            return True
         if "friendRequired"+roleName in event.baseProps and event.baseProps["friendRequired"+roleName]:
-            negOrPos = 1 if event.baseProps["neededFriendLevel"+roleName]["relation"] else -1
-            if roleName == "Victim":  # victims are only ever imposed upon
-                if negOrPos*self.friendships[actor.name][role.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
+            if not checkIfRequirementMetHelper(self.friendships, "neededFriendLevel"+roleName, True):
+                return (0, False)
+        elif ("mutual" in event.baseProps and event.baseProps["mutual"]):
+            if roleNameLower+"HasFriendRequired" in event.baseProps and event.baseProps[roleNameLower+"HasFriendRequired"]:
+                if not checkIfRequirementMetHelper(self.friendships, roleNameLower+"HasNeededFriendLevel", True):
                     return (0, False)
-            else:
-                if not ("reverse" in event.baseProps and event.baseProps["reverse"]):
-                    if negOrPos*self.friendships[actor.name][role.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
-                        return (0, False)
-                if ("mutual" in event.baseProps and event.baseProps["mutual"]) or ("reverse" in event.baseProps and event.baseProps["reverse"]):
-                    if negOrPos*self.friendships[role.name][actor.name]<negOrPos*event.baseProps["neededFriendLevel"+roleName]["value"]:
-                        return (0, False)
+        if roleNameLower+"HasFriendRequired" in event.baseProps and event.baseProps[roleNameLower+"HasFriendRequired"]:
+            if not checkIfRequirementMetHelper(self.friendships, roleNameLower+"HasNeededFriendLevel", False):
+                return (0, False)
+        elif ("mutual" in event.baseProps and event.baseProps["mutual"]):
+            if "friendRequired"+roleName in event.baseProps and event.baseProps["friendRequired"+roleName]:
+                if not checkIfRequirementMetHelper(self.friendships, "neededFriendLevel"+roleName, False):
+                    return (0, False)
         if "loveRequired"+roleName in event.baseProps and event.baseProps["loveRequired"+roleName]:
-            negOrPos = 1 if event.baseProps["neededLoveLevel"+roleName]["relation"] else -1
-            if roleName == "Victim":  # victims are only ever imposed upon
-                if negOrPos*self.loveships[actor.name][role.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
+            if not checkIfRequirementMetHelper(self.loveships, "neededLoveLevel"+roleName, True):
+                return (0, False)
+        elif ("mutual" in event.baseProps and event.baseProps["mutual"]):
+            if roleNameLower+"HasLoveRequired" in event.baseProps and event.baseProps[roleNameLower+"HasLoveRequired"]:
+                if not checkIfRequirementMetHelper(self.loveships, roleNameLower+"HasNeededLoveLevel", True):
                     return (0, False)
-            else:
-                if not ("reverse" in event.baseProps and event.baseProps["reverse"]):
-                    if negOrPos*self.loveships[actor.name][role.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
-                        return (0, False)
-                if ("mutual" in event.baseProps and event.baseProps["mutual"]) or ("reverse" in event.baseProps and event.baseProps["reverse"]):
-                    if negOrPos*self.loveships[role.name][actor.name]<negOrPos*event.baseProps["neededLoveLevel"+roleName]["value"]:
-                        return (0, False)
-        if roleName !="Victim" and "reverse" in event.baseProps and event.baseProps["reverse"]:
-            friendlevel = self.friendships[role.name][actor.name]
-            lovelevel = self.loveships[role.name][actor.name]
-        else:
-            friendlevel = self.friendships[actor.name][role.name]
-            lovelevel = self.loveships[actor.name][role.name]
-            if roleName !="Victim" and "mutual" in event.baseProps and event.baseProps["mutual"]:
-                friendlevel = (friendlevel+self.friendships[role.name][actor.name])/2
-                lovelevel = (lovelevel+self.loveships[role.name][actor.name])/2
-        return(baseEventRoleWeight*
-              (1+self.settings["relationInfluence"])**(friendlevel*event.baseProps["friendEffect"+roleName])*
-              (1+self.settings["relationInfluence"])**(lovelevel*event.baseProps["loveEffect"+roleName]),
-              True)
+        if roleNameLower+"HasLoveRequired" in event.baseProps and event.baseProps[roleNameLower+"HasLoveRequired"]:
+            if not checkIfRequirementMetHelper(self.loveships, roleNameLower+"HasNeededLoveLevel", False):
+                return (0, False)
+        elif ("mutual" in event.baseProps and event.baseProps["mutual"]):
+            if "loveRequired"+roleName in event.baseProps and event.baseProps["loveRequired"+roleName]:
+                if not checkIfRequirementMetHelper(self.loveships, "neededLoveLevel"+roleName, False):
+                    return (0, False)
+        if "friendEffect"+roleName in event.baseProps:
+            baseEventRoleWeight *= (1+self.settings["relationInfluence"])**(self.friendships[actor.name][role.name]*event.baseProps["friendEffect"+roleName])
+        elif "mutual" in event.baseProps and event.baseProps["mutual"]:
+            baseEventRoleWeight *= (1+self.settings["relationInfluence"])**(self.friendships[actor.name][role.name]*event.baseProps[roleNameLower+"HasFriendEffect"])
+        if roleNameLower+"HasFriendEffect" in event.baseProps:
+            baseEventRoleWeight *= (1+self.settings["relationInfluence"])**(self.friendships[role.name][actor.name]*event.baseProps[roleNameLower+"HasFriendEffect"])
+        elif "mutual" in event.baseProps and event.baseProps["mutual"]:
+            baseEventRoleWeight *= (1+self.settings["relationInfluence"])**(self.friendships[role.name][actor.name]*event.baseProps["friendEffect"+roleName])
+        if "loveEffect"+roleName in event.baseProps:
+            baseEventRoleWeight *= (1+self.settings["relationInfluence"])**(self.loveships[actor.name][role.name]*event.baseProps["loveEffect"+roleName])
+        elif "mutual" in event.baseProps and event.baseProps["mutual"]:
+            baseEventRoleWeight *= (1+self.settings["relationInfluence"])**(self.loveships[actor.name][role.name]*event.baseProps[roleNameLower+"HasLoveEffect"])
+        if roleNameLower+"HasLoveEffect" in event.baseProps:
+            baseEventRoleWeight *= (1+self.settings["relationInfluence"])**(self.loveships[role.name][actor.name]*event.baseProps[roleNameLower+"HasLoveEffect"])
+        elif "mutual" in event.baseProps and event.baseProps["mutual"]:
+            baseEventRoleWeight *= (1+self.settings["relationInfluence"])**(self.loveships[role.name][actor.name]*event.baseProps["loveEffect"+roleName])
+        return (baseEventRoleWeight, True)
               
     def reprocessParticipantWeightsForVictims(self, possibleParticipantEventWeights, victims, event):
         possibleParticipantWeights = possibleParticipantEventWeights[event.name]

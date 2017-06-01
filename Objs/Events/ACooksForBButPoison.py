@@ -3,25 +3,25 @@ from Objs.Events.Event import Event
 import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-    desc = str(mainActor) + " offered to cook for " + str(participants[0]) + ", who gladly accepted."
-    descList = [mainActor, participants[0]]
+    desc = str(mainActor) + " offered to cook for " + str(victims[0]) + ", who gladly accepted."
+    descList = [mainActor, victims[0]]
     
     # Roll for failure to actually poison
-    notFailure = (participants[0].stats["cleverness"] + participants[0].stats["survivalism"])/15
+    notFailure = (victims[0].stats["cleverness"] + victims[0].stats["survivalism"])/15
     if random.random() > notFailure:
         desc += " However, " + str(mainActor) + " tried to secretly poison the dish, but failed, using the wrong mushrooms. The dish was delicious."
-        state["allRelationships"].IncreaseFriendLevel(participants[0], mainActor, random.randint(1,3))
-        state["allRelationships"].IncreaseLoveLevel(participants[0], mainActor, random.randint(0,2))
+        state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, random.randint(1,3))
+        state["allRelationships"].IncreaseLoveLevel(victims[0], mainActor, random.randint(0,2))
         return (desc, descList, [])
     
     desc += " However, " + str(mainActor) + " tried to secretly poison the dish! "
     
     # Roll for participant realizing what's going on
-    detection = (participants[0].stats["cleverness"] + participants[0].stats["survivalism"])/30
+    detection = (victims[0].stats["cleverness"] + victims[0].stats["survivalism"])/30
     
     if random.random() < detection:
         # Participant realizes what's going on
-        desc += str(participants[0]) + " caught " + Event.parseGenderObject(mainActor) + " in the act and attacked!"
+        desc += str(victims[0]) + " caught " + Event.parseGenderObject(mainActor) + " in the act and attacked!"
         (fightDesc, fightDescList, fightDeadList) = Event.fight(descList, state["allRelationships"], state["settings"])
         # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot.
         if len(fightDeadList)==1 and random.random()<0.33:
@@ -33,9 +33,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                 if fightDescList:
                     desc += ' '+Event.parseGenderSubject(mainActor).capitalize()+' left behind '+Event.englishList(fightDescList)+'.'
             else:
-                desc += ' In the end, however, '+participants[0].name+' was injured and forced to flee.'
+                desc += ' In the end, however, '+victims[0].name+' was injured and forced to flee.'
                 if fightDescList:
-                    desc += ' '+Event.parseGenderSubject(participants[0]).capitalize()+' left behind '+Event.englishList(fightDescList)+'.'
+                    desc += ' '+Event.parseGenderSubject(victims[0]).capitalize()+' left behind '+Event.englishList(fightDescList)+'.'
             descList.extend(fightDescList)
             return (desc, descList, [])
         
@@ -47,9 +47,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         return (desc, descList, [x.name for x in fightDeadList])
         
     else:
-        desc += str(participants[0]) + " ate the meal, blissfully unaware, before falling over dead."
-        participants[0].alive = False
+        desc += str(victims[0]) + " ate the meal, blissfully unaware, before falling over dead."
+        victims[0].alive = False
     
-    return (desc, descList, [str(participants[0])]) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
+    return (desc, descList, [str(victims[0])]) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     
 Event.registerEvent("ACooksForBButPoison", func)
