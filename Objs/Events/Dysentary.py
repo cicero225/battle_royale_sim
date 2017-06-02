@@ -3,7 +3,7 @@ from collections import defaultdict
 
 def countDaysWithoutWater(state):
     for contestant in state["contestants"].values():
-        if state["items"]["Clean Water"] in contestant.inventory:
+        if contestant.hasThing("Clean Water"):
             state["events"]["Dysentary"].eventStore["daysWithoutWater"][str(contestant)] = 0
         else:
             state["events"]["Dysentary"].eventStore["daysWithoutWater"][str(contestant)] += 1

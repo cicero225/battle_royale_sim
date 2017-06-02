@@ -11,6 +11,7 @@ import random
 from collections import defaultdict
 from ..Utilities.ArenaUtils import weightedDictRandom
 from functools import partial
+from Objs.Items.Item import ItemInstance
 
 class Event(object): #Python 2.x compatibility
 
@@ -21,41 +22,6 @@ class Event(object): #Python 2.x compatibility
     def __init__(self, name, inDict, settings):
         self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
         # Could also use setattr, but...
-        # Should be: 
-        # list(string) optional phase <- sets which phases the event is valid for (day, night, etc.). If this is not set, it is assumed it is always valid.
-        # float mainWeight, float optional participantWeight, float optional victimWeight,
-        # int optional numParticipants, int optional numVictims, int optional numSponsors, dict (string: float) mainModifiers,
-        # int optional numParticipantsExtra, int optional numVictimsExtra, int optional numSponsorsExtra <- if there is some squishiness to the number of participants/victims
-        # dict (string: float) optional participantModifiers, dict (string: float) optional victimModifiers, dict (string: float) optional sponsorModifiers
-        # bool optional murder: indicates that an event can cause someone to kill someone, counting as a kill. Should not be used for sponsor kills or deaths with no killer.
-        # bool unique, list[string] optional uniqueUsers #at the moment only supports unique contestants performing the event, rather than being the victim etc. This is bad for, say, Mami getting her head eaten.
-        # bool itemRequired, string optional necessaryItem
-        # (The event is more (or less) likely if actor has ANY relationship that meets the criterion >mainFriendLevel. Set bool to false if you want < instead.
-        # These are optional if no corresponding victim, participant, or sponsor is actually involved in the event
-        # float mainFriendEffect (set 0 for none), (relation: bool, value: int) mainNeededFriendLevel  
-        # float mainLoveEffect (set 0 for none), (relation: bool, value:int) mainNeededLoveLevel
-        # These cause events to be more likely ONLY if ACTOR and PARTICIPANT (OR VICTIM) share relationship. By default it only checks ACTOR -> PARTICIPANT
-        # bool optional mutual # This causes relationship checking to act both ways (the usual use case)
-        # bool optional reverse # This causes relationship checking to act backwards (usually only for sponsors)
-        # float friendEffectParticipant (set 0 for none)
-        # float loveEffectParticipant (set 0 for none)
-        # float friendEffectVictim
-        # float loveEffectVictim
-        # float friendEffectSponsor
-        # float loveEffectSponsor
-        # float participantFriendEffectVictim -> Effect a friendship between participant and victim has on chance for participant to bail
-        # float loveFriendEffectVictim
-        # If first bool is true, then you need friendship level > (or if bool false, <) the specified needed level
-        # bool optional friendRequiredParticipant, (relation: bool, value:int) optional neededFriendLevelParticipant 
-        # bool optional loveRequiredParticipant, (relation: bool, value:int) optional, neededLoveLevelParticipant
-        # bool optional friendRequiredVictim, (relation: bool, value:int) optional neededFriendLevelVictim
-        # bool optional loveRequiredVictim, (relation: bool, value:int) optional, neededLoveLevelVictim
-        # bool optional friendRequiredSponsor, (relation: bool, value:int) optional neededFriendLevelSponsor
-        # bool optional loveRequiredSponsor, (relation: bool, value:int) optional, neededLoveLevelSponsor
-        # bool optional participantFriendRequiredVictim, (relation: bool, value:int) optional, ParticipantNeededFriendLevelVictim
-        # bool optional participantLoveRequiredVictim, (relation: bool, value:int) optional, ParticipantNeededLoveLevelVictim
-        # bool murder whether or not deaths in this event should be interpreted as homicide by the kill logger
-        # dict (string: dict(value: flout, all: bool)) - controls which sponsor traits respond to this event, and whether this applies to all participants or just the mainActor
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
         # sets probability of any given other contestant getting involved, victimWeight sets probability
@@ -64,8 +30,6 @@ class Event(object): #Python 2.x compatibility
         # modifier values list the contestant stats that affect the probabilities of these and by how relatively much (though
         # usually just 1 or -1). If there is a good way to make the json thing give dict(string)->float instead that'd be
         # preferred
-
-        # unique signals the event processor that only the characters listed in uniqueUsers may trigger this event
 
         # Randomize baseWeight a little
         self.name = name
@@ -147,35 +111,37 @@ class Event(object): #Python 2.x compatibility
         state["callbacks"]["modifyIndivActorWeights"].insert(0, anonfunc) # This needs to be at beginning for proper processing
         return anonfunc # If you ever intend to remove this callback, it's a good idea to keep track of this.
     
+    # TODO : We do not yet properly handle loot with potential different properties (i.e. two different non-stackable spears)
     @staticmethod
     def lootAll(looter, looted):
         if hasattr(looted, 'inventory'):
             itemList = looted.inventory
         else:
-            itemList = looted
+            itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted]
         lootList = []
         for loot in itemList:
             if hasattr(looted, 'inventory'):
-                looted.removeItem(loot)
-            if loot not in looter.inventory:
-                looter.addItem(loot)
+                looted.removeItem(loot, loot.count)
+            if not looter.hasThing(loot) or loot.stackable:  # If we wanted to make non-stackable loot acquirable in mass quantity, we'd remove the first check...but what do you even do with two spears?...and it would cause double stats, etc.
+                looter.addItem(loot, loot.count)
                 lootList.append(loot)
         return lootList
-    
+
     @staticmethod
     def lootRandom(looters, looted):
         if hasattr(looted, 'inventory'):
             itemList = looted.inventory
         else:
-            itemList = looted
+            itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted]
         lootList = []
         for loot in itemList:
             if hasattr(looted, 'inventory'):
-                looted.removeItem(loot)
-            maybeLooters = [looter for looter in looters if loot not in looter.inventory]
+                looted.removeItem(loot, loot.count)
+            maybeLooters = [looter for looter in looters if not looter.hasThing(loot) or loot.stackable]
             if maybeLooters:
-                trueLooter = random.choice(maybeLooters)
-                trueLooter.addItem(loot)
+                for _ in range(loot.count):
+                    trueLooter = random.choice(maybeLooters)
+                    trueLooter.addItem(loot)
                 lootList.append(loot)
         return lootList
     
@@ -230,7 +196,7 @@ class Event(object): #Python 2.x compatibility
                 liveList.append(person1)
                 if random.random()<probInjury:
                     injuredList.append(person1)
-                    person1.SetInjured()
+                    person1.addStatus(Event.stateStore[0]["statuses"]["Injury"])
         if not deadList:
             desc = 'but no one was killed.'
             if injuredList:
@@ -290,7 +256,7 @@ class Event(object): #Python 2.x compatibility
                 faction1LiveList.append(person1)
                 if random.random()<faction1ProbInjury:
                     injuredList.append(person1)
-                    person1.SetInjured()
+                    person1.addStatus(Event.stateStore[0]["statuses"]["Injury"])
         for person2 in faction2:
             if random.random()<faction2ProbDeath:
                 faction2DeadList.append(person2)
@@ -299,7 +265,7 @@ class Event(object): #Python 2.x compatibility
                 faction2LiveList.append(person2)
                 if random.random()<faction2ProbInjury:
                     injuredList.append(person2)
-                    person2.SetInjured()
+                    person2.addStatus(Event.stateStore[0]["statuses"]["Injury"])
                 
         if not faction1DeadList and not faction2DeadList:
             desc = 'but no one was killed.'

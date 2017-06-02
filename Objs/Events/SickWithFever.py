@@ -2,7 +2,7 @@ from Objs.Events.Event import Event
 from Objs.Events.IndividualEventHandler import IndividualEventHandler
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-    if state["items"]["Medicine"] in mainActor.inventory:
+    if mainActor.hasThing("Medicine"):
         mainActor.removeItem(state["items"]["Medicine"])
         desc = mainActor.name + " felt "+ Event.parseGenderReflexive(mainActor) + " getting sick, but was able to ward it off with " + Event.parseGenderPossessive(mainActor) + " medicine."
     else:

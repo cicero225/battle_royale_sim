@@ -14,6 +14,7 @@ import traceback
 
 from Objs.Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
 from Objs.Items.Item import Item
+from Objs.Items.Status import Status
 from Objs.Sponsors.Sponsor import Sponsor, contestantIndivActorWithSponsorsCallback
 from Objs.World.World import World
 from Objs.Relationships.Relationship import Relationship
@@ -109,6 +110,7 @@ def main():
 
     # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
     items = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Items', 'Items.json'), settings, Item)
+    statuses = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Items', 'Statuses.json'), settings, Status)
 
     # Initialize World - Maybe it should have its own settings?
     arena = World(settings) #Maybe other arguments in future, i.e. maybe in an extended world items can be found on the ground, but leaving this as-is for now.
@@ -126,6 +128,7 @@ def main():
     "events": events,
     "eventsActive": eventsActive,
     "items": items,
+    "statuses": statuses,
     "arena": arena,
     "allRelationships": allRelationships,
     "turnNumber": turnNumber,
@@ -315,7 +318,7 @@ def main():
             eventsActive = {eventName: True for eventName, x in events.items() if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]}
             while True: # this just allows resetting the iteration
                 if PRINTHTML:
-                    thisWriter = HTMLWriter()
+                    thisWriter = HTMLWriter(statuses)
                     thisWriter.addTitle(titleString.replace('#', str(turnNumber[0])))
                 restartTurn = False # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
                 initialState = copy.deepcopy(state) #Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
@@ -402,7 +405,8 @@ def main():
                     # events with unique trigger conditions. Events may signal for a reselection by returning None or []
                     # Note, however, that this _not_ a good way to enforce specific participants, etc. as this is both wasteful
                     # and not-statistically accurate.
-                    preEventInjuries = {x: contestants[x].injured for x in liveContestants}
+                    # Ugly Hack, work on this later TODO
+                    preEventInjuries = {x: statuses["Injury"] in contestants[x].statuses for x in liveContestants}
                     while(True):
                         #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
                         # print(indivProb)
@@ -472,6 +476,7 @@ def main():
                         events = state['events']
                         eventsActive = state['eventsActive']
                         items = state['items']
+                        statuses = state['statuses']
                         arena = state['arena']
                         allRelationships = state['allRelationships']
                         turnNumber = state['turnNumber']
@@ -498,7 +503,6 @@ def main():
                             else:
                                 print(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
 
-                            # TODO: Do any additional end of simulation stuff here
                             for callback in callbacks["postGameCallbacks"]:
                                 callback(state)
                             return list(liveContestants.values())[0].name, turnNumber[0]

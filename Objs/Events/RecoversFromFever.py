@@ -5,7 +5,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                               'endurance': 3,
                               'combat ability': 3})
     desc = mainActor.name + " recovered from "+Event.parseGenderPossessive(mainActor)+" fever."
-    if state["items"]["Medicine"] in mainActor.inventory:
+    if mainActor.hasThing("Medicine"):
         mainActor.removeItem(state["items"]["Medicine"])
         desc = "Thanks to "+Event.parseGenderPossessive(mainActor)+" medicine, "+desc
     del state["events"]["SickWithFever"].eventStore[mainActor.name]

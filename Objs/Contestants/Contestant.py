@@ -1,9 +1,14 @@
 """stats should vary from 0-10. 5 is average and will not affect any events."""
 
 from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
+from Objs.Items.Item import ItemInstance
+from Objs.Items.Status import StatusInstance
 
 import random
 import collections
+
+class CannotTakeInstanceOfStackableThing(Exception):
+    pass
 
 def contestantIndivActorCallback(actor, baseEventActorWeight, event):
     try:  # Pythonic, etc. Really, it's preferred this way...
@@ -56,6 +61,7 @@ class Contestant(object):
         self.imageFile = inDict['imageFile']
         self.stats = inDict['stats']
         self.inventory = []
+        self.statuses = []
         self.settings = settings
         if not self.settings["statNormalization"]:
             self.contestantStatRandomize()
@@ -72,8 +78,6 @@ class Contestant(object):
         # event should have its own dict in here regardless of anything else that is going on, so that's safe.
         self.eventAdditions = collections.defaultdict(dict)
         self.eventDisabled = collections.defaultdict(dict) # These events cannot happen to this contestant. Default False
-        self.injured = False
-        self.hypothermic = None # This is an integer indicating which turn it happened on. It's canceled at the end of the next turn unless set again.
 
     def __str__(self):
         return self.name
@@ -144,47 +148,20 @@ class Contestant(object):
 
             # NOTE: at the moment, the unique and itemrequired fields can only affect events for which the contestant is the main actor. This may need expansion in the future.
             self.eventDisabled[eventName] = {}
-            self.eventDisabled[eventName]['main'] = event.baseProps['unique'] or event.baseProps['itemRequired']
+            self.eventDisabled[eventName]['main'] = event.baseProps['unique'] or event.baseProps['itemRequired'] or ("statusRequired" in event.baseProps and event.baseProps["statusRequired"])
             if event.baseProps['unique']:
                 if self.name in event.baseProps['uniqueUsers']:
                     if event.baseProps['itemRequired']:
-                        if event.baseProps['necessaryItem'] in [x.name for x in self.inventory]:
+                        if self.hasThing(event.baseProps['necessaryItem']):
                             self.eventDisabled[eventName]['main'] = False
                     else:
                         self.eventDisabled[eventName]['main'] = False
-            else:
-                if event.baseProps['itemRequired']:
-                    if event.baseProps['necessaryItem'] in [x.name for x in self.inventory]:
-                        self.eventDisabled[eventName]['main'] = False
-    
-    def SetInjured(self):
-        if self.injured:
-            return
-        self.permStatChange({'stability': -1,
-                             'endurance': -2,
-                             'combat ability': -2})
-        self.injured = True
-        
-    def SetUninjured(self):
-        if not self.injured:
-            return
-        self.permStatChange({'stability': 1,
-                             'endurance': 2,
-                             'combat ability': 2})
-        self.injured = False
-        
-    def SetHypothermic(self, turnNumber):
-        if not self.hypothermic:
-            self.permStatChange({'stability': -1,
-                             'endurance': -2})
-        self.hypothermic = turnNumber
-        
-    def SetUnhypothermic(self):
-        if not self.hypothermic:
-            return
-        self.permStatChange({'stability': 1,
-                             'endurance': 2})
-        self.hypothermic = None
+            elif event.baseProps['itemRequired']:
+                if self.hasThing(event.baseProps['necessaryItem']):
+                    self.eventDisabled[eventName]['main'] = False
+            elif ("statusRequired" in event.baseProps and event.baseProps["statusRequired"]):
+                if event.baseProps['necessaryStatus'] in [x.name for x in self.statuses]:
+                    self.eventDisabled[eventName]['main'] = False
         
     # Later on, items will be responsible for manipulating the contestant event modifiers on
     # addition to inventory. This gives an item to perform arbitrary manipulations. For example, this could
@@ -200,27 +177,79 @@ class Contestant(object):
     # changeable properties per contestant, we can add another class specifically to store that and have it include
     # a reference to the base object class.
 
-    def addItem(self, item):
-        if item in self.inventory: # at the moment no support is given for multiple copies of an item
+    def hasThing(self, item):
+        item_list = [x for x in self.inventory+self.statuses if x.name == str(item)]
+        return item_list
+    
+    def addItem(self, item, count=1):
+        possibleItem = self.hasThing(item)
+        if not possibleItem:
+            self.inventory.append(ItemInstance.takeOrMakeInstance(item))
+        elif not item.stackable:
             return False
-        self.inventory.append(item)
+        else:
+            possibleItem[0].count += count
         self.refreshEventState()
         return True
 
-    def removeItem(self, item):
-        if item not in self.inventory:
+    def removeItem(self, item, count=1):
+        possibleItem = self.hasThing(item)
+        if not possibleItem:
             return False
-        self.inventory.remove(item)
+        if possibleItem[0].count == count:
+            self.inventory.remove(possibleItem[0])
+            possibleItem[0].onRemoval(self)
+        elif possibleItem[0].count < count:
+            self.inventory.remove(possibleItem[0])
+            possibleItem[0].onRemoval(self)
+            return False
+        else:
+            possibleItem[0].count -= count
         self.refreshEventState()
-        item.onRemoval(self)
+        return True
+    
+    def removeAndGet(self, item):
+        if item.stackable:
+            raise CannotTakeInstanceOfStackableThing
+        possibleItem = self.hasThing(item)
+        if not possibleItem:
+            return False
+        self.inventory.remove(possibleItem[0])
+        return possibleItem[0]
+    
+    def addStatus(self, status, count=1):
+        possibleStatus = self.hasThing(status)
+        if not possibleStatus:
+            self.statuses.append(StatusInstance.takeOrMakeInstance(status))
+        elif not status.stackable:
+            return False
+        else:
+            possibleStatus[0].count += count
+        self.refreshEventState()
+        return True
+
+    def removeStatus(self, status, count=1):
+        possibleStatus = self.hasThing(status)
+        if not possibleStatus:
+            return False
+        if possibleStatus[0].count == count:
+            self.statuses.remove(possibleStatus[0])
+            possibleStatus[0].onRemoval(self)
+        elif possibleStatus[0].count < count:
+            self.statuses.remove(possibleStatus[0])
+            possibleStatus[0].onRemoval(self)
+            return False
+        else:
+            possibleStatus[0].count -= count
+        self.refreshEventState()
         return True
 
     def refreshEventState(self):
         self.stats = self.originalStats.copy()
         self.InitializeEventModifiers(self.events)
-        for item in self.inventory:
+        for item in self.inventory + self.statuses:
             item.applyObjectStatChanges(self)
-        for item in self.inventory:
+        for item in self.inventory + self.statuses:
             item.onAcquisition(self)
         
     def permStatChange(self, dictOfChanges): # NOT to be called by items!

@@ -129,7 +129,7 @@ def resetKillFlag(liveContestants, baseEventActorWeights, baseEventParticipantWe
         
 def killWrite(state):
     #TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
-    killWriter = HTMLWriter()
+    killWriter = HTMLWriter(state["statuses"])
     killWriter.addTitle("Day "+str(state["turnNumber"][0])+" Kills")
     for contestant, kills in state["callbackStore"]["killCounter"].items():
         desc = 'Kills: ' + str(kills)
@@ -141,7 +141,7 @@ def killWrite(state):
     return False
 
 def sponsortTraitWrite(state):
-    sponsorWriter =HTMLWriter()
+    sponsorWriter =HTMLWriter(state["statuses"])
     sponsorWriter.addTitle("Sponsor Traits")
     for sponsor in state["sponsors"].values():
         sponsorWriter.addEvent("Primary Trait: "+sponsor.primary_trait+"<br> Secondary Trait: "+sponsor.secondary_trait, [sponsor])
@@ -157,9 +157,9 @@ def relationshipWrite(state):
     state["callbackStore"]["relationshipLastTurn"]["friendships"] = copy.deepcopy(relationships.friendships)
     state["callbackStore"]["relationshipLastTurn"]["loveships"] = copy.deepcopy(relationships.loveships)
     
-    friendWriter = HTMLWriter()
+    friendWriter = HTMLWriter(state["statuses"])
     friendWriter.addTitle("Day "+str(state["turnNumber"][0])+" Friendships")
-    loveWriter = HTMLWriter()
+    loveWriter = HTMLWriter(state["statuses"])
     loveWriter.addTitle("Day "+str(state["turnNumber"][0])+" Romances")
     anyEvent = next(iter(state["events"].values()))  # A hack to get around importing Events
     for person in list(state["contestants"].values())+list(state["sponsors"].values()):

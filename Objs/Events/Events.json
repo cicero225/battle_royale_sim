@@ -514,6 +514,8 @@
      "participantHasLoveEffect": 1.5,
      "unique": false,
      "itemRequired": false,
+     "statusRequired": true,
+     "necessaryStatus": "Injury",
      "participantHasFriendRequired": true,
      "participantHasNeededFriendLevel": {"relation": true, "value": 1},
      "sponsorInfluence": {"Shipper": {"value": 1.0},

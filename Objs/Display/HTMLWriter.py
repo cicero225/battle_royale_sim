@@ -37,8 +37,9 @@ img {
     footer = """</body>
 </html>"""
 
-    def __init__(self):
+    def __init__(self, statuses):
         self.bodylist = [self.header]
+        self.statuses = statuses
     
     def reset(self):
         self.bodylist = [self.header]
@@ -79,9 +80,9 @@ img {
             if state is not None:
                 tempList = desc.split(str(contestant))
                 insertionString = str(contestant)
-                if hasattr(contestant, "injured") and (str(contestant) not in preEventInjuries or preEventInjuries[str(contestant)]) and contestant.injured:
+                if hasattr(contestant, "statuses") and (str(contestant) not in preEventInjuries or preEventInjuries[str(contestant)]) and contestant.hasThing("Injury") :
                     insertionString += ' (Injured)'
-                if hasattr(contestant, "hypothermic") and contestant.hypothermic is not None:
+                if hasattr(contestant, "statuses") and contestant.hasThing("Hypothermia"):
                     insertionString += ' (Hypothermic)'
                 desc = insertionString.join(tempList)
             tempStringList.append("<img src='"+contestant.imageFile+"'>")

@@ -1,6 +1,7 @@
 from __future__ import division
 
 from Objs.Events.Event import Event
+from Objs.Items.Status import StatusInstance
 import random
 from collections import defaultdict
 
@@ -15,15 +16,15 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         if random.random()>chanceSuccess:
             desc = str(mainActor) + ' tried to start a fire, but failed.'
             descList = [mainActor]
-            mainActor.SetHypothermic(state["turnNumber"][0])
+            mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(data={"day": state["turnNumber"][0]}))
             return (desc, descList, [])
     
     desc = str(mainActor) + ' successfully started a fire.'
-    mainActor.SetUnhypothermic()
+    mainActor.removeStatus("Hypothermia")
     self.eventStore[str(mainActor)] = True
     
     # Unless character already has clean water, 50% chance this becomes a clean water event
-    if state["items"]["Clean Water"] not in mainActor.inventory:
+    if not mainActor.hasThing("Clean Water"):
         if random.random()>0.5:
             desc += ' Using it, '+Event.parseGenderSubject(mainActor)+' was able to boil some Clean Water.'
             mainActor.addItem(state["items"]["Clean Water"])
@@ -49,7 +50,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         and random.random()<((min(state["allRelationships"].friendships[str(mainActor)][str(contestant)], state["allRelationships"].loveships[str(mainActor)][str(contestant)])+3)/3-mainActor.stats["ruthlessness"]/15))):
         desc += ', and they agreed to share the fire together.'
         self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
-        contestant.SetUnhypothermic()
+        contestant.removeStatus("Hypothermia")
         state["allRelationships"].IncreaseFriendLevel(mainActor, contestant, random.randint(0,1))
         state["allRelationships"].IncreaseLoveLevel(mainActor, contestant, random.randint(0,1))
         state["allRelationships"].IncreaseFriendLevel(contestant, mainActor, random.randint(1,3))
@@ -70,17 +71,17 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     if len(fightDeadList)==1 and random.random()<0.33:
         # revive the loser
         fightDeadList[0].alive = True
-        fightDeadList[0].SetInjured()
+        fightDeadList[0].addStatus(state["statuses"]["Injury"])
         if fightDeadList[0]==mainActor:
             self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
             desc += ' and '+mainActor.name+' was injured and forced to flee.'
-            mainActor.SetHypothermic(state["turnNumber"][0])
-            contestant.SetUnhypothermic()
+            mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(data={"day": state["turnNumber"][0]}))
+            contestant.removeStatus("Hypothermia")
             if fightDescList:
                 desc += ' '+Event.parseGenderSubject(mainActor).capitalize()+' left behind '+Event.englishList(fightDescList)+'.'
         else:
             desc += ' but '+contestant.name+' was injured and forced to flee.'
-            contestant.SetHypothermic(state["turnNumber"][0])
+            contestant.addStatus(state["statuses"]["Hypothermia"].makeInstance(data={"day": state["turnNumber"][0]}))
             if fightDescList:
                 desc += ' '+Event.parseGenderSubject(contestant).capitalize()+' left behind '+Event.englishList(fightDescList)+'.'
         descList.extend(fightDescList)
@@ -89,7 +90,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     # If nobody was hurt, they just give up and use the fire together.
     if not fightDeadList:
         self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
-        contestant.SetUnhypothermic()
+        contestant.removeStatus("Hypothermia")
         desc += ' but in the end both sides got tired and gave up, agreeing to use the fire together for one night. Neither side slept well.'
         return (desc, descList, [])
     

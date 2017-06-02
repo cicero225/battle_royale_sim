@@ -10,7 +10,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     practiceAbility = mainActor.stats['combat ability']
     if random.random()> 1/(1+1.3**practiceAbility):
         desc += ' but hurt '+Event.parseGenderReflexive(mainActor)+' doing so.'
-        mainActor.SetInjured()
+        mainActor.addStatus(state["statuses"]["Injury"])
     else:
         desc += ' and was successfully able to improve '+Event.parseGenderPossessive(mainActor)+' skills'
         mainActor.permStatChange({'combat ability': 1})

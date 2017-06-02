@@ -1,0 +1,34 @@
+{"Injury":
+    {"imageFile": "Injury.png",
+    "statChanges": 
+        {"stability": -1,
+         "endurance": -2,
+         "combat ability": -2
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
+    },
+ "Hypothermia":
+     {"imageFile": "Hypothermia.png",
+    "statChanges": 
+        {"stability": -1,
+         "endurance": -2
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
+    }
+}

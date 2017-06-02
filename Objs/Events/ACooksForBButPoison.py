@@ -27,7 +27,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         if len(fightDeadList)==1 and random.random()<0.33:
             # revive the loser
             fightDeadList[0].alive = True
-            fightDeadList[0].SetInjured()
+            fightDeadList[0].addStatus(state["statuses"]["Injury"])
             if fightDeadList[0]==mainActor:
                 desc += ' In the end, '+mainActor.name+' was injured and forced to flee.'
                 if fightDescList:

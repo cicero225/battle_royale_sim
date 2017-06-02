@@ -2,7 +2,7 @@ from Objs.Events.Event import Event
 import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-    options = list(set(state["items"].values())-set(mainActor.inventory))
+    options = list(set(state["items"].values())-set(x for x in mainActor.inventory if not x.stackable))
     if not options:
         return None # Pick a different event
     gift = random.choice(options)
