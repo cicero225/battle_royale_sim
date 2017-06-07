@@ -203,20 +203,24 @@
      },
  "RecoversFromFever":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0,
+     "mainWeight": 10,
      "mainModifiers": {"survivalism": 1.0,
                        "endurance": 1.0},
      "unique": false,
      "itemRequired": false,
+     "statusRequired": true,
+     "necessaryStatus": "Fever",
      "sponsorInfluence": {"Likes Strong": {"value": 1.0}}
      },
  "DiesFromFever":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0,
+     "mainWeight": 10,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
      "itemRequired": false,
+     "statusRequired": true,
+     "necessaryStatus": "Fever",
      "sponsorInfluence": {"Likes Weak": {"value": 1.0}}
      },
  "SponsorGivesItem":
@@ -443,7 +447,7 @@
      },
      "FriendGivesMedicine":
     {"phase": ["Day", "Night"],
-    "mainWeight": 0,
+    "mainWeight": 10,
      "numParticipants": 1,
      "participantWeight": 5,
      "participantModifiers": {"loyalty": 1,
@@ -452,6 +456,8 @@
      "participantHasLoveEffect": 1.5,
      "unique": false,
      "itemRequired": false,
+     "statusRequired": true,
+     "necessaryStatus": "Fever",
      "participantHasFriendRequired": true,
      "participantHasNeededFriendLevel": {"relation": true, "value": 3},
      "sponsorInfluence": {"Shipper": {"value": 1.0},

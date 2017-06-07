@@ -59,6 +59,7 @@ def main():
     # Initialize Events
     # Ugly, but oh well.
     Event.Event.stateStore[0] = state
+    Contestant.stateStore[0] = state
     events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Events', 'Events.json'), settings, Event.Event)
     eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
 
@@ -151,7 +152,7 @@ def main():
     # Run once before the start of the game. Expected args: state. Modify in place.
     startup = [
     ArenaUtils.loggingStartup,
-    ArenaUtils.sponsortTraitWrite]
+    ArenaUtils.sponsorTraitWrite]
     
     if PRINTHTML:
         startup.insert(0, ArenaUtils.relationshipWrite)
@@ -203,11 +204,15 @@ def main():
     ArenaUtils.onlyOneLeft
     ]
     
+    preDayCallbacks = [ # Things that happen before each day
+    ]
+    
     postDayCallbacks = [ # Things that happen after each day
     allRelationships.decay
     ]
     
     if PRINTHTML:
+        postDayCallbacks.insert(0, ArenaUtils.injuryAndStatusWrite)
         postDayCallbacks.insert(0, ArenaUtils.killWrite)
         postDayCallbacks.insert(0, ArenaUtils.relationshipWrite)
         
@@ -228,6 +233,7 @@ def main():
                  "overrideContestantEvent": overrideContestantEvent,
                  "postEventCallbacks": postEventCallbacks,
                  "endGameConditions": endGameConditions,
+                 "preDayCallbacks": preDayCallbacks,
                  "postDayCallbacks": postDayCallbacks,
                  "postGameCallbacks": postGameCallbacks,
     }
@@ -312,6 +318,8 @@ def main():
         else:
             thisDay = phases["default"]
         print("Day "+str(turnNumber[0]))
+        for callback in callbacks["preDayCallbacks"]:
+            callback(state)
         for phaseNum, thisPhase in enumerate(thisDay["phases"]):
             titleString = thisDay["titles"][phaseNum]
             state["curPhase"] = thisPhase

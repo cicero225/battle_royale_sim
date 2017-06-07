@@ -41,7 +41,7 @@ def weightedDictRandom(inDict, num_sel=1):
                 cumsum[x] -= remWeight
             cumsum.pop(selected+1)
     return keys
-
+    
 def LoadJSONIntoDictOfObjects(path, settings, objectType):
     """
     # Args: path is the path or file handle to the json
@@ -140,8 +140,22 @@ def killWrite(state):
     killWriter.finalWrite(os.path.join("Assets",str(state["turnNumber"][0])+" Kills.html"), state)
     return False
 
-def sponsortTraitWrite(state):
-    sponsorWriter =HTMLWriter(state["statuses"])
+def injuryAndStatusWrite(state):
+    from Objs.Events.Event import Event  # aren't circular import dependencies fun...
+    def writeObjectInventory(filename, inventory_attr_name):
+        Writer = HTMLWriter(state["statuses"])
+        Writer.addTitle("Day "+str(state["turnNumber"][0])+" "+filename + " Accumulated")
+        for contestant in state["contestants"].values():
+            if not contestant.alive or not getattr(contestant, inventory_attr_name):
+                continue
+            eventLine = str(contestant) + ": " + Event.englishList(getattr(contestant, inventory_attr_name))
+            Writer.addEvent(eventLine, [contestant] + getattr(contestant, inventory_attr_name))
+        Writer.finalWrite(os.path.join("Assets", str(state["turnNumber"][0])+" "+filename+".html"), state)
+    writeObjectInventory("Items", "inventory")
+    writeObjectInventory("Statuses", "statuses")                       
+   
+def sponsorTraitWrite(state):
+    sponsorWriter = HTMLWriter(state["statuses"])
     sponsorWriter.addTitle("Sponsor Traits")
     for sponsor in state["sponsors"].values():
         sponsorWriter.addEvent("Primary Trait: "+sponsor.primary_trait+"<br> Secondary Trait: "+sponsor.secondary_trait, [sponsor])

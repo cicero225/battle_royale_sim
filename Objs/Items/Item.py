@@ -38,15 +38,26 @@ class ItemInstance(object):
     def isInstanceOf(self, item):
         return (self.item == item)
     
-    # spooky magic
-    def __getattr__(self, attr):
-        if attr == "item":
-            return None
-        return getattr(self.item, attr)
+    def __getattribute__(self, attr):
+        try:
+            return getattr(object.__getattribute__(self, "item"), attr)
+        except AttributeError:
+            return object.__getattribute__(self, attr)
+        
+    def __setattr__(self, attr, value):
+        try:
+            setattr(self.item, attr, value)
+        except AttributeError:
+            object.__setattr__(self, attr, value)
     
-    def applyObjectStatChanges(self, contestant): # this has to be processed before anything else...
-        for changedStat in self.statChanges:
-            contestant.stats[changedStat] = max(min(contestant.stats[changedStat]+self.statChanges[changedStat]*self.count,10),0)
+    def __delattr__(self, attr):
+        try:
+            self.item.__delattr__(attr)
+        except AttributeError:
+            object.__delattr__(self, attr)
+    
+    def __str__(self):  # we need another copy because __ methods completely bypass __getattribute__
+        return self.name
                 
     def onRemoval(self, contestant):
         pass
@@ -90,9 +101,13 @@ class Item(object):
         for eventName, eventModifier in self.eventAdditions.items():
             for actorType, modifier in eventModifier.items():
                 contestant.eventAdditions[eventName][actorType] += modifier
-        for eventName, eventModifier  in self.eventsDisabled.items():
-            for actorType, modifier  in eventModifier.items():
+        for eventName, eventModifier in self.eventsDisabled.items():
+            for actorType, modifier in eventModifier.items():
                 contestant.eventDisabled[eventName][actorType] = modifier
+                
+    def applyObjectStatChanges(self, contestant): # this has to be processed before anything else...
+        for changedStat in self.statChanges:
+            contestant.stats[changedStat] = max(min(contestant.stats[changedStat]+self.statChanges[changedStat]*self.count,10),0)
     
     def makeInstance(self, count=1, data=None):
         if data is None:

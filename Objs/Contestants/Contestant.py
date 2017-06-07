@@ -55,6 +55,8 @@ def contestantIndivActorWithVictimsCallback(_, victim, baseEventVictimWeight, ev
 
 class Contestant(object):
 
+    stateStore = [None]
+
     def __init__(self, name, inDict, settings): # In this case, best to bake the stats as its own thing in the json...
         self.name = name
         self.gender = inDict['gender']
@@ -178,11 +180,13 @@ class Contestant(object):
     # a reference to the base object class.
 
     def hasThing(self, item):
-        item_list = [x for x in self.inventory+self.statuses if x.name == str(item)]
+        item_list = [x for x in self.inventory+self.statuses if str(x)== str(item)]
         return item_list
     
     def addItem(self, item, count=1):
         possibleItem = self.hasThing(item)
+        if isinstance(item, str):
+            item = self.stateStore[0]["items"][item]
         if not possibleItem:
             self.inventory.append(ItemInstance.takeOrMakeInstance(item))
         elif not item.stackable:
@@ -219,6 +223,8 @@ class Contestant(object):
     
     def addStatus(self, status, count=1):
         possibleStatus = self.hasThing(status)
+        if isinstance(status, str):
+            status = self.stateStore[0]["statuses"][status]
         if not possibleStatus:
             self.statuses.append(StatusInstance.takeOrMakeInstance(status))
         elif not status.stackable:

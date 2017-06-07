@@ -16,7 +16,7 @@
     "stackable": false
     },
  "Hypothermia":
-     {"imageFile": "Hypothermia.png",
+     {"imageFile": "Hypothermia.jpg",
     "statChanges": 
         {"stability": -1,
          "endurance": -2
@@ -28,6 +28,24 @@
         {
         },
     "eventsDisabled": {
+        },
+    "stackable": false
+    },
+  "Fever":
+     {"imageFile": "Fever.jpg",
+    "statChanges": 
+        {"stability": -1,
+         "endurance": -3,
+         "combat ability": -3
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        "SickWithFever": {"main": true}
         },
     "stackable": false
     }
