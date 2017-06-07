@@ -15,7 +15,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         chanceSuccess = mainActor.stats["cleverness"]*0.02 + mainActor.stats["survivalism"]*0.05 + 0.5  # Yes this can overload past 1
         if random.random()>chanceSuccess:
             desc = str(mainActor) + ' tried to start a fire, but failed.'
-            descList = [mainActor]
+            descList = [mainActor, state["statuses"]["Hypothermia"]]
             mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(data={"day": state["turnNumber"][0]}))
             return (desc, descList, [])
     

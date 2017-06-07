@@ -8,6 +8,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     else:
         desc = mainActor.name + " got sick with a severe fever."
         mainActor.addStatus("Fever")
-    return (desc, [mainActor], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
+    return (desc, [mainActor, state["statuses"]["Fever"]], []) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
 Event.registerEvent("SickWithFever", func)

@@ -483,7 +483,8 @@
      "sponsorHasLoveEffect": -1.0,
      "sponsorHasFriendRequired": true,
      "sponsorHasNeededFriendLevel": {"relation": false, "value": 2},
-     "sponsorHasLoveRequired": true
+     "sponsorHasLoveRequired": true,
+     "sponsorHasNeededLoveLevel": {"relation": false, "value": 2}
      },
      "HomuciferKillsBadWorshipper":
      {"phase": ["Day", "Night"],
@@ -496,7 +497,8 @@
      "sponsorHasLoveEffect": -1.0,
      "sponsorHasFriendRequired": true,
      "sponsorHasNeededFriendLevel": {"relation": false, "value": 2},
-     "sponsorHasLoveRequired": true
+     "sponsorHasLoveRequired": true,
+     "sponsorHasNeededLoveLevel": {"relation": false, "value": 2}
      },
      "HurtsSelfPracticingCombat":
     {"phase": ["Day"],
