@@ -20,6 +20,7 @@ from Objs.World.World import World
 from Objs.Relationships.Relationship import Relationship
 import Objs.Utilities.ArenaUtils as ArenaUtils
 from Objs.Events import *
+from Objs.Items import DiseaseItems  # If we get more stuff here, we're going to have to do something better
 from Objs.Display.HTMLWriter import HTMLWriter
 
 PRINTHTML = True
@@ -180,7 +181,7 @@ def main():
     partial(allRelationships.relationsRoleWeightCallback, "Victim")
     ]
     
-    modifyIndivActorWeightsWithPartipantsAndVictims = [
+    modifyIndivActorWeightsWithParticipantsAndVictims = [
     ]
     
     # modifyIndivActorWeightsWithSponsors: Expected args: actor, sponsor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
@@ -199,15 +200,19 @@ def main():
         ArenaUtils.logEventsByContestant,
         ArenaUtils.logKills
     ]
+    
+    postEventWriterCallbacks = [  # For piggy-backing after events if you need to write to the main HTML. Args: thisWriter, eventOutputs, state. Returns: None.
+    ]
+    
     # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)
     endGameConditions = [
     ArenaUtils.onlyOneLeft
     ]
     
-    preDayCallbacks = [ # Things that happen before each day
+    preDayCallbacks = [ # Things that happen before each day. Args: state. Returns: None.
     ]
     
-    postDayCallbacks = [ # Things that happen after each day
+    postDayCallbacks = [ # Things that happen after each day. Args: state. Returns: None.
     allRelationships.decay
     ]
     
@@ -227,19 +232,20 @@ def main():
                  "modifyBaseWeights": modifyBaseWeights,
                  "modifyIndivActorWeights": modifyIndivActorWeights,
                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
-                 "modifyIndivActorWeightsWithPartipantsAndVictims": modifyIndivActorWeightsWithPartipantsAndVictims,
+                 "modifyIndivActorWeightsWithPartipantsAndVictims": modifyIndivActorWeightsWithParticipantsAndVictims,
                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
                  "modifyIndivActorWeightsWithSponsors": modifyIndivActorWeightsWithSponsors,
                  "overrideContestantEvent": overrideContestantEvent,
                  "postEventCallbacks": postEventCallbacks,
+                 "postEventWriterCallbacks": postEventWriterCallbacks,
                  "endGameConditions": endGameConditions,
                  "preDayCallbacks": preDayCallbacks,
                  "postDayCallbacks": postDayCallbacks,
                  "postGameCallbacks": postGameCallbacks,
     }
     
-    # loophole that allows event-defining files to slip callbacks in
-    for store, funcList in Event.Event.inserted_callbacks.items():
+    # loophole that allows event-defining and item/status-defining files to slip callbacks in
+    for store, funcList in list(Event.Event.inserted_callbacks.items())+list(Item.inserted_callbacks.items()):
         callbacks[store].extend(funcList)
     
     state["callbacks"] = callbacks
@@ -469,6 +475,8 @@ def main():
                     print(eventName)
                     if PRINTHTML:
                         thisWriter.addEvent(desc, descContestants, state, preEventInjuries)
+                        for callback in callbacks["postEventWriterCallbacks"]:
+                            callback(thisWriter, eventOutputs, state)
                     else:
                         print(desc)
                     

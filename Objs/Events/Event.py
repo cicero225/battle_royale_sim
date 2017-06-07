@@ -313,10 +313,11 @@ class Event(object): #Python 2.x compatibility
     
     @staticmethod
     def getFriendlyIfPossible(namedObject):
-        try:
-            return namedObject.friendly
+        countModifier = " (x"+str(namedObject.count)+")" if hasattr(namedObject, "count") and namedObject.count > 1 else ""
+        try:    
+            return namedObject.friendly + countModifier
         except AttributeError:
-            return namedObject.name
+            return namedObject.name + countModifier
     
     @staticmethod
     def englishList(thingList, isObjs=True, customStringGetter=None):

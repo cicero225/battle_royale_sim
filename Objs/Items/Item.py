@@ -18,21 +18,21 @@ class ItemInstance(object):
             self.count = count
             self.data = {}
     
-    @staticmethod
-    def copyOrMakeInstance(item):
+    @classmethod
+    def copyOrMakeInstance(cls, item):
         if hasattr(item, "item"):
             newItem = copy.copy(item)
             newItem.data = copy.deepcopy(item.data)
         else:
-            newItem = ItemInstance(item)
+            newItem = cls(item)
         return newItem
     
-    @staticmethod
-    def takeOrMakeInstance(item):
+    @classmethod
+    def takeOrMakeInstance(cls, item):
         if hasattr(item, "item"):
             newItem = item
         else:
-            newItem = ItemInstance(item)
+            newItem = cls(item)
         return newItem
     
     def isInstanceOf(self, item):
@@ -45,16 +45,18 @@ class ItemInstance(object):
             return object.__getattribute__(self, attr)
         
     def __setattr__(self, attr, value):
-        try:
+        if attr=="item" and not hasattr(self, "item"):
+            object.__setattr__(self, attr, value)
+        if hasattr(self.item, attr):
             setattr(self.item, attr, value)
-        except AttributeError:
+        else:
             object.__setattr__(self, attr, value)
     
     def __delattr__(self, attr):
-        try:
+        if hasattr(self.item, attr):
             self.item.__delattr__(attr)
-        except AttributeError:
-            object.__delattr__(self, attr)
+        else:
+            object.__delattr__(self, attr, value)
     
     def __str__(self):  # we need another copy because __ methods completely bypass __getattribute__
         return self.name
@@ -62,11 +64,14 @@ class ItemInstance(object):
     def onRemoval(self, contestant):
         pass
         
-    def onNewDay(self, state, contestant):
-        pass
+    def applyObjectStatChanges(self, contestant): # this has to be processed before anything else...
+        for changedStat in self.statChanges:
+            contestant.stats[changedStat] = max(min(contestant.stats[changedStat]+self.statChanges[changedStat]*self.count,10),0)
 
 class Item(object):
-
+    
+    inserted_callbacks = {}  # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
+    
     def __init__(self, name, inDict, settings):
         # The item class has certain stereotyped effects on characters that can be encoded in json
         self.name = name
@@ -89,7 +94,11 @@ class Item(object):
 
     def __str__(self):
         return self.name
-            
+    
+    @classmethod
+    def registerInsertedCallback(cls, callbackLocation, callback):
+        cls.inserted_callbacks.setdefault(callbackLocation, []).append(callback)
+    
     def applyObjectInfluence(self, inDict):
         for key in inDict:
             inDict[key] *= self.settings["objectInfluence"]
@@ -104,10 +113,6 @@ class Item(object):
         for eventName, eventModifier in self.eventsDisabled.items():
             for actorType, modifier in eventModifier.items():
                 contestant.eventDisabled[eventName][actorType] = modifier
-                
-    def applyObjectStatChanges(self, contestant): # this has to be processed before anything else...
-        for changedStat in self.statChanges:
-            contestant.stats[changedStat] = max(min(contestant.stats[changedStat]+self.statChanges[changedStat]*self.count,10),0)
     
     def makeInstance(self, count=1, data=None):
         if data is None:
