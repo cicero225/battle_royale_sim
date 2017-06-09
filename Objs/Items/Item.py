@@ -46,7 +46,7 @@ class ItemInstance(object):
     
     def __deepcopy__(self, memo):
         newInstance = copy.copy(self)  # Might as well economize
-        newInstance.data = copy.deepcopy(self.data)
+        newInstance.data = copy.deepcopy(self.data, memo)
         return newInstance
     
     def __getattribute__(self, attr):

@@ -262,5 +262,7 @@ class Contestant(object):
         """dictOfChanges is statName -> change"""
         for statName, change in dictOfChanges.items():
             self.originalStats[statName] += change
+        for statName, stat in self.originalStats.items():
+            self.originalStats[statName] = max(min(self.originalStats[statName], 10), 0)
         self.refreshEventState()
         
