@@ -1,3 +1,4 @@
+import copy
 
 # I wonder if this needs to import Contestant...
 
@@ -38,6 +39,16 @@ class ItemInstance(object):
     def isInstanceOf(self, item):
         return (self.item == item)
     
+    def __copy__(self):
+        newInstance = type(self)(self.item, self.count)
+        newInstance.data = self.data
+        return newInstance
+    
+    def __deepcopy__(self, memo):
+        newInstance = copy.copy(self)  # Might as well economize
+        newInstance.data = copy.deepcopy(self.data)
+        return newInstance
+    
     def __getattribute__(self, attr):
         try:
             return getattr(object.__getattribute__(self, "item"), attr)
@@ -47,6 +58,7 @@ class ItemInstance(object):
     def __setattr__(self, attr, value):
         if attr=="item" and not hasattr(self, "item"):
             object.__setattr__(self, attr, value)
+            return
         if hasattr(self.item, attr):
             setattr(self.item, attr, value)
         else:
