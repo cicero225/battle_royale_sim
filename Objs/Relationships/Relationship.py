@@ -3,8 +3,10 @@ from __future__ import division
 
 import itertools
 import collections
+import math
 import random
 from functools import partial
+from Objs.Utilities.ArenaUtils import inv_erf
 
 class Relationship(object):
 
@@ -18,10 +20,11 @@ class Relationship(object):
         for contestant in  mergedpeople:
             self.friendships[contestant]={}
             self.loveships[contestant]={}
+        desiredSD = 4/(inv_erf(1-2*settings["meanNumInitialRelationships"]/len(mergedpeople))*math.sqrt(2))  # we want to set SD such that "meanNumInitialRelationships" people end up beyond 4
         for contestant1, contestant2 in itertools.combinations(mergedpeople, 2):
-            self.friendships[contestant1][contestant2] = min(max(random.gauss(0, 2),-5),5)  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
+            self.friendships[contestant1][contestant2] = min(max(random.gauss(0, desiredSD),-5),5)  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
             self.friendships[contestant2][contestant1] = self.friendships[contestant1][contestant2] # But start them off equal
-            self.loveships[contestant1][contestant2] = min(max(random.gauss(0, 2),-5),5)
+            self.loveships[contestant1][contestant2] = min(max(random.gauss(0, desiredSD),-5),5)
             self.loveships[contestant2][contestant1] = self.loveships[contestant1][contestant2]
             
     def aliveOrSponsor(self, contestant):  # Convenience function for checking if contestant is valid/alive
@@ -52,7 +55,7 @@ class Relationship(object):
                 if contestantFriends[contestant2] > 0:
                     contestantFriends[contestant2] -= max(self.settings["relationshipDecay"], 0)
                 if contestantFriends[contestant2] < 0:
-                    contestantFriends[contestant2] += max(self.settings["relationshipDecay"], -1)
+                    contestantFriends[contestant2] += min(self.settings["relationshipDecay"], 0)
         for contestant, contestantLoves in self.loveships.items():
             if not self.aliveOrSponsor(contestant):
                 continue
@@ -62,19 +65,18 @@ class Relationship(object):
                 if contestantLoves[contestant2] > 0:
                     contestantLoves[contestant2] -= max(self.settings["relationshipDecay"]*0.5, 0)
                 if contestantLoves[contestant2] < 0:
-                    contestantLoves[contestant2] += max(self.settings["relationshipDecay"]*0.5, -1)
+                    contestantLoves[contestant2] += min(self.settings["relationshipDecay"]*0.5, 0)
     
     def propagateFriendshipChange(self, original, target, change): # For now, changes in friendship propagate to friendship, but changes in loveship do not propagate. Note that this propagates to sponsors!
-        change *= random.uniform(1-self.settings["relationshipRandomizer"], 1+self.settings["relationshipRandomizer"])
         for person in list(self.contestants.values()) + list(self.sponsors.values()):
             if person.name == str(original) or person.name == str(target):
                 continue
-            self.IncreaseFriendLevel(person, target, change*max((self.friendships[person.name][original.name] + 2*self.loveships[person.name][original.name])/5*self.settings["relationshipPropagation"], 1) , False)
+            self.IncreaseFriendLevel(person, target, change*(self.friendships[person.name][original.name] + 2*self.loveships[person.name][original.name])/5*self.settings["relationshipPropagation"] , False)
     
     def IncreaseFriendLevel(self, person1, person2, change, propagate=True):
-        change *= random.uniform(1-self.settings["relationshipRandomizer"], 1+self.settings["relationshipRandomizer"])
         if propagate:
             self.propagateFriendshipChange(person1, person2, change)
+        change *= random.uniform(1-self.settings["relationshipRandomizer"], 1+self.settings["relationshipRandomizer"])
         curLevel = self.friendships[person1.name][person2.name]
         if curLevel > 0:
             if change > 0:
@@ -86,7 +88,7 @@ class Relationship(object):
                 stat = 'forgiveness'
             else:
                 stat = 'meanness'    
-        change *= (1+self.settings['statFriendEffect']**(person1.stats[stat]-5)/5)*change
+        change *= (1+self.settings['statFriendEffect'])**((person1.stats[stat]-5)/5)
         self.friendships[person1.name][person2.name] = max(min(curLevel+change, 5), -5)
         
     def IncreaseLoveLevel(self, person1, person2, change):
@@ -102,7 +104,7 @@ class Relationship(object):
                 stat = 'forgiveness'
             else:
                 stat = 'meanness'    
-        change *= (1+self.settings['statFriendEffect']**(person1.stats[stat]-5)/5)*change
+        change *= (1+self.settings['statFriendEffect'])**((person1.stats[stat]-5)/5)
         self.loveships[person1.name][person2.name] = max(min(curLevel+change, 5), -5)
     
     def KillImpact(self, deadPerson):

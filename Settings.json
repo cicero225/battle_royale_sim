@@ -7,14 +7,15 @@
  "objectInfluence": 1,
  "relationInfluence": 0.1,
  "maxParticipantEffect": 3,
- "statFriendEffect": 0.5,
+ "statFriendEffect": 0.2,
  "friendCombatEffect": 0.25,
  "combatAbilityEffect": 0.1,
- "relationshipPropagation": 0.5,
+ "relationshipPropagation": 0.2,
  "statNormalization": true,
  "normalizationRange": 0.1,
- "relationshipDecay": 1.0,
+ "relationshipDecay": 0,
  "relationshipRandomizer": 0.5,
  "deathImpactOnStability": 1,
- "fullRandomStats": false
+ "fullRandomStats": false,
+ "meanNumInitialRelationships": 4
 }

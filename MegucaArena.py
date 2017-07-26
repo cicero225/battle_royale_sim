@@ -316,7 +316,7 @@ def main():
         callback(state)
 
     # Main loop of DEATH
-    lastEvents = {}
+    STATSDEBUG["allEvents"] = collections.defaultdict(int) if "allEvents" not in STATSDEBUG else STATSDEBUG["allEvents"]
     while True:
         turnNumber[0] += 1
         if turnNumber[0] in phases:
@@ -423,7 +423,11 @@ def main():
                     preEventInjuries = {x: statuses["Injury"] in contestants[x].statuses for x in liveContestants}
                     while(True):
                         #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
-                        # print(indivProb)
+                        """for iteminstance in contestants[contestantKey].inventory:
+                            if str(iteminstance) == "MolotovCocktail":
+                                print(indivProb)
+                                input()
+                                break"""
                         eventName = ArenaUtils.weightedDictRandom(indivProb)[0]     
                         # Handle event overrides, if any
                         #Determine participants, victims, if any.
@@ -473,6 +477,7 @@ def main():
                         break
                     
                     print(eventName)
+                    STATSDEBUG["allEvents"][eventName] += 1
                     if PRINTHTML:
                         thisWriter.addEvent(desc, descContestants, state, preEventInjuries)
                         for callback in callbacks["postEventWriterCallbacks"]:
@@ -543,7 +548,7 @@ def statCollection(): # expand to count number of days, and fun stuff like epiph
     days = []
     global PRINTHTML
     PRINTHTML = False
-    for _ in range(0,1000):
+    for _ in range(0,100):
         printtrace = True
         try:
             winner, day = main()
@@ -570,6 +575,8 @@ def statCollection(): # expand to count number of days, and fun stuff like epiph
     print(sum(days)/len(days))
     print(statistics.stdev(days))
     print(numErrors)
+    totEvents = sum(y for y in STATSDEBUG["allEvents"].values())
+    print({x: round(y/totEvents,3) for x, y in STATSDEBUG["allEvents"].items()})
 
 if __name__ == '__main__':
     if len(sys.argv)>1 and sys.argv[1] == '--stats':

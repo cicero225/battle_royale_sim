@@ -739,5 +739,79 @@
          "cleverness": 9,
          "combat ability": 7
          }
+    },
+    "diaeresis":
+    {"imageFile": "Diaeresis.jpg",
+    "gender": "M",
+    "stats":
+        {"gregariousness": 1,
+         "stability": 8,
+         "forgiveness": 4,
+         "loyalty": 5,
+         "meanness": 4,
+         "ruthlessness": 7,
+         "aggression": 4,
+         "endurance": 4,
+         "survivalism": 3,
+         "loneliness": 3,
+         "friendliness": 1,
+         "cleverness": 8,
+         "combat ability": 6
+         }
+    },
+    "MavisOfTheDead":
+    {"imageFile": "MavisOfTheDead.png",
+    "gender": "M",
+    "stats":
+        {"gregariousness": 4,
+         "forgiveness": 8,
+         "loyalty": 9,
+         "meanness": 0,
+         "aggression": 0,
+         "endurance": 2,
+         "survivalism": 2,
+         "loneliness": 8,
+         "friendliness": 8,
+         "cleverness": 6,
+         "combat ability": 0
+         }
+    },
+    "Alessandra 'Alice' Kaneko":
+    {"imageFile": "Alissandra_Alice_Kaneko.png",
+    "gender": "F",
+    "stats":
+        {"gregariousness": 7,
+         "stability": 6,
+         "forgiveness": 3,
+         "loyalty": 5,
+         "meanness": 2,
+         "ruthlessness": 3,
+         "aggression": 5,
+         "endurance": 6,
+         "survivalism": 3,
+         "loneliness": 2,
+         "friendliness": 5,
+         "cleverness": 5,
+         "combat ability": 6
+         }
+    },
+    "RL":
+    {"imageFile": "RL.png",
+    "gender": "M",
+    "stats":
+        {"gregariousness": 8,
+         "stability": 10,
+         "forgiveness": 8,
+         "loyalty": 8,
+         "meanness": 2,
+         "ruthlessness": 9,
+         "aggression": 1,
+         "endurance": 10,
+         "survivalism": 7,
+         "loneliness": 2,
+         "friendliness": 9,
+         "cleverness": 9,
+         "combat ability": 7
+         }
     }
 }
