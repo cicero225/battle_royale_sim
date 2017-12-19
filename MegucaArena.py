@@ -548,7 +548,7 @@ def statCollection(): # expand to count number of days, and fun stuff like epiph
     days = []
     global PRINTHTML
     PRINTHTML = False
-    for _ in range(0,100):
+    for _ in range(0,1000):
         printtrace = True
         try:
             winner, day = main()

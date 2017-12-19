@@ -813,5 +813,43 @@
          "cleverness": 9,
          "combat ability": 7
          }
+    },
+    "Miyako":
+    {"imageFile": "Miyako.png",
+    "gender": "F",
+    "stats":
+        {"gregariousness": 10,
+         "stability": 10,
+         "forgiveness": 9,
+         "loyalty": 10,
+         "meanness": 1,
+         "ruthlessness": 1,
+         "aggression": 5,
+         "endurance": 8,
+         "survivalism": 8,
+         "loneliness": 5,
+         "friendliness": 10,
+         "cleverness": 8,
+         "combat ability": 6
+         }
+    },
+    "Lillian Ada":
+    {"imageFile": "LillianAda.png",
+    "gender": "F",
+    "stats":
+        {"gregariousness": 2,
+        "stability": 7,
+        "forgiveness": 8,
+        "loyalty": 8,
+        "meanness": 2,
+        "ruthlessness": 2,
+        "aggression": 5,
+        "endurance": 4,
+        "survivalism": 5,
+        "loneliness": 8,
+        "friendliness": 5,
+        "cleverness": 10,
+        "combat ability": 5
+         }
     }
 }
