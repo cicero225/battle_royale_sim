@@ -155,6 +155,8 @@ class Event(object): #Python 2.x compatibility
         
     @staticmethod
     def fight(people, relationships, settings):
+        # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
+        alreadyInjured = set(str(person) for person in people if person.hasThing("Injury"))
         # Relationship changes
         # Fights shouldn't cause everyone's mutual friendship to go down, because sometimes it might be 2v2, but this is really hard to model, so rng
         relHitNum = random.randint(1,len(people)-1)
@@ -194,7 +196,7 @@ class Event(object): #Python 2.x compatibility
                 person1.alive = False
             else:
                 liveList.append(person1)
-                if random.random()<probInjury:
+                if str(person1) not in alreadyInjured and random.random()<probInjury:
                     injuredList.append(person1)
                     person1.addStatus(Event.stateStore[0]["statuses"]["Injury"])
         if not deadList:
@@ -223,6 +225,8 @@ class Event(object): #Python 2.x compatibility
     
     @staticmethod
     def factionFight(faction1, faction2, relationships, settings):
+        # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
+        alreadyInjured = set(str(person) for person in faction1 + faction2 if person.hasThing("Injury"))
         # Relationship changes
         for person1 in faction1:
             for person2 in faction2:
@@ -254,7 +258,7 @@ class Event(object): #Python 2.x compatibility
                 person1.alive = False
             else:
                 faction1LiveList.append(person1)
-                if random.random()<faction1ProbInjury:
+                if str(person1) not in alreadyInjured and random.random()<faction1ProbInjury:
                     injuredList.append(person1)
                     person1.addStatus(Event.stateStore[0]["statuses"]["Injury"])
         for person2 in faction2:
@@ -263,7 +267,7 @@ class Event(object): #Python 2.x compatibility
                 person2.alive = False
             else:
                 faction2LiveList.append(person2)
-                if random.random()<faction2ProbInjury:
+                if str(person2) not in alreadyInjured and random.random()<faction2ProbInjury:
                     injuredList.append(person2)
                     person2.addStatus(Event.stateStore[0]["statuses"]["Injury"])
                 
