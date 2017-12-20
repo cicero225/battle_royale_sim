@@ -80,7 +80,7 @@ img {
             if state is not None:
                 tempList = desc.split(str(contestant))
                 insertionString = str(contestant)
-                if hasattr(contestant, "statuses") and (str(contestant) not in preEventInjuries or preEventInjuries[str(contestant)]) and contestant.hasThing("Injury") :
+                if hasattr(contestant, "statuses") and preEventInjuries.get(str(contestant), False) and contestant.hasThing("Injury"):  # if the contestant isn't in the dictionary, they're dead...
                     insertionString += ' (Injured)'
                 if hasattr(contestant, "statuses") and contestant.hasThing("Hypothermia"):
                     insertionString += ' (Hypothermic)'

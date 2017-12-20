@@ -419,15 +419,10 @@ def main():
                     # events with unique trigger conditions. Events may signal for a reselection by returning None or []
                     # Note, however, that this _not_ a good way to enforce specific participants, etc. as this is both wasteful
                     # and not-statistically accurate.
-                    # Ugly Hack, work on this later TODO
-                    preEventInjuries = {x: statuses["Injury"] in contestants[x].statuses for x in liveContestants}
+                    # Ugly Hack, but not sure there's a better way. We need pre-event information on contestants, and short of deepcopying everything...
+                    preEventInjuries = {x: contestants[x].hasThing("Injury") for x in liveContestants}
                     while(True):
                         #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
-                        """for iteminstance in contestants[contestantKey].inventory:
-                            if str(iteminstance) == "MolotovCocktail":
-                                print(indivProb)
-                                input()
-                                break"""
                         eventName = ArenaUtils.weightedDictRandom(indivProb)[0]     
                         # Handle event overrides, if any
                         #Determine participants, victims, if any.
@@ -548,7 +543,7 @@ def statCollection(): # expand to count number of days, and fun stuff like epiph
     days = []
     global PRINTHTML
     PRINTHTML = False
-    for _ in range(0,1000):
+    for _ in range(0,100):
         printtrace = True
         try:
             winner, day = main()
