@@ -17,5 +17,5 @@
  "relationshipRandomizer": 0.5,
  "deathImpactOnStability": 1,
  "fullRandomStats": false,
- "meanNumInitialRelationships": 4
+ "meanNumInitialRelationships": 1
 }

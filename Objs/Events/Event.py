@@ -174,8 +174,8 @@ class Event(object): #Python 2.x compatibility
                 if person1 == person2:
                     continue
                 person2Ability = person2.stats['combat ability']*(1+((person2.stats['aggression']*2+person2.stats['ruthlessness'])/15 - 1)*0.3)
-                baseCombatAbility += settings['friendCombatEffect']*relationships.friendships[person2][person1]/5 * person2Ability if relationships.friendships[person2][person1]>0 else 0
-                baseCombatAbility += settings['friendCombatEffect']*relationships.loveships[person2][person1]/5 * person2Ability if relationships.loveships[person2][person1]>0 else 0
+                baseCombatAbility += settings['friendCombatEffect']*relationships.friendships[str(person2)][str(person1)]/5 * person2Ability if relationships.friendships[str(person2)][str(person1)]>0 else 0
+                baseCombatAbility += settings['friendCombatEffect']*relationships.loveships[str(person2)][str(person1)]/5 * person2Ability if relationships.loveships[str(person2)][str(person1)]>0 else 0
             fightDict[i]=baseCombatAbility
         probDict = {}
         deadList = []

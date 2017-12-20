@@ -48,5 +48,75 @@
         "SickWithFever": {"main": true}
         },
     "stackable": false
+    },
+    "Love":
+    {"imageFile": "Love.png",
+    "statChanges": 
+        {},
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
+    },
+    "LoveBroken":
+    {"imageFile": "LoveBroken.png",
+    "statChanges": 
+        {},
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
+    },
+    "RightArrow":
+    {"imageFile": "RightArrow.jpg",
+    "statChanges": 
+        {},
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
+    },
+    "Swords":
+    {"imageFile": "Swords.png",
+    "statChanges": 
+        {},
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
+    },
+    "SwordsBroken":
+    {"imageFile": "SwordsBroken.png",
+    "statChanges": 
+        {},
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
     }
 }

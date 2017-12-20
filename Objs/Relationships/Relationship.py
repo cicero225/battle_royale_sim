@@ -3,6 +3,7 @@ from __future__ import division
 
 import itertools
 import collections
+import copy
 import math
 import random
 from functools import partial
@@ -14,10 +15,10 @@ class Relationship(object):
         self.settings = settings
         self.contestants = contestants
         self.sponsors = sponsors
-        self.friendships = collections.defaultdict(partial(collections.defaultdict,int)) #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
-        self.loveships = collections.defaultdict(partial(collections.defaultdict,int)) # In this case, the use of these dictionaries is very immunzied from json typos
+        self.friendships = {} #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
+        self.loveships = {}
         mergedpeople = list(contestants.keys()) + list(sponsors.keys()) #Or I could write a generator to combine the iterators, but I'll just spend the memory for now
-        for contestant in  mergedpeople:
+        for contestant in mergedpeople:
             self.friendships[contestant]={}
             self.loveships[contestant]={}
         desiredSD = 4/(inv_erf(1-2*settings["meanNumInitialRelationships"]/len(mergedpeople))*math.sqrt(2))  # we want to set SD such that "meanNumInitialRelationships" people end up beyond 4
@@ -26,6 +27,34 @@ class Relationship(object):
             self.friendships[contestant2][contestant1] = self.friendships[contestant1][contestant2] # But start them off equal
             self.loveships[contestant1][contestant2] = min(max(random.gauss(0, desiredSD),-5),5)
             self.loveships[contestant2][contestant1] = self.loveships[contestant1][contestant2]
+        self.backup()
+    
+    # When explicitly called, stores a copy of the current relationship status for later use.
+    def backup(self):
+        self.backup_friendships = copy.deepcopy(self.friendships)
+        self.backup_loveships = copy.deepcopy(self.loveships)
+    
+    # Compares current state with backup, returning a summary of the changes found.
+    def reportChanges(self):
+        new_loves = {}  # tuple(a,b): bool (true if the reverse already matched this state)
+        lost_loves = {}
+        new_hates = {}
+        lost_hates = {}
+        for contestant1, likes in self.loveships.items():
+            if (contestant1 in self.contestants and not self.contestants[contestant1].alive):
+                continue
+            for contestant2, value in likes.items():
+                if (contestant2 in self.contestants and not self.contestants[contestant2].alive):
+                    continue
+                if (self.backup_loveships[contestant1][contestant2] < 4) and (value >= 4):
+                    new_loves[(contestant1, contestant2)] = (self.backup_loveships[contestant2][contestant1] >= 4)
+                elif (self.backup_loveships[contestant1][contestant2] >= 4) and (value < 4):
+                    lost_loves[(contestant1, contestant2)] = (self.backup_loveships[contestant2][contestant1] < 4)
+                elif (self.backup_loveships[contestant1][contestant2] > -4) and (value <= -4):
+                    new_hates[(contestant1, contestant2)] = (self.backup_loveships[contestant2][contestant1] <= -4)
+                elif (self.backup_loveships[contestant1][contestant2] <= -4) and (value > -4):
+                    lost_hates[(contestant1, contestant2)] = (self.backup_loveships[contestant2][contestant1] > -4)
+        return new_loves, lost_loves, new_hates, lost_hates
             
     def aliveOrSponsor(self, contestant):  # Convenience function for checking if contestant is valid/alive
         contestantKey = str(contestant)

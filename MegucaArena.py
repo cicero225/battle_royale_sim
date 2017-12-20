@@ -202,6 +202,7 @@ def main():
     ]
     
     postEventWriterCallbacks = [  # For piggy-backing after events if you need to write to the main HTML. Args: thisWriter, eventOutputs, state. Returns: None.
+        ArenaUtils.relationshipUpdate
     ]
     
     # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)
@@ -421,6 +422,7 @@ def main():
                     # and not-statistically accurate.
                     # Ugly Hack, but not sure there's a better way. We need pre-event information on contestants, and short of deepcopying everything...
                     preEventInjuries = {x: contestants[x].hasThing("Injury") for x in liveContestants}
+                    allRelationships.backup()
                     while(True):
                         #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
                         eventName = ArenaUtils.weightedDictRandom(indivProb)[0]     
