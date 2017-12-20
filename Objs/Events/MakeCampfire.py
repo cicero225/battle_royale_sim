@@ -66,7 +66,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         return (desc, descList, [], [], [mainActor])
     
     desc += ' After a moment, '+contestant.name+' attacked. A fight started, '
-    (fightDesc, fightDescList, fightDeadList) = Event.fight(descList, state["allRelationships"], state["settings"])
+    (fightDesc, fightDescList, fightDeadList, allKillers) = Event.fight(descList, state["allRelationships"], state["settings"])
     # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot.
     if len(fightDeadList)==1 and random.random()<0.33:
         # revive the loser
@@ -96,6 +96,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     
     desc += fightDesc
     descList += fightDescList
-    return (desc, descList, [x.name for x in fightDeadList])
+    return (desc, descList, [x.name for x in fightDeadList], allKillers)
     
 Event.registerEvent("MakeCampfire", func)

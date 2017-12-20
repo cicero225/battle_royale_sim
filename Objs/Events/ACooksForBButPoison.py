@@ -22,7 +22,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     if random.random() < detection:
         # Participant realizes what's going on
         desc += str(victims[0]) + " caught " + Event.parseGenderObject(mainActor) + " in the act and attacked!"
-        (fightDesc, fightDescList, fightDeadList) = Event.fight(descList, state["allRelationships"], state["settings"])
+        (fightDesc, fightDescList, fightDeadList, allKillers) = Event.fight(descList, state["allRelationships"], state["settings"])
         # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot.
         if len(fightDeadList)==1 and random.random()<0.33:
             # revive the loser
@@ -44,7 +44,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             return (desc, descList, [])
         desc += " " + fightDesc[4:].capitalize()
         descList += fightDescList
-        return (desc, descList, [x.name for x in fightDeadList])
+        return (desc, descList, [x.name for x in fightDeadList], allKillers)
         
     else:
         desc += str(victims[0]) + " ate the meal, blissfully unaware, before falling over dead."

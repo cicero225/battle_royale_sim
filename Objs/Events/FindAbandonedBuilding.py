@@ -11,13 +11,14 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     desc = Event.englishList(eventPeople)+' found an abandoned building, '
     relationships = state["allRelationships"]
     fightDead = []
+    allKillers = None
     if whatHappens == 0:
         desc += 'but it turned out to have nothing of value.'
         if len(eventPeople)>1:
             probViolence = 0.25-relationships.groupCohesion(eventPeople)/200
             if random.random()<probViolence:
                 desc += ' Violence broke out due to frustration, and '
-                fightDesc, fightList, fightDead = Event.fight(eventPeople, relationships, state['settings'])
+                fightDesc, fightList, fightDead, allKillers = Event.fight(eventPeople, relationships, state['settings'])
                 desc += fightDesc
                 descList += fightList
     elif whatHappens == 1:
@@ -30,7 +31,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             probViolence = 0.5-relationships.groupCohesion(eventPeople)/100
             if random.random()<probViolence:
                 desc += ' A fight broke out over the loot, '
-                fightDesc, fightList, fightDead = Event.fight(eventPeople, relationships, state['settings'])
+                fightDesc, fightList, fightDead, allKillers = Event.fight(eventPeople, relationships, state['settings'])
                 desc += fightDesc
                 descList += fightList
     elif whatHappens == 2:
@@ -51,6 +52,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         # This must be done separately because it assigns no killers
         return (desc, descList, [x.name for x in fightDead], {}) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     
-    return (desc, descList, [x.name for x in fightDead]) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
+    return (desc, descList, [x.name for x in fightDead], allKillers) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 
 Event.registerEvent("FindAbandonedBuilding", func)
