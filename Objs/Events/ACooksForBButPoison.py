@@ -23,8 +23,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         # Participant realizes what's going on
         desc += str(victims[0]) + " caught " + Event.parseGenderObject(mainActor) + " in the act and attacked!"
         (fightDesc, fightDescList, fightDeadList, allKillers) = Event.fight(descList, state["allRelationships"], state["settings"])
-        # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot.
-        if len(fightDeadList)==1 and random.random()<0.33:
+        # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot. If they are already injured they just die (skip this segment).
+        if len(fightDeadList)==1 and random.random()<0.33 and not fightDeadList[0].hasThing("Injury"):
             # revive the loser
             fightDeadList[0].alive = True
             fightDeadList[0].addStatus(state["statuses"]["Injury"])

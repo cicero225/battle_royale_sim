@@ -33,7 +33,10 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     chosen = weightedDictRandom(optionDict, 1)[0]
     
     if chosen == 'fight':
-        fightDesc, fightList, fightDead, allKillers = Event.fight([mainActor, participants[0]], state['allRelationships'], state['settings'])
+        # Keep running until only neither 0 nor all contestants are dead.
+        fightDead = []  # dummy list.
+        while (len(fightDead) != 1):
+            fightDesc, fightList, fightDead, allKillers = Event.fight([mainActor, participants[0]], state['allRelationships'], state['settings'])
         desc += "They did so, and " + fightDesc
         return (desc, [mainActor, participants[0]]+fightList, [str(x) for x in fightDead], allKillers)
     if chosen == 'attemptEscape':
