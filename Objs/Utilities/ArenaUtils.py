@@ -219,10 +219,10 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
             trueKillCounterDict[str(trueKiller)] = state["callbackStore"]["killCounter"][str(trueKiller)]
         state["callbackStore"]["killCounter"][str(trueKiller)] += 1
         state["callbackStore"]["KillThisTurnFlag"][str(trueKiller)] = True
-        if str(trueKiller) != str(mainActor):
-            # This is treated as if someone had done the worst possible thing to the dead person. There is also a stability impact.
-            state["allRelationships"].IncreaseFriendLevel(state["contestants"][str(dead)], state["contestants"][str(trueKiller)], -10)
-            state["allRelationships"].IncreaseLoveLevel(state["contestants"][str(dead)], state["contestants"][str(trueKiller)], -10)
+        #if str(trueKiller) != str(mainActor):
+        # This is treated as if someone had done the worst possible thing to the dead person. There is also a stability impact.
+        state["allRelationships"].IncreaseFriendLevel(state["contestants"][str(dead)], state["contestants"][str(trueKiller)], -10)
+        state["allRelationships"].IncreaseLoveLevel(state["contestants"][str(dead)], state["contestants"][str(trueKiller)], -10)
         state["allRelationships"].KillImpact(dead)
         
     # Modify description to reflect kills

@@ -10,7 +10,7 @@
  "statFriendEffect": 0.2,
  "friendCombatEffect": 0.25,
  "combatAbilityEffect": 0.1,
- "relationshipPropagation": 0.2,
+ "relationshipPropagation": 0.7,
  "statNormalization": true,
  "normalizationRange": 0.1,
  "relationshipDecay": 0,
