@@ -12,6 +12,49 @@ import html
 import copy
 import math
 
+# Needed a merged default/OrderedDict for some applications
+class DefaultOrderedDict(collections.OrderedDict):
+    # Source: http://stackoverflow.com/a/6190500/562769
+    def __init__(self, default_factory=None, *a, **kw):
+        if (default_factory is not None and
+           not callable(default_factory)):
+            raise TypeError('first argument must be callable')
+        collections.OrderedDict.__init__(self, *a, **kw)
+        self.default_factory = default_factory
+
+    def __getitem__(self, key):
+        try:
+            return collections.OrderedDict.__getitem__(self, key)
+        except KeyError:
+            return self.__missing__(key)
+
+    def __missing__(self, key):
+        if self.default_factory is None:
+            raise KeyError(key)
+        self[key] = value = self.default_factory()
+        return value
+
+    def __reduce__(self):
+        if self.default_factory is None:
+            args = tuple()
+        else:
+            args = self.default_factory,
+        return type(self), args, None, None, self.items()
+
+    def copy(self):
+        return self.__copy__()
+
+    def __copy__(self):
+        return type(self)(self.default_factory, self)
+
+    def __deepcopy__(self, memo):
+        import copy
+        return type(self)(self.default_factory,
+                          copy.deepcopy(list(self.items()), memo))
+
+    def __repr__(self):
+        return 'OrderedDefaultDict(%s, %s)' % (self.default_factory,
+                                               collections.OrderedDict.__repr__(self))
 
 # scipy inverse error function 
 def polevl(x, coefs, N):
@@ -154,8 +197,41 @@ def weightedDictRandom(inDict, num_sel=1):
                 cumsum[x] -= remWeight
             cumsum.pop(selected+1)
     return keys
-    
+
+# converts a regular dict into a sorted, ordered dict for better determinism.
+def DictToOrderedDict(d):
+    objectDict = collections.OrderedDict()
+    try:
+        orderedNames = sorted(d.keys())
+    except TypeError:
+        orderedNames = sorted(d.keys(), key=lambda x: str(x))
+    for name in orderedNames:
+        objectDict[name] = d[name]
+    return objectDict
+
+# By default, json load returns arbitrary dict and list orders, which is bad for determinsm. Use this instead.
+def JSONOrderedLoad(path):
+    try:
+        with open(path) as file:
+            fromFile = json.load(file)
+    except TypeError:
+        fromFile = json.load(path)
+    def SortListOrDict(thing):
+        if type(thing) == dict:
+            thing = DictToOrderedDict(thing)
+            for sub, value in thing.items():
+                if (type(value) == list) or (type(value) == dict):
+                    thing[sub] = SortListOrDict(value)
+        else:
+            thing = sorted(thing)
+            for i, value in enumerate(thing):
+                if (type(value) == list) or (type(value) == dict):
+                    thing[i] = SortListOrDict(value)
+        return thing
+    return SortListOrDict(fromFile)
+
 def LoadJSONIntoDictOfObjects(path, settings, objectType):
+    # TODO: this does not properly order subdicts from the .json loaded dict that are more than one deep.
     """
     # Args: path is the path or file handle to the json
     #       settings is the settings dict, itself loaded from JSON (but not by this)
@@ -167,24 +243,20 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
     # Notes: Path is typically something like os.path.join('Contestants', 'Constestant.json') but let's not assume that.
     #
     """
-    try:
-        with open(path) as file:
-            fromFile = json.load(file)
-    except TypeError:
-        fromFile = json.load(path)
+    fromFile = JSONOrderedLoad(path)
 
-    objectDict = {}
+    objectDict = collections.OrderedDict()
     for name in fromFile:
-        objectDict[name] = objectType(name, fromFile[name], settings) # Constructor should \
-                                                                  # take in dict and settings (also a dict)
+       objectDict[name] = objectType(name, fromFile[name], settings) # Constructor should take in dict and settings (also a dict)
+                                                                  
     return objectDict
 
 # Callbacks for specific arena features
 
 def loggingStartup(state):
-    state["callbackStore"]["eventLog"] = collections.defaultdict(partial(collections.defaultdict, partial(collections.defaultdict, str))) # Crazy nesting...
-    state["callbackStore"]["killCounter"] = collections.defaultdict(int)
-    state["callbackStore"]["contestantLog"] = collections.defaultdict(dict)
+    state["callbackStore"]["eventLog"] = DefaultOrderedDict(partial(DefaultOrderedDict, partial(DefaultOrderedDict, str))) # Crazy nesting...
+    state["callbackStore"]["killCounter"] = DefaultOrderedDict(int)
+    state["callbackStore"]["contestantLog"] = DefaultOrderedDict(dict)
 
 # Logs last event. Must be last callback in overrideContestantEvent. 
 def logEventsByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
@@ -200,15 +272,15 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
         killers = []
         trueKillDict = eventOutputs[3]
     else:
-        killers = [str(x) for x in set([mainActor]+participants+victims)]
-        trueKillDict = {}
+        killers = sorted([str(x) for x in set([mainActor]+participants+victims)])
+        trueKillDict = collections.OrderedDict()
     if not (killers or trueKillDict):
         return
-    trueKillCounterDict = {}
+    trueKillCounterDict = collections.OrderedDict()
     for dead in eventOutputs[2]:
         if killers:
             # This dict uses relationship levels to give a weight to how likely it is that someone is the killer
-            killDict = {x:1.1**(state["allRelationships"].friendships[str(x)][str(dead)]+2*state["allRelationships"].loveships[str(x)][str(dead)]) for x in killers if str(x)!=str(dead)}
+            killDict = DictToOrderedDict({x:1.1**(state["allRelationships"].friendships[str(x)][str(dead)]+2*state["allRelationships"].loveships[str(x)][str(dead)]) for x in killers if str(x)!=str(dead)})
             if not killDict: # This can happen if the only potential killer is also someone who died in the event.
                 continue
             trueKiller = weightedDictRandom(killDict)[0]
@@ -238,7 +310,7 @@ def logContestants(liveContestants, baseEventActorWeights, baseEventParticipantW
     state["callbackStore"]["contestantLog"][turnNumber[0]] = liveContestants
     
 def resetKillFlag(liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state):
-     state["callbackStore"]["KillThisTurnFlag"] = collections.defaultdict(dict)
+     state["callbackStore"]["KillThisTurnFlag"] = DefaultOrderedDict(dict)
         
 def killWrite(state):
     #TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
@@ -349,10 +421,10 @@ def relationshipWrite(state):
     if not firstTurn:
         oldRelationshipsFriendships = state["callbackStore"]["relationshipLastTurn"]["friendships"]
         oldRelationshipsLoveships = state["callbackStore"]["relationshipLastTurn"]["loveships"]
-    state["callbackStore"]["relationshipLastTurn"] = {}
+    state["callbackStore"]["relationshipLastTurn"] = collections.OrderedDict()
     state["callbackStore"]["relationshipLastTurn"]["friendships"] = copy.deepcopy(relationships.friendships)
     state["callbackStore"]["relationshipLastTurn"]["loveships"] = copy.deepcopy(relationships.loveships)
-    
+
     friendWriter = HTMLWriter(state["statuses"])
     friendWriter.addTitle("Day "+str(state["turnNumber"][0])+" Friendships")
     loveWriter = HTMLWriter(state["statuses"])
@@ -367,8 +439,10 @@ def relationshipWrite(state):
         enemyList = []
         lostEnemyList = []
         liveFriends = {x:y for x,y in relationships.friendships[str(person)].items() if x in state["contestants"] and state["contestants"][x].alive}
-        sortFriends = {x:liveFriends[x] for x in sorted(liveFriends, key=liveFriends.get, reverse=True)}
-        sortFriends.update({x:y for x,y in relationships.friendships[str(person)].items() if x in state["sponsors"]})
+        liveFriends.update({x:y for x,y in relationships.friendships[str(person)].items() if x in state["sponsors"]})
+        sortFriends = collections.OrderedDict()
+        for x in sorted(liveFriends, key=liveFriends.get, reverse=True):
+            sortFriends[x] = liveFriends[x]
         for key, value in sortFriends.items():
             if value >= 4:
                 writeString = key
@@ -416,15 +490,17 @@ def relationshipWrite(state):
             friendLine += anyEvent.englishList(lostEnemyList, False)
         if friendList or lostFriendList:
             friendWriter.addEvent(friendLine, [person])
-            
+
         loveLine = str(person)
         loveList = []
         lostLoveList = []
         loveEnemyList = []
         lostLoveEnemyList = []
         liveLoves = {x:y for x,y in relationships.loveships[str(person)].items() if x in state["contestants"] and state["contestants"][x].alive}
-        sortLoves = {x:liveLoves[x] for x in sorted(liveLoves, key=liveLoves.get, reverse=True)}
-        sortLoves.update({x:y for x,y in relationships.loveships[str(person)].items() if x in state["sponsors"]})
+        liveLoves.update({x:y for x,y in relationships.loveships[str(person)].items() if x in state["sponsors"]})
+        sortLoves = collections.OrderedDict()
+        for x in sorted(liveLoves, key=liveLoves.get, reverse=True):
+            sortLoves[x] = liveLoves[x]
         for key, value in sortLoves.items():
             if value >= 4:
                 writeString = key

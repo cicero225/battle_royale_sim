@@ -8,15 +8,15 @@
 from __future__ import division
 
 import random
-from collections import defaultdict
-from ..Utilities.ArenaUtils import weightedDictRandom
+from collections import defaultdict, OrderedDict
+from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict, DefaultOrderedDict
 from functools import partial
 from Objs.Items.Item import ItemInstance
 
 class Event(object): #Python 2.x compatibility
 
-    event_callbacks = {}  # It is important that this is a class attribute, which can be modified in Python
-    inserted_callbacks = {}  # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
+    event_callbacks =  OrderedDict()  # It is important that this is a class attribute, which can be modified in Python
+    inserted_callbacks =  OrderedDict()  # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
     stateStore = [None]  # This allows import time access to a pointer to state, which is needed occasionally by doEvent functors. It must be supplied by main during initialization.
 
     def __init__(self, name, inDict, settings):
@@ -39,7 +39,7 @@ class Event(object): #Python 2.x compatibility
             if multiplierType+'Weight' in self.baseProps:
                 self.eventRandomize(multiplierType+'Weight')
         self.doEvent = partial(self.event_callbacks[self.name], self)
-        self.eventStore = {}  # arbitrary storage for event data, useful for holding information over multiple calls
+        self.eventStore =  OrderedDict()  # arbitrary storage for event data, useful for holding information over multiple calls
     
     def __str__(self):
         return self.name
@@ -156,18 +156,18 @@ class Event(object): #Python 2.x compatibility
     @staticmethod
     def fight(people, relationships, settings):
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
-        alreadyInjured = set(str(person) for person in people if person.hasThing("Injury"))
+        alreadyInjured = sorted(list(set(str(person) for person in people if person.hasThing("Injury"))))
         # Relationship changes
         # Fights shouldn't cause everyone's mutual friendship to go down, because sometimes it might be 2v2, but this is really hard to model, so rng
         relHitNum = random.randint(1,len(people)-1)
         for person in people:
-            relDict = {i:6-(relationships.friendships[x.name][person.name]+relationships.friendships[person.name][x.name]+2*(relationships.loveships[person.name][x.name]+relationships.loveships[x.name][person.name]))/6 for i, x in enumerate(people) if x != person}
+            relDict = DictToOrderedDict({i:6-(relationships.friendships[x.name][person.name]+relationships.friendships[person.name][x.name]+2*(relationships.loveships[person.name][x.name]+relationships.loveships[x.name][person.name]))/6 for i, x in enumerate(people) if x != person})
             chosen = weightedDictRandom(relDict, relHitNum)
             for index in chosen:
                 relationships.IncreaseFriendLevel(person, people[index], random.randint(-4,-3))
                 relationships.IncreaseLoveLevel(person, people[index], random.randint(-6,-4))  
         # Actual fight
-        fightDict = {}
+        fightDict = OrderedDict()
         for i, person1 in enumerate(people): # people gain strength from their friends, but this has to be compared with the average strength of the rest of the group
             baseCombatAbility = person1.stats['combat ability']*(1+((person1.stats['aggression']*2+person1.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
             for person2 in people:
@@ -177,7 +177,7 @@ class Event(object): #Python 2.x compatibility
                 baseCombatAbility += settings['friendCombatEffect']*relationships.friendships[str(person2)][str(person1)]/5 * person2Ability if relationships.friendships[str(person2)][str(person1)]>0 else 0
                 baseCombatAbility += settings['friendCombatEffect']*relationships.loveships[str(person2)][str(person1)]/5 * person2Ability if relationships.loveships[str(person2)][str(person1)]>0 else 0
             fightDict[i]=baseCombatAbility
-        probDict = {}
+        probDict = OrderedDict()
         deadList = []
         liveList = []
         injuredList = []
@@ -224,21 +224,21 @@ class Event(object): #Python 2.x compatibility
         # decide a killer for anyone killed. This is unusual and needs to be handled here
         allKillers = defaultdict(str)
         for dead in deadList:
-            killDict = {x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in people if x is not dead}
+            killDict = DictToOrderedDict({x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in people if x is not dead})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         return(desc, descList, deadList, allKillers)
     
     @staticmethod
     def factionFight(faction1, faction2, relationships, settings):
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
-        alreadyInjured = set(str(person) for person in faction1 + faction2 if person.hasThing("Injury"))
+        alreadyInjured = sorted(list(set(str(person) for person in faction1 + faction2 if person.hasThing("Injury"))))
         # Relationship changes
         for person1 in faction1:
             for person2 in faction2:
                 relationships.IncreaseFriendLevel(person1, person2, random.randint(-4,-3))
                 relationships.IncreaseLoveLevel(person1, person2, random.randint(-6,-4))
                 relationships.IncreaseFriendLevel(person2, person1, random.randint(-4,-3))
-                relationships.IncreaseLoveLevel(person2, person1, random.randint(-6,-4))  
+                relationships.IncreaseLoveLevel(person2, person1, random.randint(-6,-4))
         # Actual fight
         faction1Power = 0
         for person1 in faction1:
@@ -280,7 +280,7 @@ class Event(object): #Python 2.x compatibility
             desc = 'but no one was killed.'
             if injuredList:
                 desc += ' (Injured: '+Event.englishList(injuredList)+')'
-            return(desc, [], [], {})
+            return(desc, [], [], OrderedDict())
         desc = 'and '
         descList = []
         deadList = faction1DeadList + faction2DeadList
@@ -309,12 +309,12 @@ class Event(object): #Python 2.x compatibility
         elif not faction2LiveList and not faction1LiveList:
             desc += 'everyone died in the fighting!'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
-        allKillers = defaultdict(str)
+        allKillers = DefaultOrderedDict(str)
         for dead in faction1DeadList:
-            killDict = {x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction2}
+            killDict = DictToOrderedDict({x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction2})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         for dead in faction2DeadList:
-            killDict = {x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction1}
+            killDict = DictToOrderedDict({x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction1})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         if injuredList:
             desc += ' (Injured: '+Event.englishList(injuredList)+')'

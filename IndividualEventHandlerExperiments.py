@@ -1,5 +1,6 @@
 # a file to test various theories I have as to the source of the crashing bug...
 
+import collections
 import json
 import os
 
@@ -10,27 +11,23 @@ import Objs.Utilities.ArenaUtils as ArenaUtils
 # Fake partial startup.
 
 # State initialization. This should NEVER EVER be reassigned.
-state = {}
+state = collections.OrderedDict()
 
-# Import Settings from JSON -> going to make it a dictionarys
+# Import Settings from JSON -> going to make it a dictionary
 with open('Settings.json') as settings_file:
-    settings = json.load(settings_file)
+    settings = ArenaUtils.JSONOrderedLoad(settings_file)
 
  # Initialize Events
 # Ugly, but oh well.
 Event.Event.stateStore[0] = state
 events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Events', 'Events.json'), settings, Event.Event)
 
-state.update({
-"settings": settings,
-"events": events,
-}) # Allows for convenient passing of the entire game state to anything that needs it (usually events)
+state["settings"] = settings
+state["events"] = events # Allows for convenient passing of the entire game state to anything that needs it (usually events)
 
-callbackStore = {} #Arbitrary storage specifically for non-main objects/callbacks to use. Make sure to use a unique key (ideally involving the name of the function)
+callbackStore = collections.OrderedDict() #Arbitrary storage specifically for non-main objects/callbacks to use. Make sure to use a unique key (ideally involving the name of the function)
 
-state.update({
-"callbackStore": callbackStore,
-})
+state["callbackStore"] = callbackStore
 
 # CALLBACKS
 # As much as possible influence event processing from here. Note that these callbacks happen IN ORDER. It would be possible to do this in a more

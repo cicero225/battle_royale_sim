@@ -5,5 +5,5 @@ def func(self, mainActor, state = None, participants = None, victims = None, spo
                                   "endurance": -1,
                                   "stability": -2})
         desc = mainActor.name+" was haunted by images of the things " +Event.parseGenderSubject(mainActor)+" had seen."
-        return(desc, {mainActor}, [])
+        return(desc, [mainActor], [])
 Event.registerEvent("PTSD", func)

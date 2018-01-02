@@ -1,4 +1,4 @@
-
+## OUTDATED DO NOT USE
 
 from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
 
@@ -7,6 +7,7 @@ from Events import *  # necessary for some tests. This kind of mixing in tests i
 from Items.Item import Item
 
 import ArenaUtils
+import collections
 
 class ContestantTest(object):
 
@@ -20,17 +21,17 @@ class ContestantTest(object):
                          "relationInfluence": 0.3 # How much relationships affect event chance, calculated as (1+influence)^(relationship level*eventInfluenceLevel)
                         }
         self.name = "FakeContestant"
-        self.inDict = {}
+        self.inDict = collections.OrderedDict()
         self.inDict["imageFile"] = "dummy.jpg"
         self.inDict["stats"] = {"wideness": 6, "suffering": 4, "potential": 10, "english": 0}
         self.contestant = Contestant(self.name, self.inDict, self.settings)
         # TODO: Make a dummy event set so you can test InitializeEventModifiers
-        self.contestant.events = {}
-        self.contestant.callFlags = {}
+        self.contestant.events = collections.OrderedDict()
+        self.contestant.callFlags = collections.OrderedDict()
     
     def refreshTest(self):
         self.contestant = Contestant(self.name, self.inDict, self.settings)
-        self.callFlags = {}
+        self.callFlags = collections.OrderedDict()
     
     def testStatRandomizer(self):
         #Not super-stringent, but doesn't have to be.

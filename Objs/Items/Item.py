@@ -1,3 +1,4 @@
+import collections
 import copy
 
 # I wonder if this needs to import Contestant...
@@ -17,7 +18,7 @@ class ItemInstance(object):
         else:
             self.item = item
             self.count = count
-            self.data = {}
+            self.data = collections.OrderedDict()
     
     @classmethod
     def copyOrMakeInstance(cls, item):
@@ -82,7 +83,7 @@ class ItemInstance(object):
 
 class Item(object):
     
-    inserted_callbacks = {}  # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
+    inserted_callbacks = collections.OrderedDict()  # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
     
     def __init__(self, name, inDict, settings):
         # The item class has certain stereotyped effects on characters that can be encoded in json
@@ -128,7 +129,7 @@ class Item(object):
     
     def makeInstance(self, count=1, data=None):
         if data is None:
-            data = {}
+            data = collections.OrderedDict()
         thisInstance = ItemInstance(self, count)
         thisInstance.data = data
         return thisInstance

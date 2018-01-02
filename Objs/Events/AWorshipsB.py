@@ -1,13 +1,14 @@
 
-from ..Utilities.ArenaUtils import weightedDictRandom
+from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict
 from Objs.Events.Event import Event
 from Objs.Events.IndividualEventHandler import IndividualEventHandler
+import collections
 import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     # Unlike other events, this doesn't "consume" the other participant, but it does need to pick one.
     # Weight chance of contestant being chosen by friendship and love level.
-    potentialContestants = {x.name:(abs(state["allRelationships"].friendships[mainActor.name][x.name])+2*abs(state["allRelationships"].loveships[mainActor.name][x.name])) for x in state["contestants"].values() if x.alive and x != mainActor}
+    potentialContestants = DictToOrderedDict({x.name:(abs(state["allRelationships"].friendships[mainActor.name][x.name])+2*abs(state["allRelationships"].loveships[mainActor.name][x.name])) for x in state["contestants"].values() if x.alive and x != mainActor})
     if not potentialContestants:
         return None
     #Rig the rate for Homura and Madoka
@@ -22,7 +23,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     eventHandler = IndividualEventHandler(state)
     eventHandler.banMurderEventsAtoB(mainActor.name, chosen)
     eventHandler.banEventForSingleContestant("AWorshipsB", mainActor.name, state)
-    self.eventStore.setdefault("permanent", {})[mainActor.name] = eventHandler
+    self.eventStore.setdefault("permanent", collections.OrderedDict())[mainActor.name] = eventHandler
     if chosen == "Kaname Madoka":
         eventHandler = IndividualEventHandler(state)
         eventHandler.setEventWeightForSingleContestant("HomuciferKillsBadWorshipper", mainActor.name, 10, state)

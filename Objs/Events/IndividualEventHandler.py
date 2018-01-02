@@ -7,6 +7,7 @@ state. If a group of callbacks may be deleted under different circumstances, it 
 
 from functools import partial
 import warnings
+from Objs.Utilities.ArenaUtils import DictToOrderedDict
 
 class IndividualEventHandler(object):
 
@@ -66,9 +67,9 @@ class IndividualEventHandler(object):
     @staticmethod
     def fixedRoleCallback(roleName, fixedRoleList, relevantActor, eventName, contestantKey, thisevent, state, participants, victims, sponsorsHere):
         #Avoiding eval here
-        roleDict = {"participants": participants,
+        roleDict = DictToOrderedDict({"participants": participants,
         "victims": victims,
-        "sponsors": sponsorsHere}   
+        "sponsors": sponsorsHere})   
         if thisevent.name==eventName and relevantActor.name == contestantKey:
             del roleDict[roleName][:] # Have to clear the list BUT keep the reference
             roleDict[roleName].extend(fixedRoleList)

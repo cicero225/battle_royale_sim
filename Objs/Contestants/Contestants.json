@@ -851,5 +851,24 @@
         "cleverness": 10,
         "combat ability": 5
          }
+    },
+    "Revolutionary Ballerina Lyrical Ophelia":
+    {"imageFile": "LyricalOphelia.png",
+    "gender": "F",
+    "stats":
+        {"gregariousness": 5,
+        "stability": 3,
+        "forgiveness": 10,
+        "loyalty": 7,
+        "meanness": 0,
+        "ruthlessness": 8,
+        "aggression": 0,
+        "endurance": 7,
+        "survivalism": 3,
+        "loneliness": 9,
+        "friendliness": 10,
+        "cleverness": 8,
+        "combat ability": 5
+         }
     }
 }

@@ -2,6 +2,7 @@ from __future__ import division
 
 from Objs.Events.Event import Event
 from ..Utilities.ArenaUtils import weightedDictRandom
+import collections
 import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
@@ -50,7 +51,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         else:
             desc += Event.englishList(fightDead)+' were killed.'
         # This must be done separately because it assigns no killers
-        return (desc, descList, [x.name for x in fightDead], {}) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
+        return (desc, descList, [x.name for x in fightDead], collections.OrderedDict()) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     
     return (desc, descList, [x.name for x in fightDead], allKillers) # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
 

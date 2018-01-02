@@ -6,6 +6,7 @@ import sys
 import copy
 import json
 import os
+import pickle # Used to backup and potentially restore the random seed, for debugging purposes.
 import random # A not very good random library, but probably fine for our purposes
 import statistics # Note: this is Python 3.4 +
 import collections
@@ -25,7 +26,7 @@ from Objs.Display.HTMLWriter import HTMLWriter
 
 PRINTHTML = True
 DEBUG = True
-STATSDEBUG = {}
+STATSDEBUG = collections.OrderedDict()
 
 def main():
     """The main for the battle royale sim"""
@@ -33,14 +34,14 @@ def main():
     # Initial Setup:
 
     # State initialization. This should NEVER EVER be reassigned.
-    state = {}
+    state = collections.OrderedDict()
     
     # Import Settings from JSON -> going to make it a dictionarys
     with open('Settings.json') as settings_file:
-        settings = json.load(settings_file)
+        settings = ArenaUtils.JSONOrderedLoad(settings_file)
         
     with open('Phases.json') as phases_file:
-        phases = json.load(phases_file)
+        phases = ArenaUtils.JSONOrderedLoad(phases_file)
  
     # List of settings as I come up with them. It can stay as a dict.
     # traitRandomness = 3
@@ -62,12 +63,16 @@ def main():
     Event.Event.stateStore[0] = state
     Contestant.stateStore[0] = state
     events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Events', 'Events.json'), settings, Event.Event)
-    eventsActive = {x: True for x in events} # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
+    eventsActive = collections.OrderedDict()
+    for x in events:
+        eventsActive[x] = True # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
 
     # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
     contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Contestants', 'Contestants.json'), settings, Contestant)
+    
     # Deduce stats from the union of all contestants - if there are any typos this is a problem.
     statTemplate = set()
+
     for x in contestants.values():
         statTemplate |= set(list(x.stats.keys()))
     # This is kind of dumb, but easiest: If we want pure random stats, any stats in the file are directly overwritten.
@@ -92,7 +97,7 @@ def main():
         assert(len(contestants)==settings['numContestants'])
     else:
         settings['numContestants'] = len(contestants)
-    
+
     if settings["statNormalization"]:
         targetSum = sum(sum(x.stats.values()) for x in contestants.values())/len(contestants)
     for contestant in contestants.values():
@@ -105,10 +110,9 @@ def main():
     # from any type of object gift, otherwise 1, Anything else we think of)
     # No placeholder sponsors because of the way it is handled.
     sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Sponsors', 'Sponsors.json'), settings, Sponsor)
-
     # for now relationship levels (arbitrarily, -5 to 5, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
-    allRelationships = Relationship(contestants, sponsors, settings)
 
+    allRelationships = Relationship(contestants, sponsors, settings)
 
     # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
     items = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join('Objs', 'Items', 'Items.json'), settings, Item)
@@ -116,14 +120,14 @@ def main():
 
     # Initialize World - Maybe it should have its own settings?
     arena = World(settings) #Maybe other arguments in future, i.e. maybe in an extended world items can be found on the ground, but leaving this as-is for now.
-    
+
     turnNumber = [0] # Deliberately a list of 1, so it's passed by reference
     
-    callbackStore = {} #Arbitrary storage specifically for non-main objects/callbacks to use. Make sure to use a unique key (ideally involving the name of the function)
-    
+    callbackStore = collections.OrderedDict() #Arbitrary storage specifically for non-main objects/callbacks to use. Make sure to use a unique key (ideally involving the name of the function)
+
     thisWriter = None # current HTML display object
     
-    state.update({
+    state.update(ArenaUtils.DictToOrderedDict({
     "settings": settings,
     "contestants": contestants,
     "sponsors": sponsors,
@@ -137,12 +141,10 @@ def main():
     "callbackStore": callbackStore,
     "thisWriter": thisWriter,
     "phases": phases
-    }) # Allows for convenient passing of the entire game state to anything that needs it (usually events)
-    
+    })) # Allows for convenient passing of the entire game state to anything that needs it (usually events)
     # An unfortunate bit of split processing
     for sponsor in sponsors.values():
         sponsor.initializeTraits(state)
-    
     # CALLBACKS
     # As much as possible influence event processing from here. Note that these callbacks happen IN ORDER. It would be possible to do this in a more
     # modular manner by defining a callback object, defining a registering function, using decorators... but that provides effectively no control on
@@ -157,7 +159,7 @@ def main():
     
     if PRINTHTML:
         startup.insert(0, ArenaUtils.relationshipWrite)
-    
+
     # modifyBaseWeights: Expected args: liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state. Modify in place.
         # Also a good time to do any beginning of turn stuff
     modifyBaseWeights = [
@@ -189,7 +191,7 @@ def main():
     contestantIndivActorWithSponsorsCallback,
     partial(allRelationships.relationsRoleWeightCallback, "Sponsor")
     ]
-    
+
     # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantKey, thisevent, state, participants, victims, sponsorsHere. Return: bool proceedAsUsual, resetEvent (True if you want the usual event chain to still happen, and True if you want the event to Reset entirely)
     # Note that if *any* of these returns "unusually", then normal event processing is overridden and no further callbacks occur
     overrideContestantEvent = []  
@@ -228,8 +230,8 @@ def main():
     if PRINTHTML:
         postGameCallbacks.insert(0, ArenaUtils.killWrite)
         postGameCallbacks.insert(0, ArenaUtils.relationshipWrite)
-    
-    callbacks = {"startup": startup,
+
+    callbacks = ArenaUtils.DictToOrderedDict({"startup": startup,
                  "modifyBaseWeights": modifyBaseWeights,
                  "modifyIndivActorWeights": modifyIndivActorWeights,
                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
@@ -243,16 +245,15 @@ def main():
                  "preDayCallbacks": preDayCallbacks,
                  "postDayCallbacks": postDayCallbacks,
                  "postGameCallbacks": postGameCallbacks,
-    }
-    
+    })
+
     # loophole that allows event-defining and item/status-defining files to slip callbacks in
     for store, funcList in list(Event.Event.inserted_callbacks.items())+list(Item.inserted_callbacks.items()):
         callbacks[store].extend(funcList)
-    
+
     state["callbacks"] = callbacks
-    
+
     # Nested functions that need access to variables in main
-    
     def modifyWeightForMultipleActors(trueNumRoles, baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
         if eventName in baseWeights:
             if not trueNumRoles[eventName]:
@@ -273,6 +274,7 @@ def main():
                 if len(validRoles) < trueNumRoles[eventName]:
                     indivProb[eventName] = 0 # This event cannot happen
                     return
+            validRoles = sorted(list(validRoles))
             for role in validRoles:
                 weights[eventName][role] = baseWeights[eventName]
                 eventMayProceed = True
@@ -296,7 +298,7 @@ def main():
         else:
             roles = []
         return roles
-    
+
     # Run simulation
 
     # General idea:
@@ -311,13 +313,14 @@ def main():
     # Then print results into HTML (?) or whatever makes sense
     # Repeat.
     restartTurn = False
-    
+ 
     #Startup callbacks
     for callback in callbacks["startup"]:
         callback(state)
 
+
     # Main loop of DEATH
-    STATSDEBUG["allEvents"] = collections.defaultdict(int) if "allEvents" not in STATSDEBUG else STATSDEBUG["allEvents"]
+    STATSDEBUG["allEvents"] = ArenaUtils.DefaultOrderedDict(int) if "allEvents" not in STATSDEBUG else STATSDEBUG["allEvents"]
     while True:
         turnNumber[0] += 1
         if turnNumber[0] in phases:
@@ -330,23 +333,23 @@ def main():
         for phaseNum, thisPhase in enumerate(thisDay["phases"]):
             titleString = thisDay["titles"][phaseNum]
             state["curPhase"] = thisPhase
-            eventsActive = {eventName: True for eventName, x in events.items() if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]}
+            eventsActive = ArenaUtils.DictToOrderedDict({eventName: True for eventName, x in events.items() if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]})
             while True: # this just allows resetting the iteration
                 if PRINTHTML:
                     thisWriter = HTMLWriter(statuses)
                     thisWriter.addTitle(titleString.replace('#', str(turnNumber[0])))
                 restartTurn = False # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
                 initialState = copy.deepcopy(state) #Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
-                liveContestants = {x: y for x, y in contestants.items() if y.alive}
+                liveContestants = ArenaUtils.DictToOrderedDict({x: y for x, y in contestants.items() if y.alive})
                 if phaseNum == 0: # I want to be explicit here
                     origLiveContestants = copy.copy(liveContestants)
                 # Sample contestants randomly
                 randOrderContestantKeys = random.sample(liveContestants.keys(), len(liveContestants))
                 # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
-                baseEventActorWeights = {x: y.baseProps["mainWeight"] if x in eventsActive and eventsActive[x] else 0 for x, y in events.items()}
-                baseEventParticipantWeights = {x: y.baseProps["participantWeight"] for x, y in events.items() if "participantWeight" in y.baseProps}
-                baseEventVictimWeights = {x: y.baseProps["victimWeight"] for x, y in events.items() if "victimWeight" in y.baseProps}
-                baseEventSponsorWeights = {x: y.baseProps["sponsorWeight"] for x, y in events.items() if "sponsorWeight" in y.baseProps}
+                baseEventActorWeights = ArenaUtils.DictToOrderedDict({x: y.baseProps["mainWeight"] if x in eventsActive and eventsActive[x] else 0 for x, y in events.items()})
+                baseEventParticipantWeights = ArenaUtils.DictToOrderedDict({x: y.baseProps["participantWeight"] for x, y in events.items() if "participantWeight" in y.baseProps})
+                baseEventVictimWeights = ArenaUtils.DictToOrderedDict({x: y.baseProps["victimWeight"] for x, y in events.items() if "victimWeight" in y.baseProps})
+                baseEventSponsorWeights = ArenaUtils.DictToOrderedDict({x: y.baseProps["sponsorWeight"] for x, y in events.items() if "sponsorWeight" in y.baseProps})
                 #Do callbacks for modifying base weights
                 for callback in callbacks["modifyBaseWeights"]:
                     callback(liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state)
@@ -358,13 +361,13 @@ def main():
                     actor = liveContestants[contestantKey] # Some contestants may die in events, they get removed at the end of the for loop
                     alreadyUsed.add(contestantKey) 
                     # Calculate individualized/multi-contestant corrected event probabilities
-                    indivProb = {}
-                    eventParticipantWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-                    eventVictimWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-                    eventSponsorWeights = collections.defaultdict(dict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-                    trueNumParticipants = collections.defaultdict(int)
-                    trueNumVictims = collections.defaultdict(int)
-                    trueNumSponsors = collections.defaultdict(int)
+                    indivProb = collections.OrderedDict()
+                    eventParticipantWeights = ArenaUtils.DefaultOrderedDict(collections.OrderedDict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+                    eventVictimWeights = ArenaUtils.DefaultOrderedDict(collections.OrderedDict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+                    eventSponsorWeights = ArenaUtils.DefaultOrderedDict(collections.OrderedDict) # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
+                    trueNumParticipants = ArenaUtils.DefaultOrderedDict(int)
+                    trueNumVictims = ArenaUtils.DefaultOrderedDict(int)
+                    trueNumSponsors = ArenaUtils.DefaultOrderedDict(int)
                     itcounter = 0
                     while True:
                         for eventName, event in events.items():
@@ -421,7 +424,7 @@ def main():
                     # Note, however, that this _not_ a good way to enforce specific participants, etc. as this is both wasteful
                     # and not-statistically accurate.
                     # Ugly Hack, but not sure there's a better way. We need pre-event information on contestants, and short of deepcopying everything...
-                    preEventInjuries = {x: contestants[x].hasThing("Injury") for x in liveContestants}
+                    preEventInjuries = ArenaUtils.DictToOrderedDict({x: contestants[x].hasThing("Injury") for x in liveContestants})
                     allRelationships.backup()
                     while(True):
                         #Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved. 
@@ -429,7 +432,7 @@ def main():
                         # Handle event overrides, if any
                         #Determine participants, victims, if any.
                         thisevent = events[eventName]
-                        victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims) 
+                        victims = selectRoles(baseEventVictimWeights, eventVictimWeights, trueNumVictims)
                         possibleParticipantEventWeights = copy.deepcopy(eventParticipantWeights) # Can't be both a participant and a victim... (this creates a bit of bias, but oh well)
                         for x in victims:
                             possibleParticipantEventWeights[eventName][x.name] = 0
@@ -535,12 +538,13 @@ def main():
             callback(state)  
         if turnNumber[0]>200:
             raise TooManyDays('Way too many days')
+            
 
 class TooManyDays(Exception):
     pass
             
 def statCollection(): # expand to count number of days, and fun stuff like epiphany targets?
-    statDict = collections.defaultdict(int)
+    statDict = ArenaUtils.DefaultOrderedDict(int)
     numErrors = 0
     days = []
     global PRINTHTML
@@ -579,6 +583,14 @@ if __name__ == '__main__':
     if len(sys.argv)>1 and sys.argv[1] == '--stats':
         statCollection()
     else:
+        if len(sys.argv)>1 and sys.argv[1] == '--loadseed':  # this is deliberately mutually exclusive with "--stats"
+            with open("RSEED_BACKUP", "rb") as f:
+                lograndstate = pickle.load(f)
+            random.setstate(lograndstate)
+        else:
+            lograndstate = random.getstate()
+            with open("RSEED_BACKUP", "wb") as f:
+                pickle.dump(lograndstate, f)
         if not DEBUG:
             main()
         else:   

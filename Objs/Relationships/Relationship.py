@@ -15,14 +15,16 @@ class Relationship(object):
         self.settings = settings
         self.contestants = contestants
         self.sponsors = sponsors
-        self.friendships = {} #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
-        self.loveships = {}
+        self.friendships = collections.OrderedDict() #Storing it like this is more memory-intensive than storing pointers in the contestants, but globally faster.
+        self.loveships = collections.OrderedDict()
         mergedpeople = list(contestants.keys()) + list(sponsors.keys()) #Or I could write a generator to combine the iterators, but I'll just spend the memory for now
         for contestant in mergedpeople:
-            self.friendships[contestant]={}
-            self.loveships[contestant]={}
+            self.friendships[contestant] = collections.OrderedDict()
+            self.loveships[contestant] = collections.OrderedDict()
         desiredSD = 4/(inv_erf(1-2*settings["meanNumInitialRelationships"]/len(mergedpeople))*math.sqrt(2))  # we want to set SD such that "meanNumInitialRelationships" people end up beyond 4
-        for contestant1, contestant2 in itertools.combinations(mergedpeople, 2):
+        # This is awkward and memory-intensive, but we need this sorted for determinism
+        sortedMergedPeople = sorted(itertools.combinations(mergedpeople, 2))       
+        for contestant1, contestant2 in sortedMergedPeople:
             self.friendships[contestant1][contestant2] = min(max(random.gauss(0, desiredSD),-5),5)  # Relationships can be bidirectional. Dict keys must be immutable and tuples are only immutable if all their entries are.
             self.friendships[contestant2][contestant1] = self.friendships[contestant1][contestant2] # But start them off equal
             self.loveships[contestant1][contestant2] = min(max(random.gauss(0, desiredSD),-5),5)
@@ -36,10 +38,10 @@ class Relationship(object):
     
     # Compares current state with backup, returning a summary of the changes found.
     def reportChanges(self):
-        new_loves = {}  # tuple(a,b): bool (true if the reverse already matched this state)
-        lost_loves = {}
-        new_hates = {}
-        lost_hates = {}
+        new_loves = collections.OrderedDict()  # tuple(a,b): bool (true if the reverse already matched this state)
+        lost_loves = collections.OrderedDict()
+        new_hates = collections.OrderedDict()
+        lost_hates = collections.OrderedDict()
         for contestant1, likes in self.loveships.items():
             if (contestant1 in self.contestants and not self.contestants[contestant1].alive):
                 continue
@@ -100,7 +102,7 @@ class Relationship(object):
         for person in list(self.contestants.values()) + list(self.sponsors.values()):
             if person.name == str(original) or person.name == str(target):
                 continue
-            self.IncreaseFriendLevel(person, target, change*(self.friendships[person.name][original.name] + 2*self.loveships[person.name][original.name])/5*self.settings["relationshipPropagation"] , False)
+            self.IncreaseFriendLevel(person, target, change*(self.friendships[person.name][original.name] + 2*self.loveships[person.name][original.name])/5*self.settings["relationshipPropagation"], False)
     
     def IncreaseFriendLevel(self, person1, person2, change, propagate=True):
         if propagate:

@@ -3,6 +3,7 @@
 from __future__ import division # In case of Python 2+. The Python 3 implementation is way less dumb.
 from Objs.Items.Item import ItemInstance
 from Objs.Items.Status import StatusInstance
+import Objs.Utilities.ArenaUtils as ArenaUtils
 
 import random
 import collections
@@ -71,15 +72,15 @@ class Contestant(object):
         # Note that this is not a deepcopy.
         self.alive = True
         self.events = None
-        self.statEventMultipliers = collections.defaultdict(dict) # For efficiency, each contestant stores information about how their
+        self.statEventMultipliers = ArenaUtils.DefaultOrderedDict(collections.OrderedDict) # For efficiency, each contestant stores information about how their
         # event probabilities differ from the base. This cannot be fully initialized until the Events are known,
         # and I choose to defer it to its own step in main. statEventMultipliers are calculated off of base stats
         # The rest come from items and perhaps other sources.
-        self.fullEventMultipliers = collections.defaultdict(dict) # Note that I _could_ pass in another default dict to give default values,
+        self.fullEventMultipliers = ArenaUtils.DefaultOrderedDict(collections.OrderedDict) # Note that I _could_ pass in another default dict to give default values,
         # but this isn't actually a good idea (I actually want access attempts to the bottom layer to fail if unavailable). However, every
         # event should have its own dict in here regardless of anything else that is going on, so that's safe.
-        self.eventAdditions = collections.defaultdict(dict)
-        self.eventDisabled = collections.defaultdict(dict) # These events cannot happen to this contestant. Default False
+        self.eventAdditions = ArenaUtils.DefaultOrderedDict(collections.OrderedDict)
+        self.eventDisabled = ArenaUtils.DefaultOrderedDict(collections.OrderedDict) # These events cannot happen to this contestant. Default False
 
     def __str__(self):
         return self.name
@@ -90,17 +91,16 @@ class Contestant(object):
                                            random.randint(-1*self.settings['traitRandomness'], self.settings['traitRandomness']), 0), 10)
                                            
     def contestantStatFill(self, statsTemplate):  # Fills in missing stats based on a template
-        for x in statsTemplate:
+        for x in sorted(list(statsTemplate)):  # We need a deteriministic order.
             if x not in self.stats:
                 self.stats[x] = random.randint(0, 10)
 
     @classmethod
     def makeRandomContestant(cls, name, gender, imageFile, statstemplate, settings):
-        inDict = {
-            'imageFile': imageFile,
-            'stats': {},
-            'gender': gender,
-            }
+        inDict = collections.OrderedDict()
+        inDict['imageFile'] = imageFile,
+        inDict['stats'] = collections.OrderedDict(),
+        inDict['gender'] = gender,
         for key in statstemplate:
             inDict['stats'][key] = random.randint(0, 10)
         return cls(name, inDict, settings)
@@ -149,7 +149,7 @@ class Contestant(object):
                     self.fullEventMultipliers[eventName][multiplierType] = self.statEventMultipliers[eventName][multiplierType]
 
             # NOTE: at the moment, the unique and itemrequired fields can only affect events for which the contestant is the main actor. This may need expansion in the future.
-            self.eventDisabled[eventName] = {}
+            self.eventDisabled[eventName] = collections.OrderedDict()
             self.eventDisabled[eventName]['main'] = event.baseProps['unique'] or event.baseProps['itemRequired'] or ("statusRequired" in event.baseProps and event.baseProps["statusRequired"])
             if event.baseProps['unique']:
                 if self.name in event.baseProps['uniqueUsers']:

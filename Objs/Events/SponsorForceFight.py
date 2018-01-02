@@ -1,5 +1,6 @@
 from Objs.Events.Event import Event
 from ..Utilities.ArenaUtils import weightedDictRandom
+import collections
 import random
 
 # For perfornace reasons, this could be a self-removing callback that sets a flag and destroys itself. However, in case we ever allow resurrection, I will do it this way.
@@ -21,7 +22,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     desc = "Tired of waiting, the sponsors force two of the remaining contestants to fight. "
     
     # Build dict of weights for various possibilities
-    optionDict = {'fight': 1}
+    optionDict = collections.OrderedDict()
+    optionDict['fight'] = 1
     if state['allRelationships'].friendships[str(mainActor)][str(participants[0])]>3 and state['allRelationships'].friendships[str(participants[0])][str(mainActor)]>3:
         optionDict['attemptEscape'] = 2
     if state['allRelationships'].loveships[str(mainActor)][str(participants[0])]>3:

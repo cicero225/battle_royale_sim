@@ -1,8 +1,10 @@
 from Objs.Items.Item import Item
+import collections
 import random
 
 # The numbers here are the chance the disease spreads per interaction per person.
-DISEASE_ITEMS = {"Fever": 0.5}
+DISEASE_ITEMS = collections.OrderedDict()
+DISEASE_ITEMS["Fever"] = 0.5
 
 def spreadDisease(thisWriter, eventOutputs, state):
     if len(eventOutputs[1]) < 2:  # This happens fairly often, so might as well shortcut this
@@ -13,7 +15,7 @@ def spreadDisease(thisWriter, eventOutputs, state):
         if not hasDisease:
             return
         # Each person who already has the disease has a chance to spread it to every other person. I will pull it from the instance, in case in the future we have diseases with changing spread chances.
-        for contestant in set(potentialContestants) - set(hasDisease):
+        for contestant in sorted(list(set(potentialContestants) - set(hasDisease)), key=lambda x: str(x)):
             if not contestant.alive:
                 continue
             # Chance procs for each person already sick
