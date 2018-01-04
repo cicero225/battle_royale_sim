@@ -13,14 +13,19 @@ from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict, Defaul
 from functools import partial
 from Objs.Items.Item import ItemInstance
 
-class Event(object): #Python 2.x compatibility
 
-    event_callbacks =  OrderedDict()  # It is important that this is a class attribute, which can be modified in Python
-    inserted_callbacks =  OrderedDict()  # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
-    stateStore = [None]  # This allows import time access to a pointer to state, which is needed occasionally by doEvent functors. It must be supplied by main during initialization.
+class Event(object):  # Python 2.x compatibility
+
+    # It is important that this is a class attribute, which can be modified in Python
+    event_callbacks = OrderedDict()
+    # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
+    inserted_callbacks = OrderedDict()
+    # This allows import time access to a pointer to state, which is needed occasionally by doEvent functors. It must be supplied by main during initialization.
+    stateStore = [None]
 
     def __init__(self, name, inDict, settings):
-        self.baseProps = inDict # Hey, it's the most straightforward way and basically achieves the purpose
+        # Hey, it's the most straightforward way and basically achieves the purpose
+        self.baseProps = inDict
         # Could also use setattr, but...
 
         # mainWeight = sets relative probability of rolling event for given character, participantWeight
@@ -33,34 +38,38 @@ class Event(object): #Python 2.x compatibility
 
         # Randomize baseWeight a little
         self.name = name
-        self.settings = settings #screw it, everyone gets a copy of what they need. Python stores by reference anyway.
-        #This is kind of a dumb way to do it, but being more general is a pain
+        # screw it, everyone gets a copy of what they need. Python stores by reference anyway.
+        self.settings = settings
+        # This is kind of a dumb way to do it, but being more general is a pain
         for multiplierType in ['main', 'participant', 'victim']:
-            if multiplierType+'Weight' in self.baseProps:
-                self.eventRandomize(multiplierType+'Weight')
+            if multiplierType + 'Weight' in self.baseProps:
+                self.eventRandomize(multiplierType + 'Weight')
         self.doEvent = partial(self.event_callbacks[self.name], self)
-        self.eventStore =  OrderedDict()  # arbitrary storage for event data, useful for holding information over multiple calls
-    
+        # arbitrary storage for event data, useful for holding information over multiple calls
+        self.eventStore = OrderedDict()
+
     def __str__(self):
         return self.name
-    
+
     @classmethod
     def registerInsertedCallback(cls, callbackLocation, callback):
-        cls.inserted_callbacks.setdefault(callbackLocation, []).append(callback)
-    
+        cls.inserted_callbacks.setdefault(
+            callbackLocation, []).append(callback)
+
     @classmethod
     def registerEvent(cls, eventName, callback):
         cls.event_callbacks[eventName] = callback
-    
+
     def doEvent(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-        desc = mainActor.name+' did absolutely nothing.'
-        return (desc, [mainActor], []) # Second entry is the contestants named in desc, in order. Third is anyone who died.
+        desc = mainActor.name + ' did absolutely nothing.'
+        # Second entry is the contestants named in desc, in order. Third is anyone who died.
+        return (desc, [mainActor], [])
 
     def eventRandomize(self, propName):
         self.baseProps[propName] = (self.baseProps[propName]
-                                    *(1+random.uniform(-1*self.settings['eventRandomness'], self.settings['eventRandomness'])))
-                                    
-    @staticmethod                                
+                                    * (1 + random.uniform(-1 * self.settings['eventRandomness'], self.settings['eventRandomness'])))
+
+    @staticmethod
     def parseGenderSubject(contestantObj):
         genString = contestantObj.gender
         if genString == "F":
@@ -69,8 +78,8 @@ class Event(object): #Python 2.x compatibility
             return "he"
         else:
             return "it"
-            
-    @staticmethod                                
+
+    @staticmethod
     def parseGenderObject(contestantObj):
         genString = contestantObj.gender
         if genString == "F":
@@ -80,7 +89,7 @@ class Event(object): #Python 2.x compatibility
         else:
             return "it"
 
-    @staticmethod                                
+    @staticmethod
     def parseGenderPossessive(contestantObj):
         genString = contestantObj.gender
         if genString == "F":
@@ -89,7 +98,7 @@ class Event(object): #Python 2.x compatibility
             return "his"
         else:
             return "its"
-    
+
     @staticmethod
     def parseGenderReflexive(contestantObj):
         genString = contestantObj.gender
@@ -99,7 +108,7 @@ class Event(object): #Python 2.x compatibility
             return "himself"
         else:
             return "itself"
-    
+
     @staticmethod
     def activateEventNextTurnForContestant(eventName, contestantName, state, weight):
         def func(actor, origWeight, event):
@@ -107,10 +116,15 @@ class Event(object): #Python 2.x compatibility
                 return (weight, True)
             else:
                 return (origWeight, True)
-        anonfunc = lambda actor, origWeight, event: func(actor, origWeight, event) # this anonymizes func, giving a new reference each this is called
-        state["callbacks"]["modifyIndivActorWeights"].insert(0, anonfunc) # This needs to be at beginning for proper processing
-        return anonfunc # If you ever intend to remove this callback, it's a good idea to keep track of this.
-    
+
+        # this anonymizes func, giving a new reference each this is called
+        def anonfunc(actor, origWeight, event): return func(
+            actor, origWeight, event)
+        # This needs to be at beginning for proper processing
+        state["callbacks"]["modifyIndivActorWeights"].insert(0, anonfunc)
+        # If you ever intend to remove this callback, it's a good idea to keep track of this.
+        return anonfunc
+
     # TODO : We do not yet properly handle loot with potential different properties (i.e. two different non-stackable spears)
     @staticmethod
     def lootAll(looter, looted):
@@ -122,7 +136,8 @@ class Event(object): #Python 2.x compatibility
         for loot in itemList:
             if hasattr(looted, 'inventory'):
                 looted.removeItem(loot, loot.count)
-            if not looter.hasThing(loot) or loot.stackable:  # If we wanted to make non-stackable loot acquirable in mass quantity, we'd remove the first check...but what do you even do with two spears?...and it would cause double stats, etc.
+            # If we wanted to make non-stackable loot acquirable in mass quantity, we'd remove the first check...but what do you even do with two spears?...and it would cause double stats, etc.
+            if not looter.hasThing(loot) or loot.stackable:
                 looter.addItem(loot, loot.count)
                 lootList.append(loot)
         return lootList
@@ -137,46 +152,59 @@ class Event(object): #Python 2.x compatibility
         for loot in itemList:
             if hasattr(looted, 'inventory'):
                 looted.removeItem(loot, loot.count)
-            maybeLooters = [looter for looter in looters if not looter.hasThing(loot) or loot.stackable]
+            maybeLooters = [looter for looter in looters if not looter.hasThing(
+                loot) or loot.stackable]
             if maybeLooters:
                 for _ in range(loot.count):
                     trueLooter = random.choice(maybeLooters)
                     trueLooter.addItem(loot)
                 lootList.append(loot)
         return lootList
-    
+
     @staticmethod
-    def DieOrEscapeProb1v1(person1, person2, settings, attackStat=None, defenseStat=None): # Attacker, victim
+    # Attacker, victim
+    def DieOrEscapeProb1v1(person1, person2, settings, attackStat=None, defenseStat=None):
         if attackStat is None:
             attackStat = person1.stats['combat ability']
         if defenseStat is None:
             defenseStat = person2.stats['combat ability']
-        return 1/(1+(1+settings['combatAbilityEffect'])**(attackStat-defenseStat)) # probability of kill
-        
+        # probability of kill
+        return 1 / (1 + (1 + settings['combatAbilityEffect'])**(attackStat - defenseStat))
+
     @staticmethod
     def fight(people, relationships, settings):
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
-        alreadyInjured = sorted(list(set(str(person) for person in people if person.hasThing("Injury"))))
+        alreadyInjured = sorted(
+            list(set(str(person) for person in people if person.hasThing("Injury"))))
         # Relationship changes
         # Fights shouldn't cause everyone's mutual friendship to go down, because sometimes it might be 2v2, but this is really hard to model, so rng
-        relHitNum = random.randint(1,len(people)-1)
+        relHitNum = random.randint(1, len(people) - 1)
         for person in people:
-            relDict = DictToOrderedDict({i:6-(relationships.friendships[x.name][person.name]+relationships.friendships[person.name][x.name]+2*(relationships.loveships[person.name][x.name]+relationships.loveships[x.name][person.name]))/6 for i, x in enumerate(people) if x != person})
+            relDict = DictToOrderedDict({i: 6 - (relationships.friendships[x.name][person.name] + relationships.friendships[person.name][x.name] + 2 * (
+                relationships.loveships[person.name][x.name] + relationships.loveships[x.name][person.name])) / 6 for i, x in enumerate(people) if x != person})
             chosen = weightedDictRandom(relDict, relHitNum)
             for index in chosen:
-                relationships.IncreaseFriendLevel(person, people[index], random.randint(-4,-3))
-                relationships.IncreaseLoveLevel(person, people[index], random.randint(-6,-4))  
+                relationships.IncreaseFriendLevel(
+                    person, people[index], random.randint(-4, -3))
+                relationships.IncreaseLoveLevel(
+                    person, people[index], random.randint(-6, -4))
         # Actual fight
         fightDict = OrderedDict()
-        for i, person1 in enumerate(people): # people gain strength from their friends, but this has to be compared with the average strength of the rest of the group
-            baseCombatAbility = person1.stats['combat ability']*(1+((person1.stats['aggression']*2+person1.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
+        # people gain strength from their friends, but this has to be compared with the average strength of the rest of the group
+        for i, person1 in enumerate(people):
+            # includes a small multiplier from ruthlessness and aggression
+            baseCombatAbility = person1.stats['combat ability'] * (1 + (
+                (person1.stats['aggression'] * 2 + person1.stats['ruthlessness']) / 15 - 1) * 0.3)
             for person2 in people:
                 if person1 == person2:
                     continue
-                person2Ability = person2.stats['combat ability']*(1+((person2.stats['aggression']*2+person2.stats['ruthlessness'])/15 - 1)*0.3)
-                baseCombatAbility += settings['friendCombatEffect']*relationships.friendships[str(person2)][str(person1)]/5 * person2Ability if relationships.friendships[str(person2)][str(person1)]>0 else 0
-                baseCombatAbility += settings['friendCombatEffect']*relationships.loveships[str(person2)][str(person1)]/5 * person2Ability if relationships.loveships[str(person2)][str(person1)]>0 else 0
-            fightDict[i]=baseCombatAbility
+                person2Ability = person2.stats['combat ability'] * (1 + (
+                    (person2.stats['aggression'] * 2 + person2.stats['ruthlessness']) / 15 - 1) * 0.3)
+                baseCombatAbility += settings['friendCombatEffect'] * relationships.friendships[str(person2)][str(
+                    person1)] / 5 * person2Ability if relationships.friendships[str(person2)][str(person1)] > 0 else 0
+                baseCombatAbility += settings['friendCombatEffect'] * relationships.loveships[str(person2)][str(
+                    person1)] / 5 * person2Ability if relationships.loveships[str(person2)][str(person1)] > 0 else 0
+            fightDict[i] = baseCombatAbility
         probDict = OrderedDict()
         deadList = []
         liveList = []
@@ -188,21 +216,24 @@ class Event(object): #Python 2.x compatibility
                     continue
                 meanAbilityTot += fightDict[ii]
             # Sigmoid probability! woo...
-            probDeath = 1/(1+(1+settings['combatAbilityEffect'])**(fightDict[i]-meanAbilityTot/(len(people)-1)))
+            probDeath = 1 / (1 + (1 + settings['combatAbilityEffect'])**(
+                fightDict[i] - meanAbilityTot / (len(people) - 1)))
             # Yes the exact same formula... because it makes sense.
-            probInjury = 1/(1+(1+settings['combatAbilityEffect'])**(fightDict[i]-meanAbilityTot/(len(people)-1)))
-            if random.random()<probDeath:
+            probInjury = 1 / (1 + (1 + settings['combatAbilityEffect'])**(
+                fightDict[i] - meanAbilityTot / (len(people) - 1)))
+            if random.random() < probDeath:
                 deadList.append(person1)
                 person1.alive = False
             else:
                 liveList.append(person1)
-                if str(person1) not in alreadyInjured and random.random()<probInjury:
+                if str(person1) not in alreadyInjured and random.random() < probInjury:
                     injuredList.append(person1)
-                    person1.addStatus(Event.stateStore[0]["statuses"]["Injury"])
+                    person1.addStatus(
+                        Event.stateStore[0]["statuses"]["Injury"])
         if not deadList:
             desc = 'but no one was killed.'
             if injuredList:
-                desc += ' (Injured: '+Event.englishList(injuredList)+')'
+                desc += ' (Injured: ' + Event.englishList(injuredList) + ')'
             return(desc, [], [], None)
         desc = 'and '
         descList = []
@@ -211,46 +242,64 @@ class Event(object): #Python 2.x compatibility
             for theDead in deadList:
                 lootList += Event.lootRandom(liveList, theDead)
             if len(deadList) == 1:
-                desc += deadList[0].name+' was killed!'
+                desc += deadList[0].name + ' was killed!'
             else:
-                desc += Event.englishList(deadList)+' were killed!'
+                desc += Event.englishList(deadList) + ' were killed!'
             if lootList:
-                desc += ' '+Event.englishList(lootList)+' was looted.'
+                desc += ' ' + Event.englishList(lootList) + ' was looted.'
             descList.extend(lootList)
         elif len(deadList) == len(people):
             desc += 'everyone died in the fighting!'
         if injuredList:
-            desc += ' (Injured: '+Event.englishList(injuredList)+')'
+            desc += ' (Injured: ' + Event.englishList(injuredList) + ')'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
         allKillers = defaultdict(str)
         for dead in deadList:
-            killDict = DictToOrderedDict({x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in people if x is not dead})
+            killDict = DictToOrderedDict({x: 1.1**(relationships.friendships[str(x)][str(
+                dead)] + 2 * relationships.loveships[str(x)][str(dead)]) for x in people if x is not dead})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         return(desc, descList, deadList, allKillers)
-    
+
     @staticmethod
     def factionFight(faction1, faction2, relationships, settings):
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
-        alreadyInjured = sorted(list(set(str(person) for person in faction1 + faction2 if person.hasThing("Injury"))))
+        alreadyInjured = sorted(list(
+            set(str(person) for person in faction1 + faction2 if person.hasThing("Injury"))))
         # Relationship changes
         for person1 in faction1:
             for person2 in faction2:
-                relationships.IncreaseFriendLevel(person1, person2, random.randint(-4,-3))
-                relationships.IncreaseLoveLevel(person1, person2, random.randint(-6,-4))
-                relationships.IncreaseFriendLevel(person2, person1, random.randint(-4,-3))
-                relationships.IncreaseLoveLevel(person2, person1, random.randint(-6,-4))
+                relationships.IncreaseFriendLevel(
+                    person1, person2, random.randint(-4, -3))
+                relationships.IncreaseLoveLevel(
+                    person1, person2, random.randint(-6, -4))
+                relationships.IncreaseFriendLevel(
+                    person2, person1, random.randint(-4, -3))
+                relationships.IncreaseLoveLevel(
+                    person2, person1, random.randint(-6, -4))
         # Actual fight
         faction1Power = 0
         for person1 in faction1:
-            faction1Power += person1.stats['combat ability']*(1+((person1.stats['aggression']*2+person1.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
+            # includes a small multiplier from ruthlessness and aggression
+            faction1Power += person1.stats['combat ability'] * (1 + (
+                (person1.stats['aggression'] * 2 + person1.stats['ruthlessness']) / 15 - 1) * 0.3)
         faction2Power = 0
         for person2 in faction2:
-            faction2Power += person2.stats['combat ability']*(1+((person2.stats['aggression']*2+person2.stats['ruthlessness'])/15 - 1)*0.3) # includes a small multiplier from ruthlessness and aggression
-        
-        faction1ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**(faction1Power-faction2Power))
-        faction1ProbInjury = 1/(1+(1+settings['combatAbilityEffect'])**(faction1Power-faction2Power))
-        faction2ProbDeath = 1/(1+(1+settings['combatAbilityEffect'])**(faction2Power-faction1Power))
-        faction2ProbInjury = 1/(1+(1+settings['combatAbilityEffect'])**(faction1Power-faction2Power))
+            # includes a small multiplier from ruthlessness and aggression
+            faction2Power += person2.stats['combat ability'] * (1 + (
+                (person2.stats['aggression'] * 2 + person2.stats['ruthlessness']) / 15 - 1) * 0.3)
+
+        faction1ProbDeath = 1 / \
+            (1 + (1 + settings['combatAbilityEffect'])
+             ** (faction1Power - faction2Power))
+        faction1ProbInjury = 1 / \
+            (1 + (1 + settings['combatAbilityEffect'])
+             ** (faction1Power - faction2Power))
+        faction2ProbDeath = 1 / \
+            (1 + (1 + settings['combatAbilityEffect'])
+             ** (faction2Power - faction1Power))
+        faction2ProbInjury = 1 / \
+            (1 + (1 + settings['combatAbilityEffect'])
+             ** (faction1Power - faction2Power))
         faction1DeadList = []
         faction1LiveList = []
         faction2DeadList = []
@@ -258,28 +307,30 @@ class Event(object): #Python 2.x compatibility
         injuredList = []
         for person1 in faction1:
             # Sigmoid probability! woo...
-            if random.random()<faction1ProbDeath:
+            if random.random() < faction1ProbDeath:
                 faction1DeadList.append(person1)
                 person1.alive = False
             else:
                 faction1LiveList.append(person1)
-                if str(person1) not in alreadyInjured and random.random()<faction1ProbInjury:
+                if str(person1) not in alreadyInjured and random.random() < faction1ProbInjury:
                     injuredList.append(person1)
-                    person1.addStatus(Event.stateStore[0]["statuses"]["Injury"])
+                    person1.addStatus(
+                        Event.stateStore[0]["statuses"]["Injury"])
         for person2 in faction2:
-            if random.random()<faction2ProbDeath:
+            if random.random() < faction2ProbDeath:
                 faction2DeadList.append(person2)
                 person2.alive = False
             else:
                 faction2LiveList.append(person2)
-                if str(person2) not in alreadyInjured and random.random()<faction2ProbInjury:
+                if str(person2) not in alreadyInjured and random.random() < faction2ProbInjury:
                     injuredList.append(person2)
-                    person2.addStatus(Event.stateStore[0]["statuses"]["Injury"])
-                
+                    person2.addStatus(
+                        Event.stateStore[0]["statuses"]["Injury"])
+
         if not faction1DeadList and not faction2DeadList:
             desc = 'but no one was killed.'
             if injuredList:
-                desc += ' (Injured: '+Event.englishList(injuredList)+')'
+                desc += ' (Injured: ' + Event.englishList(injuredList) + ')'
             return(desc, [], [], OrderedDict())
         desc = 'and '
         descList = []
@@ -288,7 +339,7 @@ class Event(object): #Python 2.x compatibility
             # We have to do the looting carefully
             lootList1 = []
             for theDead in faction1DeadList:
-                if not faction2LiveList: # If the entire other faction is dead, this faction gets their own dead teammate's stuff
+                if not faction2LiveList:  # If the entire other faction is dead, this faction gets their own dead teammate's stuff
                     lootList1 += Event.lootRandom(faction1LiveList, theDead)
                 else:
                     lootList1 += Event.lootRandom(faction2LiveList, theDead)
@@ -300,34 +351,37 @@ class Event(object): #Python 2.x compatibility
                     lootList2 += Event.lootRandom(faction1LiveList, theDead)
             lootList = lootList1 + lootList2
             if len(deadList) == 1:
-                desc += deadList[0].name+' was killed!'
+                desc += deadList[0].name + ' was killed!'
             else:
-                desc += Event.englishList(deadList)+' were killed!'
+                desc += Event.englishList(deadList) + ' were killed!'
             if lootList:
-                desc += ' '+Event.englishList(lootList)+' was looted.'
+                desc += ' ' + Event.englishList(lootList) + ' was looted.'
             descList.extend(lootList)
         elif not faction2LiveList and not faction1LiveList:
             desc += 'everyone died in the fighting!'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
         allKillers = DefaultOrderedDict(str)
         for dead in faction1DeadList:
-            killDict = DictToOrderedDict({x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction2})
+            killDict = DictToOrderedDict({x: 1.1**(relationships.friendships[str(x)][str(
+                dead)] + 2 * relationships.loveships[str(x)][str(dead)]) for x in faction2})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         for dead in faction2DeadList:
-            killDict = DictToOrderedDict({x:1.1**(relationships.friendships[str(x)][str(dead)]+2*relationships.loveships[str(x)][str(dead)]) for x in faction1})
+            killDict = DictToOrderedDict({x: 1.1**(relationships.friendships[str(x)][str(
+                dead)] + 2 * relationships.loveships[str(x)][str(dead)]) for x in faction1})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         if injuredList:
-            desc += ' (Injured: '+Event.englishList(injuredList)+')'
+            desc += ' (Injured: ' + Event.englishList(injuredList) + ')'
         return(desc, descList, deadList, allKillers)
-    
+
     @staticmethod
     def getFriendlyIfPossible(namedObject):
-        countModifier = " (x"+str(namedObject.count)+")" if hasattr(namedObject, "count") and namedObject.count > 1 else ""
-        try:    
+        countModifier = " (x" + str(namedObject.count) + ")" if hasattr(
+            namedObject, "count") and namedObject.count > 1 else ""
+        try:
             return namedObject.friendly + countModifier
         except AttributeError:
             return namedObject.name + countModifier
-    
+
     @staticmethod
     def englishList(thingList, isObjs=True, customStringGetter=None):
         if customStringGetter:
@@ -336,7 +390,7 @@ class Event(object): #Python 2.x compatibility
             if isObjs:
                 stringGetter = Event.getFriendlyIfPossible
             else:
-                stringGetter = lambda x: x
+                def stringGetter(x): return x
         if not thingList:
             return ''
         thingList = list(thingList)
@@ -345,4 +399,4 @@ class Event(object): #Python 2.x compatibility
         elif len(thingList) == 2:
             return stringGetter(thingList[0]) + ' and ' + stringGetter(thingList[1])
         else:
-            return ', '.join(stringGetter(x) for x in thingList[:-1])+' and '+stringGetter(thingList[-1])
+            return ', '.join(stringGetter(x) for x in thingList[:-1]) + ' and ' + stringGetter(thingList[-1])
