@@ -114,6 +114,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += ' but in the end both sides got tired and gave up, agreeing to use the fire together for one night. Neither side slept well.'
         return (desc, descList, [])
 
+    # need to ban contestant from turning up again in fire events if they won the fight.
+    if contestant.name not in fightDeadList:
+        self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
     desc += fightDesc
     descList += fightDescList
     return (desc, descList, [x.name for x in fightDeadList], allKillers)
