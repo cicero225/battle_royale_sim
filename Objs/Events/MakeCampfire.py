@@ -4,6 +4,7 @@ from Objs.Events.Event import Event
 from Objs.Items.Status import StatusInstance
 import random
 from collections import defaultdict
+from math import exp
 
 # Survivalism, etc. shouldn't be included in the event weights, because this is kind of a neutral event.
 
@@ -29,7 +30,19 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     mainActor.removeStatus("Hypothermia")
     self.eventStore[str(mainActor)] = True
 
-    # Unless character already has clean water, 50% chance this becomes a clean water event
+    # If character has ever killed anyone, initial 1/3 chance this becomes a haunting event. (affected by stability)
+    # logistic
+    hauntprob = 1/(1 + exp(3 - len(state["callbackStore"]["killCounter"][str(mainActor)]) + (mainActor.stats["stability"] - 5) * self.settings['statInfluence'] * 0.4))
+    if state["callbackStore"]["killCounter"][str(mainActor)] and random.random() < hauntprob:
+        haunter = state["contestants"][str(random.choice(state["callbackStore"]["killCounter"][str(mainActor)]))]
+        desc = str(mainActor) + " was haunted by the ghost of " + str(haunter) + " and unable to sleep or make a fire."
+        descList = [mainActor, state["statuses"]["Ghost"], haunter, state["statuses"]["Hypothermia"]]
+        mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(
+                data={"day": state["turnNumber"][0]}))
+        mainActor.permStatChange({"stability": random.randint(-2,0)})
+        return (desc, descList, [])
+    
+    # Unless character already has clean water, 50% chance (potentially of the remaining 2/3) this becomes a clean water event
     if not mainActor.hasThing("Clean Water"):
         if random.random() > 0.5:
             desc += ' Using it, ' + \

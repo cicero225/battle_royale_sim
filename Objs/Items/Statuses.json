@@ -118,5 +118,19 @@
     "eventsDisabled": {
         },
     "stackable": false
+    },
+    "Ghost":
+    {"imageFile": "Ghost.png",
+    "statChanges": 
+        {},
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
     }
 }
