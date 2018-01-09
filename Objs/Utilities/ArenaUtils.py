@@ -274,7 +274,7 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
 def loggingStartup(state):
     state["callbackStore"]["eventLog"] = DefaultOrderedDict(partial(
         DefaultOrderedDict, partial(DefaultOrderedDict, str)))  # Crazy nesting...
-    state["callbackStore"]["killCounter"] = DefaultOrderedDict(int)
+    state["callbackStore"]["killCounter"] = DefaultOrderedDict(set)
     state["callbackStore"]["contestantLog"] = DefaultOrderedDict(dict)
 
 # Logs last event. Must be last callback in overrideContestantEvent.
@@ -316,8 +316,8 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
             trueKiller = trueKillDict[str(dead)]
         if str(trueKiller) not in trueKillCounterDict:
             trueKillCounterDict[str(
-                trueKiller)] = state["callbackStore"]["killCounter"][str(trueKiller)]
-        state["callbackStore"]["killCounter"][str(trueKiller)] += 1
+                trueKiller)] = len(state["callbackStore"]["killCounter"][str(trueKiller)])
+        state["callbackStore"]["killCounter"][str(trueKiller)].add(dead)
         state["callbackStore"]["KillThisTurnFlag"][str(trueKiller)] = True
         # if str(trueKiller) != str(mainActor):
         # This is treated as if someone had done the worst possible thing to the dead person. There is also a stability impact.
@@ -351,7 +351,7 @@ def killWrite(state):
     killWriter = HTMLWriter(state["statuses"])
     killWriter.addTitle("Day " + str(state["turnNumber"][0]) + " Kills")
     for contestant, kills in state["callbackStore"]["killCounter"].items():
-        desc = 'Kills: ' + str(kills)
+        desc = 'Kills: ' + str(len(kills))
         descContestant = state["contestants"][contestant]
         if not descContestant.alive:
             desc += ' - DEAD'
