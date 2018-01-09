@@ -54,7 +54,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         if not totSum:  # all existing traps were made by this character, cancel event
             return None
     chosen = weightedDictRandom(thisTrapDict, 1)[0]
-    trapSourceDict = ArenaUtils.DictToOrderedDict(
+    trapSourceDict = DictToOrderedDict(
         {key: self.eventStore["trapMakerCounter"][key][chosen] for key in self.eventStore["trapMakerCounter"]})
     if str(mainActor) in trapSourceDict:
         trapSourceDict[str(mainActor)] *= (1 - notBeingStupidRatio)
