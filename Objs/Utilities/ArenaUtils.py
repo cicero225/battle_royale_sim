@@ -274,7 +274,7 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
 def loggingStartup(state):
     state["callbackStore"]["eventLog"] = DefaultOrderedDict(partial(
         DefaultOrderedDict, partial(DefaultOrderedDict, str)))  # Crazy nesting...
-    state["callbackStore"]["killCounter"] = DefaultOrderedDict(set)
+    state["callbackStore"]["killCounter"] = DefaultOrderedDict(list)
     state["callbackStore"]["contestantLog"] = DefaultOrderedDict(dict)
 
 # Logs last event. Must be last callback in overrideContestantEvent.
@@ -317,7 +317,7 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
         if str(trueKiller) not in trueKillCounterDict:
             trueKillCounterDict[str(
                 trueKiller)] = len(state["callbackStore"]["killCounter"][str(trueKiller)])
-        state["callbackStore"]["killCounter"][str(trueKiller)].add(dead)
+        state["callbackStore"]["killCounter"][str(trueKiller)].append(dead)
         state["callbackStore"]["KillThisTurnFlag"][str(trueKiller)] = True
         # if str(trueKiller) != str(mainActor):
         # This is treated as if someone had done the worst possible thing to the dead person. There is also a stability impact.
@@ -348,13 +348,14 @@ def resetKillFlag(liveContestants, baseEventActorWeights, baseEventParticipantWe
 
 def killWrite(state):
     # TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
+    from Objs.Events.Event import Event
     killWriter = HTMLWriter(state["statuses"])
     killWriter.addTitle("Day " + str(state["turnNumber"][0]) + " Kills")
     for contestant, kills in state["callbackStore"]["killCounter"].items():
-        desc = 'Kills: ' + str(len(kills))
+        desc = 'Kills: ' + str(len(kills)) + '<br/>' + Event.englishList(kills, False)
         descContestant = state["contestants"][contestant]
         if not descContestant.alive:
-            desc += ' - DEAD'
+            desc = '(DEAD) ' + desc
         killWriter.addEvent(desc, [descContestant])
     killWriter.finalWrite(os.path.join("Assets", str(
         state["turnNumber"][0]) + " Kills.html"), state)

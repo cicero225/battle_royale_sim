@@ -375,8 +375,11 @@ class Event(object):  # Python 2.x compatibility
 
     @staticmethod
     def getFriendlyIfPossible(namedObject):
-        countModifier = " (x" + str(namedObject.count) + ")" if hasattr(
-            namedObject, "count") and namedObject.count > 1 else ""
+        try:
+            countModifier = " (x" + str(namedObject.count) + ")" if hasattr(
+                namedObject, "count") and namedObject.count > 1 else ""
+        except TypeError:
+            countModifier = ""
         try:
             return namedObject.friendly + countModifier
         except AttributeError:
