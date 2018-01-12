@@ -614,6 +614,13 @@ def main():
 class TooManyDays(Exception):
     pass
 
+def postmortem():
+    if not DEBUG:
+        return
+    import pdb
+    type, value, tb = sys.exc_info()
+    traceback.print_exc()
+    pdb.post_mortem(tb)
 
 def statCollection():  # expand to count number of days, and fun stuff like epiphany targets?
     statDict = ArenaUtils.DefaultOrderedDict(int)
@@ -622,28 +629,16 @@ def statCollection():  # expand to count number of days, and fun stuff like epip
     global PRINTHTML
     PRINTHTML = False
     for _ in range(0, 100):
-        printtrace = True
         try:
             winner, day = main()
             statDict[winner] += 1
             days.append(day)
         except TooManyDays:
             pass
-        except Exception as e:
-            if not DEBUG:
-                numErrors += 1
-            else:
-                if printtrace:
-                    traceback.print_exc()
-                    printtrace = False
-                while True:
-                    y = input()
-                    if y.lower() == "q":
-                        break
-                    try:
-                        eval('print(' + y + ')')
-                    except Exception as e2:
-                        print(e2)
+        except Exception:
+            postmortem()
+            numErrors += 1
+
     print(statDict)
     print(sum(days) / len(days))
     print(statistics.stdev(days))
@@ -666,21 +661,8 @@ if __name__ == '__main__':
             lograndstate = random.getstate()
             with open("RSEED_BACKUP", "wb") as f:
                 pickle.dump(lograndstate, f)
-        if not DEBUG:
+        try:
             main()
-        else:
-            printtrace = True
-            try:
-                main()
-            except Exception as e:
-                if printtrace:
-                    traceback.print_exc()
-                    printtrace = False
-                while True:
-                    y = input()
-                    if y.lower() == "q":
-                        break
-                    try:
-                        eval('print(' + y + ')')
-                    except Exception as e2:
-                        print(e2)
+        except Exception as e:
+            postmortem()
+            raise e
