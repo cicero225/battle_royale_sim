@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """The main for the battle royale sim"""
 
 # In case of Python 2+. The Python 3 implementation is way less dumb.
