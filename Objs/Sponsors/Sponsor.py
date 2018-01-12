@@ -7,7 +7,7 @@ import random
 from ..Sponsors.Traits import Traits
 from Objs.Utilities.ArenaUtils import JSONOrderedLoad
 
-TRAIT_FILE_PATH = 'Objs\Sponsors\Traits.json'
+TRAIT_FILE_PATH = 'Objs/Sponsors/Traits.json'
 with open(TRAIT_FILE_PATH) as TRAIT_FILE:
     RANDOM_TRAITS = JSONOrderedLoad(TRAIT_FILE)["Traits"]
 
