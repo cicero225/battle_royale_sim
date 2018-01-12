@@ -34,13 +34,7 @@ STATSDEBUG = collections.OrderedDict()
 
 class MegucaArena:
     def __init__(self, write_strategy = HTMLWriter):
-        self.writer = None
-        self.write_strategy = write_strategy
-
-    def newDay(self, statuses, titleStringTemplate, turnNumber):
-        self.writer = self.write_strategy(statuses)
-        self.writer.addTitle(titleStringTemplate.replace('#', str(turnNumber)))
-
+        self.writer = write_strategy()
 
     def afterWrite(self, eventOutputs, state, callbacks):
         for callback in callbacks:
@@ -182,8 +176,7 @@ class MegucaArena:
         # Run once before the start of the game. Expected args: state. Modify in place.
         startup = [
             ArenaUtils.loggingStartup,
-            ArenaUtils.sponsorTraitWrite,
-            ArenaUtils.relationshipWrite]
+            self.writer.writeStartupReports]
 
         # modifyBaseWeights: Expected args: liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state. Modify in place.
             # Also a good time to do any beginning of turn stuff
@@ -242,14 +235,10 @@ class MegucaArena:
 
         postDayCallbacks = [  # Things that happen after each day. Args: state. Returns: None.
             allRelationships.decay,
-            ArenaUtils.injuryAndStatusWrite,
-            ArenaUtils.killWrite,
-            ArenaUtils.relationshipWrite,
         ]
 
         postGameCallbacks = [
-            ArenaUtils.killWrite,
-            ArenaUtils.relationshipWrite,
+            self.writer.writeFinalReports,
         ]
 
         callbacks = ArenaUtils.DictToOrderedDict({"startup": startup,
@@ -352,6 +341,7 @@ class MegucaArena:
             else:
                 thisDay = phases["default"]
             print("Day " + str(turnNumber[0]))
+            self.writer.newDay(turnNumber[0])
             for callback in callbacks["preDayCallbacks"]:
                 callback(state)
             for phaseNum, thisPhase in enumerate(thisDay["phases"]):
@@ -360,7 +350,7 @@ class MegucaArena:
                 eventsActive = ArenaUtils.DictToOrderedDict({eventName: True for eventName, x in events.items(
                 ) if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]})
                 while True:  # this just allows resetting the iteration
-                    self.newDay(statuses, titleStringTemplate, turnNumber[0])
+                    self.writer.newPhase(thisPhase, titleStringTemplate, statuses)
                     # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
                     restartTurn = False
                     # Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
@@ -580,7 +570,7 @@ class MegucaArena:
                         for callback in callbacks["endGameConditions"]:
                             if callback(liveContestants, state):
                                 self.writer.addBigLine(list(liveContestants.values())[0].name + " survive(s) the game and win(s)!")
-                                self.writer.finalWrite(os.path.join("Assets", str(turnNumber[0]) + " Phase " + thisPhase + ".html"), state)
+                                self.writer.endPhase(state)
 
                                 for callback in callbacks["postGameCallbacks"]:
                                     callback(state)
@@ -591,7 +581,7 @@ class MegucaArena:
                             if deadThisTurn:
                                 self.writer.addEvent(
                                     "The following names were added to the memorial wall: " + Event.Event.englishList(deadThisTurn), deadThisTurn)
-                        self.writer.finalWrite(os.path.join("Assets", str(turnNumber[0]) + " Phase " + thisPhase + ".html"), state)
+                        self.writer.endPhase(state)
                         break
             for callback in callbacks["postDayCallbacks"]:
                 callback(state)
