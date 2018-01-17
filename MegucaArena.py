@@ -37,13 +37,15 @@ class MegucaArena:
     def __init__(self):
         # Initial Setup:
         self.state = collections.OrderedDict()
+        self.loadParametersFromJSON()
+        
+    def loadParametersFromJSON(self):
+        # Import Settings from JSON -> going to make it a dictionarys
+        with open('Settings.json') as settings_file:
+            self.settings = ArenaUtils.JSONOrderedLoad(settings_file)
 
     def main(self):
         """The main for the battle royale sim"""
-
-        # Import Settings from JSON -> going to make it a dictionarys
-        with open('Settings.json') as settings_file:
-            settings = ArenaUtils.JSONOrderedLoad(settings_file)
 
         with open('Phases.json') as phases_file:
             phases = ArenaUtils.JSONOrderedLoad(phases_file)
@@ -68,7 +70,7 @@ class MegucaArena:
         Event.Event.stateStore[0] = self.state
         Contestant.stateStore[0] = self.state
         events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
-            'Objs', 'Events', 'Events.json'), settings, Event.Event)
+            'Objs', 'Events', 'Events.json'), self.settings, Event.Event)
         eventsActive = collections.OrderedDict()
         for x in events:
             # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
@@ -76,7 +78,7 @@ class MegucaArena:
 
         # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
         contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
-            'Objs', 'Contestants', 'Contestants.json'), settings, Contestant)
+            'Objs', 'Contestants', 'Contestants.json'), self.settings, Contestant)
 
         # Deduce stats from the union of all contestants - if there are any typos this is a problem.
         statTemplate = set()
@@ -84,36 +86,36 @@ class MegucaArena:
         for x in contestants.values():
             statTemplate |= set(list(x.stats.keys()))
         # This is kind of dumb, but easiest: If we want pure random stats, any stats in the file are directly overwritten.
-        if settings['fullRandomStats']:
+        if self.settings['fullRandomStats']:
             for key, value in contestants.items():
                 contestants[key] = Contestant.makeRandomContestant(
-                    value.name, value.gender, value.imageFile, statTemplate, settings)
+                    value.name, value.gender, value.imageFile, statTemplate, self.settings)
         else:  # fill in missing stats for any contestants
             for value in contestants.values():
                 value.contestantStatFill(statTemplate)
-        if not settings['matchContestantCount']:
+        if not self.settings['matchContestantCount']:
             # If number of contestants in settings less than those found in the json, randomly remove some
             contestantNames = contestants.keys()
-            if settings['numContestants'] < len(contestantNames):
+            if self.settings['numContestants'] < len(contestantNames):
                 contestantNames = random.sample(contestantNames, len(
-                    contestantNames) - settings['numContestants'])
+                    contestantNames) - self.settings['numContestants'])
                 for remove in contestantNames:
                     del contestants[remove]
             # If number of contestants in settings more than those found in the json, add Rando Calrissians
-            for i in range(len(contestantNames), settings['numContestants']):
+            for i in range(len(contestantNames), self.settings['numContestants']):
                 # Here contestants[0].stats is used as a template for making random stats
                 contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant(
-                    'Rando Calrissian ' + str(i), "M", "Rando.jpg", statTemplate, settings)  # need Rando image to put here
+                    'Rando Calrissian ' + str(i), "M", "Rando.jpg", statTemplate, self.settings)  # need Rando image to put here
 
-            assert(len(contestants) == settings['numContestants'])
+            assert(len(contestants) == self.settings['numContestants'])
         else:
-            settings['numContestants'] = len(contestants)
+            self.settings['numContestants'] = len(contestants)
 
-        if settings["statNormalization"]:
+        if self.settings["statNormalization"]:
             targetSum = sum(sum(x.stats.values())
                             for x in contestants.values()) / len(contestants)
         for contestant in contestants.values():
-            if settings["statNormalization"]:
+            if self.settings["statNormalization"]:
                 contestant.contestantStatNormalizer(targetSum)
             contestant.InitializeEventModifiers(events)
 
@@ -122,20 +124,20 @@ class MegucaArena:
         # from any type of object gift, otherwise 1, Anything else we think of)
         # No placeholder sponsors because of the way it is handled.
         sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
-            'Objs', 'Sponsors', 'Sponsors.json'), settings, Sponsor)
+            'Objs', 'Sponsors', 'Sponsors.json'), self.settings, Sponsor)
         # for now relationship levels (arbitrarily, -5 to 5, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
 
-        allRelationships = Relationship(contestants, sponsors, settings)
+        allRelationships = Relationship(contestants, sponsors, self.settings)
 
         # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
         items = ArenaUtils.LoadJSONIntoDictOfObjects(
-            os.path.join('Objs', 'Items', 'Items.json'), settings, Item)
+            os.path.join('Objs', 'Items', 'Items.json'), self.settings, Item)
         statuses = ArenaUtils.LoadJSONIntoDictOfObjects(
-            os.path.join('Objs', 'Items', 'Statuses.json'), settings, Status)
+            os.path.join('Objs', 'Items', 'Statuses.json'), self.settings, Status)
 
         # Initialize World - Maybe it should have its own settings?
         # Maybe other arguments in future, i.e. maybe in an extended world items can be found on the ground, but leaving this as-is for now.
-        arena = World(settings)
+        arena = World(self.settings)
 
         turnNumber = [0]  # Deliberately a list of 1, so it's passed by reference
 
@@ -145,7 +147,7 @@ class MegucaArena:
         thisWriter = None  # current HTML display object
 
         self.state.update(ArenaUtils.DictToOrderedDict({
-            "settings": settings,
+            "settings": self.settings,
             "contestants": contestants,
             "sponsors": sponsors,
             "events": events,
@@ -308,7 +310,7 @@ class MegucaArena:
                 correctionRoleWeight = sum(
                     weights[eventName].values()) / len(weights)
                 indivProb[eventName] *= min(correctionRoleWeight /
-                                            origIndivWeight, settings["maxParticipantEffect"])
+                                            origIndivWeight, self.settings["maxParticipantEffect"])
 
         def selectRoles(baseWeights, weights, trueNumRoles, people=contestants):
             if eventName in baseWeights and trueNumRoles[eventName] > 0:
@@ -555,7 +557,7 @@ class MegucaArena:
                             # This turn needs to be rerun
                             self.state.clear()
                             self.state.update(initialState.copy())
-                            settings = self.state['settings']
+                            self.settings = self.state['settings']
                             contestants = self.state['contestants']
                             callbacks = self.state['callbacks']
                             sponsors = self.state['sponsors']
