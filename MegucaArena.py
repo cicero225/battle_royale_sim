@@ -34,10 +34,12 @@ STATSDEBUG = collections.OrderedDict()
 
 
 class MegucaArena:
-    def __init__(self):
+    def __init__(self, eventClass=Event.Event):
         # Initial Setup:
         self.state = collections.OrderedDict()
         self.loadParametersFromJSON()
+         # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
+        self.InitializeEvents(eventClass)     
         
     def loadParametersFromJSON(self):
         # Import Settings from JSON -> going to make it a dictionarys
@@ -45,11 +47,16 @@ class MegucaArena:
             self.settings = ArenaUtils.JSONOrderedLoad(settings_file)
         with open('Phases.json') as phases_file:
             self.phases = ArenaUtils.JSONOrderedLoad(phases_file)
+       
+    def InitializeEvents(self, eventClass):
+        eventClass.stateStore[0] = self.state
+        self.events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
+            'Objs', 'Events', 'Events.json'), self.settings, eventClass)
 
     def main(self):
         """The main for the battle royale sim"""
 
-        # List of settings as I come up with them. It can stay as a dict.
+        # List of settings as I come up with them. It can stay as a dict. THIS IS OUT OF DATE.
         # traitRandomness = 3
         # numContestants = 24 # Program should pad or randomly remove contestants as necessary
         # eventRandomness = 0.5 # Percent range over which the base weights of events varies from json settings
@@ -62,16 +69,11 @@ class MegucaArena:
         # combatAbilityEffect = 0.3 # How much combat ability (and associated modifiers) affect chance of death in combat. i.e. 0 would make it pure random
         # Note that objects that fully disable a event should still do so!
 
-        # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
-
         # Initialize Events
         # Ugly, but oh well.
-        Event.Event.stateStore[0] = self.state
         Contestant.stateStore[0] = self.state
-        events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
-            'Objs', 'Events', 'Events.json'), self.settings, Event.Event)
         eventsActive = collections.OrderedDict()
-        for x in events:
+        for x in self.events:
             # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
             eventsActive[x] = True
 
@@ -116,7 +118,7 @@ class MegucaArena:
         for contestant in contestants.values():
             if self.settings["statNormalization"]:
                 contestant.contestantStatNormalizer(targetSum)
-            contestant.InitializeEventModifiers(events)
+            contestant.InitializeEventModifiers(self.events)
 
         # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
         # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
@@ -149,7 +151,7 @@ class MegucaArena:
             "settings": self.settings,
             "contestants": contestants,
             "sponsors": sponsors,
-            "events": events,
+            "events": self.events,
             "eventsActive": eventsActive,
             "items": items,
             "statuses": statuses,
@@ -354,7 +356,7 @@ class MegucaArena:
             for phaseNum, thisPhase in enumerate(thisDay["phases"]):
                 titleString = thisDay["titles"][phaseNum]
                 self.state["curPhase"] = thisPhase
-                eventsActive = ArenaUtils.DictToOrderedDict({eventName: True for eventName, x in events.items(
+                eventsActive = ArenaUtils.DictToOrderedDict({eventName: True for eventName, x in self.events.items(
                 ) if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]})
                 while True:  # this just allows resetting the iteration
                     if PRINTHTML:
@@ -374,13 +376,13 @@ class MegucaArena:
                         liveContestants.keys(), len(liveContestants))
                     # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
                     baseEventActorWeights = ArenaUtils.DictToOrderedDict(
-                        {x: y.baseProps["mainWeight"] if x in eventsActive and eventsActive[x] else 0 for x, y in events.items()})
+                        {x: y.baseProps["mainWeight"] if x in eventsActive and eventsActive[x] else 0 for x, y in self.events.items()})
                     baseEventParticipantWeights = ArenaUtils.DictToOrderedDict(
-                        {x: y.baseProps["participantWeight"] for x, y in events.items() if "participantWeight" in y.baseProps})
+                        {x: y.baseProps["participantWeight"] for x, y in self.events.items() if "participantWeight" in y.baseProps})
                     baseEventVictimWeights = ArenaUtils.DictToOrderedDict(
-                        {x: y.baseProps["victimWeight"] for x, y in events.items() if "victimWeight" in y.baseProps})
+                        {x: y.baseProps["victimWeight"] for x, y in self.events.items() if "victimWeight" in y.baseProps})
                     baseEventSponsorWeights = ArenaUtils.DictToOrderedDict(
-                        {x: y.baseProps["sponsorWeight"] for x, y in events.items() if "sponsorWeight" in y.baseProps})
+                        {x: y.baseProps["sponsorWeight"] for x, y in self.events.items() if "sponsorWeight" in y.baseProps})
                     # Do callbacks for modifying base weights
                     for callback in callbacks["modifyBaseWeights"]:
                         callback(liveContestants, baseEventActorWeights, baseEventParticipantWeights,
@@ -410,7 +412,7 @@ class MegucaArena:
                         trueNumSponsors = ArenaUtils.DefaultOrderedDict(int)
                         itcounter = 0
                         while True:
-                            for eventName, event in events.items():
+                            for eventName, event in self.events.items():
                                 indivProb[eventName] = baseEventActorWeights[eventName]
                                 eventMayProceed = True
                                 for callback in callbacks["modifyIndivActorWeights"]:
@@ -483,7 +485,7 @@ class MegucaArena:
                             eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
                             # Handle event overrides, if any
                             # Determine participants, victims, if any.
-                            thisevent = events[eventName]
+                            thisevent = self.events[eventName]
                             victims = selectRoles(
                                 baseEventVictimWeights, eventVictimWeights, trueNumVictims)
                             # Can't be both a participant and a victim... (this creates a bit of bias, but oh well)
@@ -493,7 +495,7 @@ class MegucaArena:
                                 possibleParticipantEventWeights[eventName][x.name] = 0
                             # some participants need adjustment based on the chosen victim(s)
                             aborted = allRelationships.reprocessParticipantWeightsForVictims(
-                                possibleParticipantEventWeights, victims, events[eventName])
+                                possibleParticipantEventWeights, victims, self.events[eventName])
                             # check if enough possible participants are left to satisfy the event, presuming it has participants
                             if "numParticipants" in thisevent.baseProps:
                                 # print(possibleParticipantEventWeights[eventName])
@@ -560,7 +562,7 @@ class MegucaArena:
                             contestants = self.state['contestants']
                             callbacks = self.state['callbacks']
                             sponsors = self.state['sponsors']
-                            events = self.state['events']
+                            self.events = self.state['events']
                             eventsActive = self.state['eventsActive']
                             items = self.state['items']
                             statuses = self.state['statuses']
