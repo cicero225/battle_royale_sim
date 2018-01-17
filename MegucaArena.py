@@ -35,15 +35,11 @@ STATSDEBUG = collections.OrderedDict()
 
 class MegucaArena:
     def __init__(self):
-        pass
+        # Initial Setup:
+        self.state = collections.OrderedDict()
 
     def main(self):
         """The main for the battle royale sim"""
-
-        # Initial Setup:
-
-        # State initialization. This should NEVER EVER be reassigned.
-        state = collections.OrderedDict()
 
         # Import Settings from JSON -> going to make it a dictionarys
         with open('Settings.json') as settings_file:
@@ -69,8 +65,8 @@ class MegucaArena:
 
         # Initialize Events
         # Ugly, but oh well.
-        Event.Event.stateStore[0] = state
-        Contestant.stateStore[0] = state
+        Event.Event.stateStore[0] = self.state
+        Contestant.stateStore[0] = self.state
         events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
             'Objs', 'Events', 'Events.json'), settings, Event.Event)
         eventsActive = collections.OrderedDict()
@@ -148,7 +144,7 @@ class MegucaArena:
 
         thisWriter = None  # current HTML display object
 
-        state.update(ArenaUtils.DictToOrderedDict({
+        self.state.update(ArenaUtils.DictToOrderedDict({
             "settings": settings,
             "contestants": contestants,
             "sponsors": sponsors,
@@ -165,7 +161,7 @@ class MegucaArena:
         }))  # Allows for convenient passing of the entire game state to anything that needs it (usually events)
         # An unfortunate bit of split processing
         for sponsor in sponsors.values():
-            sponsor.initializeTraits(state)
+            sponsor.initializeTraits(self.state)
         # CALLBACKS
         # As much as possible influence event processing from here. Note that these callbacks happen IN ORDER. It would be possible to do this in a more
         # modular manner by defining a callback object, defining a registering function, using decorators... but that provides effectively no control on
@@ -189,7 +185,7 @@ class MegucaArena:
 
         # modifyIndivActorWeights: Expected args: actor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
         modifyIndivActorWeights = [
-            partial(ArenaUtils.eventMayNotRepeat, state=state),
+            partial(ArenaUtils.eventMayNotRepeat, state=self.state),
             contestantIndivActorCallback,
             allRelationships.relationsMainWeightCallback
         ]
@@ -272,7 +268,7 @@ class MegucaArena:
         for store, funcList in list(Event.Event.inserted_callbacks.items()) + list(Item.inserted_callbacks.items()):
             callbacks[store].extend(funcList)
 
-        state["callbacks"] = callbacks
+        self.state["callbacks"] = callbacks
 
         # Nested functions that need access to variables in main
         def modifyWeightForMultipleActors(trueNumRoles, baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
@@ -340,7 +336,7 @@ class MegucaArena:
 
         # Startup callbacks
         for callback in callbacks["startup"]:
-            callback(state)
+            callback(self.state)
 
         # Main loop of DEATH
         STATSDEBUG["allEvents"] = ArenaUtils.DefaultOrderedDict(
@@ -353,10 +349,10 @@ class MegucaArena:
                 thisDay = phases["default"]
             print("Day " + str(turnNumber[0]))
             for callback in callbacks["preDayCallbacks"]:
-                callback(state)
+                callback(self.state)
             for phaseNum, thisPhase in enumerate(thisDay["phases"]):
                 titleString = thisDay["titles"][phaseNum]
-                state["curPhase"] = thisPhase
+                self.state["curPhase"] = thisPhase
                 eventsActive = ArenaUtils.DictToOrderedDict({eventName: True for eventName, x in events.items(
                 ) if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]})
                 while True:  # this just allows resetting the iteration
@@ -367,7 +363,7 @@ class MegucaArena:
                     # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
                     restartTurn = False
                     # Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
-                    initialState = copy.deepcopy(state)
+                    initialState = copy.deepcopy(self.state)
                     liveContestants = ArenaUtils.DictToOrderedDict(
                         {x: y for x, y in contestants.items() if y.alive})
                     if phaseNum == 0:  # I want to be explicit here
@@ -387,7 +383,7 @@ class MegucaArena:
                     # Do callbacks for modifying base weights
                     for callback in callbacks["modifyBaseWeights"]:
                         callback(liveContestants, baseEventActorWeights, baseEventParticipantWeights,
-                                 baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state)
+                                 baseEventVictimWeights, baseEventSponsorWeights, turnNumber, self.state)
                     # Now go through the contestants and trigger events based on their individualized probabilities
                     alreadyUsed = set()
                     # This is not statistically uniform because these multi-person events are hard and probably not worth figuring out in exact detail...
@@ -506,7 +502,7 @@ class MegucaArena:
                                     # abort event
                                     continue
                             if DEBUG:
-                                STATSDEBUG["state"] = state
+                                STATSDEBUG["state"] = self.state
                                 STATSDEBUG["indivProb"] = indivProb
                                 STATSDEBUG["eventParticipantWeights"] = eventParticipantWeights[eventName]
                                 STATSDEBUG["participants"] = (
@@ -523,14 +519,14 @@ class MegucaArena:
                             for override in callbacks["overrideContestantEvent"]:
                                 # Be very careful of modifying state here.
                                 proceedAsUsual, resetEvent = override(
-                                    contestantKey, thisevent, state, participants, victims, sponsorsHere)
+                                    contestantKey, thisevent, self.state, participants, victims, sponsorsHere)
                                 if not proceedAsUsual or resetEvent:
                                     break
                             if resetEvent:
                                 continue
                             if proceedAsUsual:
                                 eventOutputs = thisevent.doEvent(
-                                    contestants[contestantKey], state, participants, victims, sponsorsHere)
+                                    contestants[contestantKey], self.state, participants, victims, sponsorsHere)
                                 if not eventOutputs:
                                     # Apparently this event is not valid for this contestant (participants etc. should not be considered)
                                     indivProb[eventName] = 0
@@ -540,7 +536,7 @@ class MegucaArena:
                                     thisevent, contestants[contestantKey], participants + victims)
                             for postEvent in callbacks["postEventCallbacks"]:
                                 postEvent(proceedAsUsual, eventOutputs, thisevent,
-                                          contestants[contestantKey], state, participants, victims, sponsorsHere)
+                                          contestants[contestantKey], self.state, participants, victims, sponsorsHere)
                             desc, descContestants, theDead = eventOutputs[:3]
                             break
 
@@ -548,31 +544,31 @@ class MegucaArena:
                         STATSDEBUG["allEvents"][eventName] += 1
                         if PRINTHTML:
                             thisWriter.addEvent(
-                                desc, descContestants, state, preEventInjuries)
+                                desc, descContestants, self.state, preEventInjuries)
                             for callback in callbacks["postEventWriterCallbacks"]:
-                                callback(thisWriter, eventOutputs, state)
+                                callback(thisWriter, eventOutputs, self.state)
                         else:
                             print(desc)
 
                         # Check if everyone is now dead...
                         if all(not x.alive for x in liveContestants.values()):
                             # This turn needs to be rerun
-                            state.clear()
-                            state.update(initialState.copy())
-                            settings = state['settings']
-                            contestants = state['contestants']
-                            callbacks = state['callbacks']
-                            sponsors = state['sponsors']
-                            events = state['events']
-                            eventsActive = state['eventsActive']
-                            items = state['items']
-                            statuses = state['statuses']
-                            arena = state['arena']
-                            allRelationships = state['allRelationships']
-                            turnNumber = state['turnNumber']
-                            callbackStore = state['callbackStore']
-                            thisWriter = state['thisWriter']
-                            Event.stateStore = state
+                            self.state.clear()
+                            self.state.update(initialState.copy())
+                            settings = self.state['settings']
+                            contestants = self.state['contestants']
+                            callbacks = self.state['callbacks']
+                            sponsors = self.state['sponsors']
+                            events = self.state['events']
+                            eventsActive = self.state['eventsActive']
+                            items = self.state['items']
+                            statuses = self.state['statuses']
+                            arena = self.state['arena']
+                            allRelationships = self.state['allRelationships']
+                            turnNumber = self.state['turnNumber']
+                            callbackStore = self.state['callbackStore']
+                            thisWriter = self.state['thisWriter']
+                            Event.stateStore = self.state
                             restartTurn = True
                             break
 
@@ -587,18 +583,18 @@ class MegucaArena:
                     if not restartTurn:
                         # conditions for ending the game
                         for callback in callbacks["endGameConditions"]:
-                            if callback(liveContestants, state):
+                            if callback(liveContestants, self.state):
                                 if PRINTHTML:
                                     thisWriter.addBigLine(list(liveContestants.values())[
                                                           0].name + " survive(s) the game and win(s)!")
                                     thisWriter.finalWrite(os.path.join("Assets", str(
-                                        turnNumber[0]) + " Phase " + thisPhase + ".html"), state)
+                                        turnNumber[0]) + " Phase " + thisPhase + ".html"), self.state)
                                 else:
                                     print(list(liveContestants.values())[
                                           0].name + " survive(s) the game and win(s)!")
 
                                 for callback in callbacks["postGameCallbacks"]:
-                                    callback(state)
+                                    callback(self.state)
                                 return list(liveContestants.values())[0].name, turnNumber[0]
                         if PRINTHTML:
                             if phaseNum == len(thisDay["phases"]) - 1:
@@ -608,10 +604,10 @@ class MegucaArena:
                                     thisWriter.addEvent(
                                         "The following names were added to the memorial wall: " + Event.Event.englishList(deadThisTurn), deadThisTurn)
                             thisWriter.finalWrite(os.path.join("Assets", str(
-                                turnNumber[0]) + " Phase " + thisPhase + ".html"), state)
+                                turnNumber[0]) + " Phase " + thisPhase + ".html"), self.state)
                         break
             for callback in callbacks["postDayCallbacks"]:
-                callback(state)
+                callback(self.state)
             if turnNumber[0] > 200:
                 raise TooManyDays('Way too many days')
 
