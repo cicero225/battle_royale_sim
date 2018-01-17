@@ -43,12 +43,11 @@ class MegucaArena:
         # Import Settings from JSON -> going to make it a dictionarys
         with open('Settings.json') as settings_file:
             self.settings = ArenaUtils.JSONOrderedLoad(settings_file)
+        with open('Phases.json') as phases_file:
+            self.phases = ArenaUtils.JSONOrderedLoad(phases_file)
 
     def main(self):
         """The main for the battle royale sim"""
-
-        with open('Phases.json') as phases_file:
-            phases = ArenaUtils.JSONOrderedLoad(phases_file)
 
         # List of settings as I come up with them. It can stay as a dict.
         # traitRandomness = 3
@@ -159,7 +158,7 @@ class MegucaArena:
             "turnNumber": turnNumber,
             "callbackStore": callbackStore,
             "thisWriter": thisWriter,
-            "phases": phases
+            "phases": self.phases
         }))  # Allows for convenient passing of the entire game state to anything that needs it (usually events)
         # An unfortunate bit of split processing
         for sponsor in sponsors.values():
@@ -345,10 +344,10 @@ class MegucaArena:
             int) if "allEvents" not in STATSDEBUG else STATSDEBUG["allEvents"]
         while True:
             turnNumber[0] += 1
-            if turnNumber[0] in phases:
-                thisDay = phases[turnNumber[0]]
+            if turnNumber[0] in self.phases:
+                thisDay = self.phases[turnNumber[0]]
             else:
-                thisDay = phases["default"]
+                thisDay = self.phases["default"]
             print("Day " + str(turnNumber[0]))
             for callback in callbacks["preDayCallbacks"]:
                 callback(self.state)
