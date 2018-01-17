@@ -31,27 +31,29 @@ from Objs.Display.HTMLWriter import HTMLWriter
 PRINTHTML = True
 DEBUG = True
 STATSDEBUG = collections.OrderedDict()
-
+CONFIG_FILE_PATHS = {"settings": "Settings.json",
+                     "phases": "Phases.json",
+                     "events": os.path.join('Objs', 'Events', 'Events.json')}
 
 class MegucaArena:
-    def __init__(self, eventClass=Event.Event):
+    def __init__(self, configFilePaths, eventClass=Event.Event):
         # Initial Setup:
         self.state = collections.OrderedDict()
+        self.configFilePaths = configFilePaths
         self.loadParametersFromJSON()
          # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
         self.InitializeEvents(eventClass)     
         
     def loadParametersFromJSON(self):
         # Import Settings from JSON -> going to make it a dictionarys
-        with open('Settings.json') as settings_file:
+        with open(self.configFilePaths["settings"]) as settings_file:
             self.settings = ArenaUtils.JSONOrderedLoad(settings_file)
-        with open('Phases.json') as phases_file:
+        with open(self.configFilePaths["phases"]) as phases_file:
             self.phases = ArenaUtils.JSONOrderedLoad(phases_file)
        
     def InitializeEvents(self, eventClass):
         eventClass.stateStore[0] = self.state
-        self.events = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
-            'Objs', 'Events', 'Events.json'), self.settings, eventClass)
+        self.events = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["events"], self.settings, eventClass)
 
     def main(self):
         """The main for the battle royale sim"""
@@ -651,7 +653,6 @@ def statCollection():  # expand to count number of days, and fun stuff like epip
     print({x: round(y / totEvents, 3)
            for x, y in STATSDEBUG["allEvents"].items()})
 
-
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == '--stats':
         statCollection()
@@ -666,7 +667,7 @@ if __name__ == '__main__':
             with open("RSEED_BACKUP", "wb") as f:
                 pickle.dump(lograndstate, f)
         try:
-            MegucaArena().main()
+            MegucaArena(CONFIG_FILE_PATHS).main()
         except Exception as e:
             postmortem()
             raise e
