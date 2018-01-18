@@ -33,16 +33,18 @@ DEBUG = True
 STATSDEBUG = collections.OrderedDict()
 CONFIG_FILE_PATHS = {"settings": "Settings.json",
                      "phases": "Phases.json",
-                     "events": os.path.join('Objs', 'Events', 'Events.json')}
+                     "events": os.path.join('Objs', 'Events', 'Events.json'),
+                     "contestants": os.path.join('Objs', 'Contestants', 'Contestants.json')}
 
 class MegucaArena:
-    def __init__(self, configFilePaths, eventClass=Event.Event):
+    def __init__(self, configFilePaths, eventClass=Event.Event, contestantClass=Contestant):
         # Initial Setup:
         self.state = collections.OrderedDict()
         self.configFilePaths = configFilePaths
         self.loadParametersFromJSON()
          # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
-        self.InitializeEvents(eventClass)     
+        self.initializeEvents(eventClass)
+        self.initializeContestants(contestantClass)
         
     def loadParametersFromJSON(self):
         # Import Settings from JSON -> going to make it a dictionarys
@@ -51,10 +53,15 @@ class MegucaArena:
         with open(self.configFilePaths["phases"]) as phases_file:
             self.phases = ArenaUtils.JSONOrderedLoad(phases_file)
        
-    def InitializeEvents(self, eventClass):
+    def initializeEvents(self, eventClass):
         eventClass.stateStore[0] = self.state
         self.events = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["events"], self.settings, eventClass)
 
+    def initializeContestants(self, contestantClass):
+        contestantClass.stateStore[0] = self.state
+        # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
+        self.contestants = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["contestants"], self.settings, contestantClass)
+        
     def main(self):
         """The main for the battle royale sim"""
 
@@ -71,53 +78,46 @@ class MegucaArena:
         # combatAbilityEffect = 0.3 # How much combat ability (and associated modifiers) affect chance of death in combat. i.e. 0 would make it pure random
         # Note that objects that fully disable a event should still do so!
 
-        # Initialize Events
-        # Ugly, but oh well.
-        Contestant.stateStore[0] = self.state
         eventsActive = collections.OrderedDict()
         for x in self.events:
             # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
             eventsActive[x] = True
 
-        # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
-        contestants = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
-            'Objs', 'Contestants', 'Contestants.json'), self.settings, Contestant)
-
         # Deduce stats from the union of all contestants - if there are any typos this is a problem.
         statTemplate = set()
 
-        for x in contestants.values():
+        for x in self.contestants.values():
             statTemplate |= set(list(x.stats.keys()))
         # This is kind of dumb, but easiest: If we want pure random stats, any stats in the file are directly overwritten.
         if self.settings['fullRandomStats']:
-            for key, value in contestants.items():
-                contestants[key] = Contestant.makeRandomContestant(
+            for key, value in self.contestants.items():
+                self.contestants[key] = Contestant.makeRandomContestant(
                     value.name, value.gender, value.imageFile, statTemplate, self.settings)
         else:  # fill in missing stats for any contestants
-            for value in contestants.values():
+            for value in self.contestants.values():
                 value.contestantStatFill(statTemplate)
         if not self.settings['matchContestantCount']:
             # If number of contestants in settings less than those found in the json, randomly remove some
-            contestantNames = contestants.keys()
+            contestantNames = self.contestants.keys()
             if self.settings['numContestants'] < len(contestantNames):
                 contestantNames = random.sample(contestantNames, len(
                     contestantNames) - self.settings['numContestants'])
                 for remove in contestantNames:
-                    del contestants[remove]
+                    del self.contestants[remove]
             # If number of contestants in settings more than those found in the json, add Rando Calrissians
             for i in range(len(contestantNames), self.settings['numContestants']):
                 # Here contestants[0].stats is used as a template for making random stats
-                contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant(
+                self.contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant(
                     'Rando Calrissian ' + str(i), "M", "Rando.jpg", statTemplate, self.settings)  # need Rando image to put here
 
-            assert(len(contestants) == self.settings['numContestants'])
+            assert(len(self.contestants) == self.settings['numContestants'])
         else:
-            self.settings['numContestants'] = len(contestants)
+            self.settings['numContestants'] = len(self.contestants)
 
         if self.settings["statNormalization"]:
             targetSum = sum(sum(x.stats.values())
-                            for x in contestants.values()) / len(contestants)
-        for contestant in contestants.values():
+                            for x in self.contestants.values()) / len(self.contestants)
+        for contestant in self.contestants.values():
             if self.settings["statNormalization"]:
                 contestant.contestantStatNormalizer(targetSum)
             contestant.InitializeEventModifiers(self.events)
@@ -130,7 +130,7 @@ class MegucaArena:
             'Objs', 'Sponsors', 'Sponsors.json'), self.settings, Sponsor)
         # for now relationship levels (arbitrarily, -5 to 5, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
 
-        allRelationships = Relationship(contestants, sponsors, self.settings)
+        allRelationships = Relationship(self.contestants, sponsors, self.settings)
 
         # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
         items = ArenaUtils.LoadJSONIntoDictOfObjects(
@@ -151,7 +151,7 @@ class MegucaArena:
 
         self.state.update(ArenaUtils.DictToOrderedDict({
             "settings": self.settings,
-            "contestants": contestants,
+            "contestants": self.contestants,
             "sponsors": sponsors,
             "events": self.events,
             "eventsActive": eventsActive,
@@ -276,7 +276,7 @@ class MegucaArena:
         self.state["callbacks"] = callbacks
 
         # Nested functions that need access to variables in main
-        def modifyWeightForMultipleActors(trueNumRoles, baseWeights, weights, roleName, numRoles, callbackName, people=contestants, forSponsors=False):
+        def modifyWeightForMultipleActors(trueNumRoles, baseWeights, weights, roleName, numRoles, callbackName, people=self.contestants, forSponsors=False):
             if eventName in baseWeights:
                 if not trueNumRoles[eventName]:
                     return
@@ -315,7 +315,7 @@ class MegucaArena:
                 indivProb[eventName] *= min(correctionRoleWeight /
                                             origIndivWeight, self.settings["maxParticipantEffect"])
 
-        def selectRoles(baseWeights, weights, trueNumRoles, people=contestants):
+        def selectRoles(baseWeights, weights, trueNumRoles, people=self.contestants):
             if eventName in baseWeights and trueNumRoles[eventName] > 0:
                 rolekeys = ArenaUtils.weightedDictRandom(
                     weights[eventName], trueNumRoles[eventName])
@@ -370,7 +370,7 @@ class MegucaArena:
                     # Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
                     initialState = copy.deepcopy(self.state)
                     liveContestants = ArenaUtils.DictToOrderedDict(
-                        {x: y for x, y in contestants.items() if y.alive})
+                        {x: y for x, y in self.contestants.items() if y.alive})
                     if phaseNum == 0:  # I want to be explicit here
                         origLiveContestants = copy.copy(liveContestants)
                     # Sample contestants randomly
@@ -480,7 +480,7 @@ class MegucaArena:
                         # and not-statistically accurate.
                         # Ugly Hack, but not sure there's a better way. We need pre-event information on contestants, and short of deepcopying everything...
                         preEventInjuries = ArenaUtils.DictToOrderedDict(
-                            {x: contestants[x].hasThing("Injury") for x in liveContestants})
+                            {x: self.contestants[x].hasThing("Injury") for x in liveContestants})
                         allRelationships.backup()
                         while(True):
                             # Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
@@ -531,17 +531,17 @@ class MegucaArena:
                                 continue
                             if proceedAsUsual:
                                 eventOutputs = thisevent.doEvent(
-                                    contestants[contestantKey], self.state, participants, victims, sponsorsHere)
+                                    self.contestants[contestantKey], self.state, participants, victims, sponsorsHere)
                                 if not eventOutputs:
                                     # Apparently this event is not valid for this contestant (participants etc. should not be considered)
                                     indivProb[eventName] = 0
                                     continue
                                 eventOutputs = list(eventOutputs)
                                 allRelationships.processTraitEffect(
-                                    thisevent, contestants[contestantKey], participants + victims)
+                                    thisevent, self.contestants[contestantKey], participants + victims)
                             for postEvent in callbacks["postEventCallbacks"]:
                                 postEvent(proceedAsUsual, eventOutputs, thisevent,
-                                          contestants[contestantKey], self.state, participants, victims, sponsorsHere)
+                                          self.contestants[contestantKey], self.state, participants, victims, sponsorsHere)
                             desc, descContestants, theDead = eventOutputs[:3]
                             break
 
@@ -561,7 +561,7 @@ class MegucaArena:
                             self.state.clear()
                             self.state.update(initialState.copy())
                             self.settings = self.state['settings']
-                            contestants = self.state['contestants']
+                            self.contestants = self.state['contestants']
                             callbacks = self.state['callbacks']
                             sponsors = self.state['sponsors']
                             self.events = self.state['events']
