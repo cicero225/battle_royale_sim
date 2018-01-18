@@ -44,6 +44,7 @@ class MegucaArena:
         self.loadParametersFromJSON()
          # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
         self.initializeEvents(eventClass)
+        self.eventsActive = ArenaUtils.DictToOrderedDict({x: True for x in self.events})
         self.initializeContestants(contestantClass)
         
     def loadParametersFromJSON(self):
@@ -118,11 +119,6 @@ class MegucaArena:
         # combatAbilityEffect = 0.3 # How much combat ability (and associated modifiers) affect chance of death in combat. i.e. 0 would make it pure random
         # Note that objects that fully disable a event should still do so!
 
-        eventsActive = collections.OrderedDict()
-        for x in self.events:
-            # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
-            eventsActive[x] = True
-
         # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
         # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
         # from any type of object gift, otherwise 1, Anything else we think of)
@@ -155,7 +151,7 @@ class MegucaArena:
             "contestants": self.contestants,
             "sponsors": sponsors,
             "events": self.events,
-            "eventsActive": eventsActive,
+            "eventsActive": self.eventsActive,
             "items": items,
             "statuses": statuses,
             "arena": arena,
@@ -359,7 +355,7 @@ class MegucaArena:
             for phaseNum, thisPhase in enumerate(thisDay["phases"]):
                 titleString = thisDay["titles"][phaseNum]
                 self.state["curPhase"] = thisPhase
-                eventsActive = ArenaUtils.DictToOrderedDict({eventName: True for eventName, x in self.events.items(
+                self.eventsActive = ArenaUtils.DictToOrderedDict({eventName: True for eventName, x in self.events.items(
                 ) if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]})
                 while True:  # this just allows resetting the iteration
                     if PRINTHTML:
@@ -379,7 +375,7 @@ class MegucaArena:
                         liveContestants.keys(), len(liveContestants))
                     # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
                     baseEventActorWeights = ArenaUtils.DictToOrderedDict(
-                        {x: y.baseProps["mainWeight"] if x in eventsActive and eventsActive[x] else 0 for x, y in self.events.items()})
+                        {x: y.baseProps["mainWeight"] if x in self.eventsActive and self.eventsActive[x] else 0 for x, y in self.events.items()})
                     baseEventParticipantWeights = ArenaUtils.DictToOrderedDict(
                         {x: y.baseProps["participantWeight"] for x, y in self.events.items() if "participantWeight" in y.baseProps})
                     baseEventVictimWeights = ArenaUtils.DictToOrderedDict(
@@ -566,7 +562,7 @@ class MegucaArena:
                             callbacks = self.state['callbacks']
                             sponsors = self.state['sponsors']
                             self.events = self.state['events']
-                            eventsActive = self.state['eventsActive']
+                            self.eventsActive = self.state['eventsActive']
                             items = self.state['items']
                             statuses = self.state['statuses']
                             arena = self.state['arena']
