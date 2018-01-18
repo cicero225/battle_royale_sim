@@ -34,18 +34,25 @@ STATSDEBUG = collections.OrderedDict()
 CONFIG_FILE_PATHS = {"settings": "Settings.json",
                      "phases": "Phases.json",
                      "events": os.path.join('Objs', 'Events', 'Events.json'),
-                     "contestants": os.path.join('Objs', 'Contestants', 'Contestants.json')}
+                     "contestants": os.path.join('Objs', 'Contestants', 'Contestants.json'),
+                     "sponsors": os.path.join('Objs', 'Sponsors', 'Sponsors.json')}
 
 class MegucaArena:
-    def __init__(self, configFilePaths, eventClass=Event.Event, contestantClass=Contestant):
+    # Hmm...make object feeding list or dict based?
+    def __init__(self, configFilePaths, eventClass=Event.Event, contestantClass=Contestant, sponsorClass=Sponsor, relationshipClass=Relationship):
         # Initial Setup:
         self.state = collections.OrderedDict()
         self.configFilePaths = configFilePaths
         self.loadParametersFromJSON()
          # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
         self.initializeEvents(eventClass)
-        self.eventsActive = ArenaUtils.DictToOrderedDict({x: True for x in self.events})
         self.initializeContestants(contestantClass)
+        # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
+        # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
+        # from any type of object gift, otherwise 1, Anything else we think of)
+        # No placeholder sponsors because of the way it is handled.
+        self.sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["sponsors"], self.settings, sponsorClass)
+        self.allRelationships = relationshipClass(self.contestants, self.sponsors, self.settings)
         
     def loadParametersFromJSON(self):
         # Import Settings from JSON -> going to make it a dictionarys
@@ -57,6 +64,8 @@ class MegucaArena:
     def initializeEvents(self, eventClass):
         eventClass.stateStore[0] = self.state
         self.events = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["events"], self.settings, eventClass)
+        # This dict allows for absolute disabling of events by setting False.
+        self.eventsActive = ArenaUtils.DictToOrderedDict({x: True for x in self.events})
 
     def initializeContestants(self, contestantClass):
         contestantClass.stateStore[0] = self.state
@@ -119,16 +128,6 @@ class MegucaArena:
         # combatAbilityEffect = 0.3 # How much combat ability (and associated modifiers) affect chance of death in combat. i.e. 0 would make it pure random
         # Note that objects that fully disable a event should still do so!
 
-        # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
-        # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
-        # from any type of object gift, otherwise 1, Anything else we think of)
-        # No placeholder sponsors because of the way it is handled.
-        sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(os.path.join(
-            'Objs', 'Sponsors', 'Sponsors.json'), self.settings, Sponsor)
-        # for now relationship levels (arbitrarily, -5 to 5, starting at zero) are stored in this dict. Later on we can make relationship objects to store, if this is somehow useful.
-
-        allRelationships = Relationship(self.contestants, sponsors, self.settings)
-
         # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
         items = ArenaUtils.LoadJSONIntoDictOfObjects(
             os.path.join('Objs', 'Items', 'Items.json'), self.settings, Item)
@@ -149,20 +148,20 @@ class MegucaArena:
         self.state.update(ArenaUtils.DictToOrderedDict({
             "settings": self.settings,
             "contestants": self.contestants,
-            "sponsors": sponsors,
+            "sponsors": self.sponsors,
             "events": self.events,
             "eventsActive": self.eventsActive,
             "items": items,
             "statuses": statuses,
             "arena": arena,
-            "allRelationships": allRelationships,
+            "allRelationships": self.allRelationships,
             "turnNumber": turnNumber,
             "callbackStore": callbackStore,
             "thisWriter": thisWriter,
             "phases": self.phases
         }))  # Allows for convenient passing of the entire game state to anything that needs it (usually events)
         # An unfortunate bit of split processing
-        for sponsor in sponsors.values():
+        for sponsor in self.sponsors.values():
             sponsor.initializeTraits(self.state)
         # CALLBACKS
         # As much as possible influence event processing from here. Note that these callbacks happen IN ORDER. It would be possible to do this in a more
@@ -189,17 +188,17 @@ class MegucaArena:
         modifyIndivActorWeights = [
             partial(ArenaUtils.eventMayNotRepeat, state=self.state),
             contestantIndivActorCallback,
-            allRelationships.relationsMainWeightCallback
+            self.allRelationships.relationsMainWeightCallback
         ]
         # modifyIndivActorWeightsWithParticipants: Expected args: actor, participant, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
         modifyIndivActorWeightsWithParticipants = [
             contestantIndivActorWithParticipantsCallback,
-            partial(allRelationships.relationsRoleWeightCallback, "Participant")
+            partial(self.allRelationships.relationsRoleWeightCallback, "Participant")
         ]
         # modifyIndivActorWeightsWithVictims: Expected args: actor, victim, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
         modifyIndivActorWeightsWithVictims = [
             contestantIndivActorWithVictimsCallback,
-            partial(allRelationships.relationsRoleWeightCallback, "Victim")
+            partial(self.allRelationships.relationsRoleWeightCallback, "Victim")
         ]
 
         modifyIndivActorWeightsWithParticipantsAndVictims = [
@@ -208,7 +207,7 @@ class MegucaArena:
         # modifyIndivActorWeightsWithSponsors: Expected args: actor, sponsor, baseEventActorWeight, event. Return newWeight, bool eventMayProceed
         modifyIndivActorWeightsWithSponsors = [
             contestantIndivActorWithSponsorsCallback,
-            partial(allRelationships.relationsRoleWeightCallback, "Sponsor")
+            partial(self.allRelationships.relationsRoleWeightCallback, "Sponsor")
         ]
 
         # In case it ever becomes a good idea to directly manipulate events as they happen. Expected args: contestantKey, thisevent, state, participants, victims, sponsorsHere. Return: bool proceedAsUsual, resetEvent (True if you want the usual event chain to still happen, and True if you want the event to Reset entirely)
@@ -235,7 +234,7 @@ class MegucaArena:
         ]
 
         postDayCallbacks = [  # Things that happen after each day. Args: state. Returns: None.
-            allRelationships.decay
+            self.allRelationships.decay
         ]
 
         if PRINTHTML:
@@ -457,7 +456,7 @@ class MegucaArena:
                                 modifyWeightForMultipleActors(
                                     trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
                                 modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights,
-                                                              "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", sponsors, True)
+                                                              "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", self.sponsors, True)
                                 # the above precalculation fails if some victims or participants are invalid, so an addition check is necessary; Unfortunately this distorts the statistics a little.
                                 if eventVictimWeights[eventName] and eventParticipantWeights[eventName]:
                                     if trueNumParticipants[eventName] + trueNumVictims[eventName] + list(eventVictimWeights[eventName].values()).count(0) + list(eventParticipantWeights[eventName].values()).count(0) > len(set(list(eventVictimWeights[eventName]) + list(eventParticipantWeights[eventName]))):
@@ -478,7 +477,7 @@ class MegucaArena:
                         # Ugly Hack, but not sure there's a better way. We need pre-event information on contestants, and short of deepcopying everything...
                         preEventInjuries = ArenaUtils.DictToOrderedDict(
                             {x: self.contestants[x].hasThing("Injury") for x in liveContestants})
-                        allRelationships.backup()
+                        self.allRelationships.backup()
                         while(True):
                             # Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
                             eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
@@ -493,7 +492,7 @@ class MegucaArena:
                             for x in victims:
                                 possibleParticipantEventWeights[eventName][x.name] = 0
                             # some participants need adjustment based on the chosen victim(s)
-                            aborted = allRelationships.reprocessParticipantWeightsForVictims(
+                            aborted = self.allRelationships.reprocessParticipantWeightsForVictims(
                                 possibleParticipantEventWeights, victims, self.events[eventName])
                             # check if enough possible participants are left to satisfy the event, presuming it has participants
                             if "numParticipants" in thisevent.baseProps:
@@ -515,7 +514,7 @@ class MegucaArena:
                             participants = selectRoles(
                                 baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
                             sponsorsHere = selectRoles(
-                                baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, sponsors)
+                                baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, self.sponsors)
                             proceedAsUsual = True
                             resetEvent = False
                             for override in callbacks["overrideContestantEvent"]:
@@ -534,7 +533,7 @@ class MegucaArena:
                                     indivProb[eventName] = 0
                                     continue
                                 eventOutputs = list(eventOutputs)
-                                allRelationships.processTraitEffect(
+                                self.allRelationships.processTraitEffect(
                                     thisevent, self.contestants[contestantKey], participants + victims)
                             for postEvent in callbacks["postEventCallbacks"]:
                                 postEvent(proceedAsUsual, eventOutputs, thisevent,
@@ -560,13 +559,13 @@ class MegucaArena:
                             self.settings = self.state['settings']
                             self.contestants = self.state['contestants']
                             callbacks = self.state['callbacks']
-                            sponsors = self.state['sponsors']
+                            self.sponsors = self.state['sponsors']
                             self.events = self.state['events']
                             self.eventsActive = self.state['eventsActive']
                             items = self.state['items']
                             statuses = self.state['statuses']
                             arena = self.state['arena']
-                            allRelationships = self.state['allRelationships']
+                            self.allRelationships = self.state['allRelationships']
                             turnNumber = self.state['turnNumber']
                             callbackStore = self.state['callbackStore']
                             thisWriter = self.state['thisWriter']
