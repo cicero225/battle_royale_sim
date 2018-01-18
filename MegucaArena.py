@@ -61,6 +61,46 @@ class MegucaArena:
         contestantClass.stateStore[0] = self.state
         # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
         self.contestants = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["contestants"], self.settings, contestantClass)
+        # Initialize stats
+        # Deduce stats from the union of all contestants - if there are any typos this is a problem.
+        statTemplate = set()
+        for x in self.contestants.values():
+            statTemplate |= set(list(x.stats.keys()))
+        # This is kind of dumb, but easiest: If we want pure random stats, any stats in the file are directly overwritten.
+        if self.settings['fullRandomStats']:
+            for key, value in self.contestants.items():
+                self.contestants[key] = Contestant.makeRandomContestant(
+                    value.name, value.gender, value.imageFile, statTemplate, self.settings)
+        else:  # fill in missing stats for any contestants
+            for value in self.contestants.values():
+                value.contestantStatFill(statTemplate)
+        # Adjust contestant count to the desired value
+        if not self.settings['matchContestantCount']:
+            # If number of contestants in settings less than those found in the json, randomly remove some
+            contestantNames = self.contestants.keys()
+            if self.settings['numContestants'] < len(contestantNames):
+                contestantNames = random.sample(contestantNames, len(
+                    contestantNames) - self.settings['numContestants'])
+                for remove in contestantNames:
+                    del self.contestants[remove]
+            # If number of contestants in settings more than those found in the json, add Rando Calrissians
+            for i in range(len(contestantNames), self.settings['numContestants']):
+                # Here contestants[0].stats is used as a template for making random stats
+                self.contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant(
+                    'Rando Calrissian ' + str(i), "M", "Rando.jpg", statTemplate, self.settings)  # need Rando image to put here
+
+            assert(len(self.contestants) == self.settings['numContestants'])
+        else:
+            self.settings['numContestants'] = len(self.contestants)
+        # Normalize stats if necessary
+        if self.settings["statNormalization"]:
+            targetSum = sum(sum(x.stats.values())
+                            for x in self.contestants.values()) / len(self.contestants)
+        for contestant in self.contestants.values():
+            if self.settings["statNormalization"]:
+                contestant.contestantStatNormalizer(targetSum)
+            contestant.InitializeEventModifiers(self.events)
+        
         
     def main(self):
         """The main for the battle royale sim"""
@@ -82,45 +122,6 @@ class MegucaArena:
         for x in self.events:
             # Global array that permits absolute disabling of events regardless of anything else. This could also be done by directly setting the base weight to 0, but this is clearer.
             eventsActive[x] = True
-
-        # Deduce stats from the union of all contestants - if there are any typos this is a problem.
-        statTemplate = set()
-
-        for x in self.contestants.values():
-            statTemplate |= set(list(x.stats.keys()))
-        # This is kind of dumb, but easiest: If we want pure random stats, any stats in the file are directly overwritten.
-        if self.settings['fullRandomStats']:
-            for key, value in self.contestants.items():
-                self.contestants[key] = Contestant.makeRandomContestant(
-                    value.name, value.gender, value.imageFile, statTemplate, self.settings)
-        else:  # fill in missing stats for any contestants
-            for value in self.contestants.values():
-                value.contestantStatFill(statTemplate)
-        if not self.settings['matchContestantCount']:
-            # If number of contestants in settings less than those found in the json, randomly remove some
-            contestantNames = self.contestants.keys()
-            if self.settings['numContestants'] < len(contestantNames):
-                contestantNames = random.sample(contestantNames, len(
-                    contestantNames) - self.settings['numContestants'])
-                for remove in contestantNames:
-                    del self.contestants[remove]
-            # If number of contestants in settings more than those found in the json, add Rando Calrissians
-            for i in range(len(contestantNames), self.settings['numContestants']):
-                # Here contestants[0].stats is used as a template for making random stats
-                self.contestants['Rando Calrissian ' + str(i)] = Contestant.makeRandomContestant(
-                    'Rando Calrissian ' + str(i), "M", "Rando.jpg", statTemplate, self.settings)  # need Rando image to put here
-
-            assert(len(self.contestants) == self.settings['numContestants'])
-        else:
-            self.settings['numContestants'] = len(self.contestants)
-
-        if self.settings["statNormalization"]:
-            targetSum = sum(sum(x.stats.values())
-                            for x in self.contestants.values()) / len(self.contestants)
-        for contestant in self.contestants.values():
-            if self.settings["statNormalization"]:
-                contestant.contestantStatNormalizer(targetSum)
-            contestant.InitializeEventModifiers(self.events)
 
         # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
         # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
