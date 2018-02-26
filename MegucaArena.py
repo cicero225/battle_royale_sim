@@ -15,6 +15,7 @@ import statistics  # Note: this is Python 3.4 +
 import collections
 from functools import partial  # Might be useful later
 import traceback
+import warnings
 
 from Objs.Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
 from Objs.Items.Item import Item
@@ -36,6 +37,156 @@ CONFIG_FILE_PATHS = {"settings": "Settings.json",
                      "events": os.path.join('Objs', 'Events', 'Events.json'),
                      "contestants": os.path.join('Objs', 'Contestants', 'Contestants.json'),
                      "sponsors": os.path.join('Objs', 'Sponsors', 'Sponsors.json')}
+
+# Object used by the MegucaArena Main to store and track probability details about the events under consideration for a given contestant.
+class EventSelectionState:
+
+    # Static look-up tables, hard-coded participants/victims/sponsorsHere
+    callbackNames = ArenaUtils.DictToOrderedDict({
+        "participant": "modifyIndivActorWeightsWithParticipants",
+        "victim": "modifyIndivActorWeightsWithVictims",
+        "sponsor": "modifyIndivActorWeightsWithSponsors"
+    })
+    
+    peopleList = ArenaUtils.DictToOrderedDict({
+        "participant": "contestants",
+        "victim": "contestants",
+        "sponsor": "sponsors"
+    })
+    
+    basePropNumField = ArenaUtils.DictToOrderedDict({
+        "participant": "numParticipants",
+        "victim": "numVictims",
+        "sponsor": "numSponsors"
+    })
+
+    def __init__(self, actor, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, state, liveContestants, alreadyUsed):
+        self.actor = actor
+        # individualized/multi-contestant corrected event probabilities
+        self.indivProb = copy.deepcopy(baseEventActorWeights)
+        # Copies of the general event weights; Should not be modified by this class
+        self.baseEventWeights = collections.OrderedDict()
+        self.baseEventWeights["actor"] = baseEventActorWeights
+        self.baseEventWeights["participant"] = baseEventParticipantWeights
+        self.baseEventWeights["victim"] = baseEventVictimWeights
+        self.baseEventWeights["sponsor"] = baseEventSponsorWeights
+        # Personalized Weights for this contestant as main actor.
+        self.eventWeights = collections.OrderedDict()
+        self.eventWeights["participant"] = ArenaUtils.DefaultOrderedDict(
+            collections.OrderedDict)
+        self.eventWeights["victim"] = ArenaUtils.DefaultOrderedDict(
+            collections.OrderedDict)
+        self.eventWeights["sponsor"] = ArenaUtils.DefaultOrderedDict(
+            collections.OrderedDict)
+        # Number of participants rolled for each event.
+        self.trueNumRoles = collections.OrderedDict()
+        self.trueNumRoles["participant"] = ArenaUtils.DefaultOrderedDict(int)
+        self.trueNumRoles["victim"] = ArenaUtils.DefaultOrderedDict(int)
+        self.trueNumRoles["sponsor"] = ArenaUtils.DefaultOrderedDict(int)
+        # State reference to the global state.
+        self.state = state
+        self.liveContestants = liveContestants
+        self.alreadyUsed = alreadyUsed
+    
+    # Predetermine number of participants/victims. Returns False if impossible.
+    def selectNumberRoles(self, event):
+        eventName = str(event)
+        numExtraAllowed = len(self.liveContestants) - (event.baseProps["numParticipants"] if "numParticipants" in event.baseProps else 0) - (
+            event.baseProps["numVictims"] if "numVictims" in event.baseProps else 0) - 1
+        if numExtraAllowed < 0:
+            self.indivProb[eventName] = 0
+            return False
+
+        # Set initial values based on eventName in base props (do sponsors as well here)
+        for roleName in self.callbackNames:
+            if self.basePropNumField[roleName] in event.baseProps:
+                self.trueNumRoles[roleName][eventName] = event.baseProps[self.basePropNumField[roleName]]
+
+        if "numVictimsExtra" in event.baseProps and "numParticipantsExtra" in event.baseProps:
+            numExtraParticipants = round(event.baseProps["numParticipantsExtra"] / (
+                event.baseProps["numParticipantsExtra"] + event.baseProps["numVictimsExtra"])) * numExtraAllowed            
+            numExtraVictims = numExtraAllowed - numExtraParticipants
+            self.trueNumRoles["participant"][eventName] += random.randint(
+                0, min(event.baseProps["numParticipantsExtra"], numExtraParticipants))
+            self.trueNumRoles["victim"][eventName] += random.randint(
+                0, min(event.baseProps["numVictimsExtra"], numExtraVictims))
+        elif "numVictimsExtra" in event.baseProps:
+            self.trueNumRoles["victim"][eventName] += random.randint(
+                0, min(event.baseProps["numVictimsExtra"], numExtraAllowed))
+        elif "numParticipantsExtra" in event.baseProps:
+            self.trueNumRoles["participant"][eventName] += random.randint(
+                0, min(event.baseProps["numParticipantsExtra"], numExtraAllowed))
+        return True
+    
+    # Adjusts Event Probabilities for the presence of multiple actors.
+    def modifyWeightForMultipleActors(self, event, origIndivWeight):
+        for roleName in self.callbackNames:
+            weights = self.eventWeights[roleName]
+            trueNumRoles = self.trueNumRoles[roleName]
+            baseWeights = self.baseEventWeights[roleName]
+            eventName = str(event)
+            callbackName = self.callbackNames[roleName]
+            people = self.state[self.peopleList[roleName]]
+            if eventName in baseWeights:
+                if not trueNumRoles[eventName]:
+                    return
+                if not origIndivWeight:  # this causes numerical issues and should end up 0 anyway
+                    self.indivProb[eventName] = 0.0
+                    return
+                # A bit of set magic
+                if roleName == "sponsor":
+                    validRoles = people.keys()
+                elif roleName in ["participant", "victim"]:
+                    validRoles = set(self.liveContestants) - self.alreadyUsed
+                    for x in validRoles:
+                        try:
+                            validRoles.difference_update(
+                                people[x].eventDisabled[eventName][roleName])
+                        except:
+                            pass
+                    if len(validRoles) < trueNumRoles[eventName]:
+                        self.indivProb[eventName] = 0  # This event cannot happen
+                        return
+                else:
+                    raise Exception("Invalid Role!")
+                validRoles = sorted(list(validRoles))
+                for role in validRoles:
+                    weights[eventName][role] = baseWeights[eventName]
+                    eventMayProceed = True
+                    for callback in self.state["callbacks"][callbackName]:
+                        weights[eventName][role], eventMayProceed = callback(self.actor, people[role],
+                                                                             weights[eventName][role],
+                                                                             event)
+                        if not eventMayProceed:
+                            break
+                if sum(bool(x) for x in weights[eventName].values()) < trueNumRoles[eventName]:
+                    self.indivProb[eventName] = 0
+                    return
+                correctionRoleWeight = sum(
+                    weights[eventName].values()) / len(weights)
+                self.indivProb[eventName] *= min(correctionRoleWeight /
+                                                 origIndivWeight, self.state["settings"]["maxParticipantEffect"])
+        # the above precalculation fails if some victims or participants are invalid, so an additional check is necessary; Unfortunately this distorts the statistics a little.
+        if self.eventWeights["victim"][eventName] and self.eventWeights["participant"][eventName]:
+            if self.trueNumRoles["participant"][eventName] + self.trueNumRoles["victim"][eventName] + list(self.eventWeights["victim"][eventName].values()).count(0) + list(self.eventWeights["participant"][eventName].values()).count(0) > len(set(list(self.eventWeights["victim"][eventName]) + list(self.eventWeights["participant"][eventName]))):
+                self.indivProb[eventName] = 0
+                
+    # Selects contestants to play each role in an event based on their weights.
+    def selectRoles(self, eventName, roleName, weights=None):
+        if weights is None:
+            weights = self.eventWeights[roleName]
+        trueNumRoles = self.trueNumRoles[roleName]
+        baseWeights = self.baseEventWeights[roleName]
+        people = self.state[self.peopleList[roleName]]
+        if eventName in baseWeights and trueNumRoles[eventName] > 0:
+            rolekeys = ArenaUtils.weightedDictRandom(
+                weights[eventName], trueNumRoles[eventName])
+            roles = [people[key] for key in rolekeys]
+        else:
+            roles = []
+        return roles
+    
+                     
 
 class MegucaArena:
     # Hmm...make object feeding list or dict based?
@@ -109,8 +260,7 @@ class MegucaArena:
         for contestant in self.contestants.values():
             if self.settings["statNormalization"]:
                 contestant.contestantStatNormalizer(targetSum)
-            contestant.InitializeEventModifiers(self.events)
-        
+            contestant.InitializeEventModifiers(self.events)        
         
     def main(self):
         """The main for the battle royale sim"""
@@ -249,76 +399,27 @@ class MegucaArena:
             postGameCallbacks.insert(0, ArenaUtils.killWrite)
             postGameCallbacks.insert(0, ArenaUtils.relationshipWrite)
 
-        callbacks = ArenaUtils.DictToOrderedDict({"startup": startup,
-                                                  "modifyBaseWeights": modifyBaseWeights,
-                                                  "modifyIndivActorWeights": modifyIndivActorWeights,
-                                                  "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
-                                                  "modifyIndivActorWeightsWithPartipantsAndVictims": modifyIndivActorWeightsWithParticipantsAndVictims,
-                                                  "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
-                                                  "modifyIndivActorWeightsWithSponsors": modifyIndivActorWeightsWithSponsors,
-                                                  "overrideContestantEvent": overrideContestantEvent,
-                                                  "postEventCallbacks": postEventCallbacks,
-                                                  "postEventWriterCallbacks": postEventWriterCallbacks,
-                                                  "endGameConditions": endGameConditions,
-                                                  "preDayCallbacks": preDayCallbacks,
-                                                  "postDayCallbacks": postDayCallbacks,
-                                                  "postGameCallbacks": postGameCallbacks,
-                                                  })
+        self.callbacks = ArenaUtils.DictToOrderedDict({"startup": startup,
+                                                       "modifyBaseWeights": modifyBaseWeights,
+                                                       "modifyIndivActorWeights": modifyIndivActorWeights,
+                                                       "modifyIndivActorWeightsWithParticipants": modifyIndivActorWeightsWithParticipants,
+                                                       "modifyIndivActorWeightsWithPartipantsAndVictims": modifyIndivActorWeightsWithParticipantsAndVictims,
+                                                       "modifyIndivActorWeightsWithVictims": modifyIndivActorWeightsWithVictims,
+                                                       "modifyIndivActorWeightsWithSponsors": modifyIndivActorWeightsWithSponsors,
+                                                       "overrideContestantEvent": overrideContestantEvent,
+                                                       "postEventCallbacks": postEventCallbacks,
+                                                       "postEventWriterCallbacks": postEventWriterCallbacks,
+                                                       "endGameConditions": endGameConditions,
+                                                       "preDayCallbacks": preDayCallbacks,
+                                                       "postDayCallbacks": postDayCallbacks,
+                                                       "postGameCallbacks": postGameCallbacks,
+                                                       })
 
         # loophole that allows event-defining and item/status-defining files to slip callbacks in
         for store, funcList in list(Event.Event.inserted_callbacks.items()) + list(Item.inserted_callbacks.items()):
-            callbacks[store].extend(funcList)
+            self.callbacks[store].extend(funcList)
 
-        self.state["callbacks"] = callbacks
-
-        # Nested functions that need access to variables in main
-        def modifyWeightForMultipleActors(trueNumRoles, baseWeights, weights, roleName, numRoles, callbackName, people=self.contestants, forSponsors=False):
-            if eventName in baseWeights:
-                if not trueNumRoles[eventName]:
-                    return
-                if not origIndivWeight:  # this causes numerical issues and shoudl end up 0 anyway
-                    indivProb[eventName] = 0.0
-                    return
-                # A bit of set magic
-                if forSponsors:
-                    validRoles = people.keys()
-                else:
-                    validRoles = set(liveContestants) - alreadyUsed
-                    for x in validRoles:
-                        try:
-                            validRoles.difference_update(
-                                people[x].eventDisabled[eventName][roleName])
-                        except:
-                            pass
-                    if len(validRoles) < trueNumRoles[eventName]:
-                        indivProb[eventName] = 0  # This event cannot happen
-                        return
-                validRoles = sorted(list(validRoles))
-                for role in validRoles:
-                    weights[eventName][role] = baseWeights[eventName]
-                    eventMayProceed = True
-                    for callback in callbacks[callbackName]:
-                        weights[eventName][role], eventMayProceed = callback(actor, people[role],
-                                                                             weights[eventName][role],
-                                                                             event)
-                        if not eventMayProceed:
-                            break
-                if sum(bool(x) for x in weights[eventName].values()) < trueNumRoles[eventName]:
-                    indivProb[eventName] = 0
-                    return
-                correctionRoleWeight = sum(
-                    weights[eventName].values()) / len(weights)
-                indivProb[eventName] *= min(correctionRoleWeight /
-                                            origIndivWeight, self.settings["maxParticipantEffect"])
-
-        def selectRoles(baseWeights, weights, trueNumRoles, people=self.contestants):
-            if eventName in baseWeights and trueNumRoles[eventName] > 0:
-                rolekeys = ArenaUtils.weightedDictRandom(
-                    weights[eventName], trueNumRoles[eventName])
-                roles = [people[key] for key in rolekeys]
-            else:
-                roles = []
-            return roles
+        self.state["callbacks"] = self.callbacks
 
         # Run simulation
 
@@ -336,7 +437,7 @@ class MegucaArena:
         restartTurn = False
 
         # Startup callbacks
-        for callback in callbacks["startup"]:
+        for callback in self.callbacks["startup"]:
             callback(self.state)
 
         # Main loop of DEATH
@@ -349,7 +450,7 @@ class MegucaArena:
             else:
                 thisDay = self.phases["default"]
             print("Day " + str(turnNumber[0]))
-            for callback in callbacks["preDayCallbacks"]:
+            for callback in self.callbacks["preDayCallbacks"]:
                 callback(self.state)
             for phaseNum, thisPhase in enumerate(thisDay["phases"]):
                 titleString = thisDay["titles"][phaseNum]
@@ -363,7 +464,7 @@ class MegucaArena:
                             titleString.replace('#', str(turnNumber[0])))
                     # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
                     restartTurn = False
-                    # Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradism. The other option is to force the last event in a turn to never kill the last contestant.
+                    # Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradigm. The other option is to force the last event in a turn to never kill the last contestant.
                     initialState = copy.deepcopy(self.state)
                     liveContestants = ArenaUtils.DictToOrderedDict(
                         {x: y for x, y in self.contestants.items() if y.alive})
@@ -382,7 +483,7 @@ class MegucaArena:
                     baseEventSponsorWeights = ArenaUtils.DictToOrderedDict(
                         {x: y.baseProps["sponsorWeight"] for x, y in self.events.items() if "sponsorWeight" in y.baseProps})
                     # Do callbacks for modifying base weights
-                    for callback in callbacks["modifyBaseWeights"]:
+                    for callback in self.callbacks["modifyBaseWeights"]:
                         callback(liveContestants, baseEventActorWeights, baseEventParticipantWeights,
                                  baseEventVictimWeights, baseEventSponsorWeights, turnNumber, self.state)
                     # Now go through the contestants and trigger events based on their individualized probabilities
@@ -393,80 +494,32 @@ class MegucaArena:
                             continue
                         # Some contestants may die in events, they get removed at the end of the for loop
                         actor = liveContestants[contestantKey]
-                        alreadyUsed.add(contestantKey)
-                        # Calculate individualized/multi-contestant corrected event probabilities
-                        indivProb = collections.OrderedDict()
-                        # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-                        eventParticipantWeights = ArenaUtils.DefaultOrderedDict(
-                            collections.OrderedDict)
-                        # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-                        eventVictimWeights = ArenaUtils.DefaultOrderedDict(
-                            collections.OrderedDict)
-                        # We're about to calculate it here, and we don't want to recalculate when we get to the *next* for loop, so let's save it
-                        eventSponsorWeights = ArenaUtils.DefaultOrderedDict(
-                            collections.OrderedDict)
-                        trueNumParticipants = ArenaUtils.DefaultOrderedDict(int)
-                        trueNumVictims = ArenaUtils.DefaultOrderedDict(int)
-                        trueNumSponsors = ArenaUtils.DefaultOrderedDict(int)
+                        alreadyUsed.add(contestantKey)                        
                         itcounter = 0
+                        selectionState = EventSelectionState(
+                            actor, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, self.state, liveContestants, alreadyUsed)
                         while True:
                             for eventName, event in self.events.items():
-                                indivProb[eventName] = baseEventActorWeights[eventName]
                                 eventMayProceed = True
-                                for callback in callbacks["modifyIndivActorWeights"]:
-                                    indivProb[eventName], eventMayProceed = callback(
-                                        actor, indivProb[eventName], event)
+                                for callback in self.callbacks["modifyIndivActorWeights"]:
+                                    selectionState.indivProb[eventName], eventMayProceed = callback(
+                                        actor, selectionState.indivProb[eventName], event)
                                     if not eventMayProceed:  # If one returns false, it signals that the event has been blocked
                                         break
                                 if not eventMayProceed:
                                     continue
-                                origIndivWeight = indivProb[eventName]
-                                # Predetermine number of participants/victims
-                                numExtraAllowed = len(liveContestants) - (event.baseProps["numParticipants"] if "numParticipants" in event.baseProps else 0) - (
-                                    event.baseProps["numVictims"] if "numVictims" in event.baseProps else 0) - 1
-                                if numExtraAllowed < 0:
-                                    indivProb[eventName] = 0
+                                origIndivWeight = selectionState.indivProb[eventName]
+                                if not selectionState.selectNumberRoles(event):
                                     continue
-                                # Set initial values based on eventName in base props (do sponsors as well here)
-                                if "numParticipants" in event.baseProps:
-                                    trueNumParticipants[eventName] = event.baseProps["numParticipants"]
-                                if "numVictims" in event.baseProps:
-                                    trueNumVictims[eventName] = event.baseProps["numVictims"]
-                                if "numSponsors" in event.baseProps:
-                                    trueNumSponsors[eventName] = event.baseProps["numSponsors"]
-                                if "numVictimsExtra" in event.baseProps and "numParticipantsExtra" in event.baseProps:
-                                    numExtraParticipants = round(event.baseProps["numParticipantsExtra"] / (
-                                        event.baseProps["numParticipantsExtra"] + event.baseProps["numVictimsExtra"])) * numExtraAllowed
-                                    numExtraVictims = numExtraAllowed - numExtraParticipants
-                                    trueNumParticipants[eventName] += random.randint(
-                                        0, min(event.baseProps["numParticipantsExtra"], numExtraParticipants))
-                                    trueNumVictims[eventName] += random.randint(
-                                        0, min(event.baseProps["numVictimsExtra"], numExtraVictims))
-                                elif "numVictimsExtra" in event.baseProps:
-                                    trueNumVictims[eventName] += random.randint(
-                                        0, min(event.baseProps["numVictimsExtra"], numExtraAllowed))
-                                elif "numParticipantsExtra" in event.baseProps:
-                                    trueNumParticipants[eventName] += random.randint(
-                                        0, min(event.baseProps["numParticipantsExtra"], numExtraAllowed))
-
-                                # Probability correction for multi-contestant events, if necessary
-                                # this feels silly but is very useful
-                                modifyWeightForMultipleActors(trueNumParticipants, baseEventParticipantWeights, eventParticipantWeights,
-                                                              "participant", "numParticipants", "modifyIndivActorWeightsWithParticipants")
-                                modifyWeightForMultipleActors(
-                                    trueNumVictims, baseEventVictimWeights, eventVictimWeights, "victim", "numVictims", "modifyIndivActorWeightsWithVictims")
-                                modifyWeightForMultipleActors(trueNumSponsors, baseEventSponsorWeights, eventSponsorWeights,
-                                                              "sponsor", "numSponsors", "modifyIndivActorWeightsWithSponsors", self.sponsors, True)
-                                # the above precalculation fails if some victims or participants are invalid, so an addition check is necessary; Unfortunately this distorts the statistics a little.
-                                if eventVictimWeights[eventName] and eventParticipantWeights[eventName]:
-                                    if trueNumParticipants[eventName] + trueNumVictims[eventName] + list(eventVictimWeights[eventName].values()).count(0) + list(eventParticipantWeights[eventName].values()).count(0) > len(set(list(eventVictimWeights[eventName]) + list(eventParticipantWeights[eventName]))):
-                                        indivProb[eventName] = 0
+                                selectionState.modifyWeightForMultipleActors(event, origIndivWeight)
+                                
                             # If ALL events are banned, rerun this until a working combination appears
-                            if sum(indivProb.values()):
+                            if sum(selectionState.indivProb.values()):
                                 break
                             # There's a few edge cases where it's really hard to keep infinite loop from happening, so if that happens, just give up
                             if itcounter > 4:
-                                indivProb = baseEventActorWeights
+                                selectionState.indivProb = copy.deepcopy(baseEventActorWeights)
+                                warnings.warn("Reached cycle limit on trying to find valid event probabilities; reverting to fallback.")
                                 break
                             itcounter += 1
                         # It is occasionally useful for an event to be able to force a new event to be chosen.
@@ -480,15 +533,14 @@ class MegucaArena:
                         self.allRelationships.backup()
                         while(True):
                             # Now select which event happens and make it happen, selecting additional participants and victims by the relative chance they have of being involved.
-                            eventName = ArenaUtils.weightedDictRandom(indivProb)[0]
+                            eventName = ArenaUtils.weightedDictRandom(selectionState.indivProb)[0]
                             # Handle event overrides, if any
                             # Determine participants, victims, if any.
                             thisevent = self.events[eventName]
-                            victims = selectRoles(
-                                baseEventVictimWeights, eventVictimWeights, trueNumVictims)
+                            victims = selectionState.selectRoles(eventName, "victim")
                             # Can't be both a participant and a victim... (this creates a bit of bias, but oh well)
                             possibleParticipantEventWeights = copy.deepcopy(
-                                eventParticipantWeights)
+                                selectionState.eventWeights["participant"])
                             for x in victims:
                                 possibleParticipantEventWeights[eventName][x.name] = 0
                             # some participants need adjustment based on the chosen victim(s)
@@ -499,25 +551,23 @@ class MegucaArena:
                                 # print(possibleParticipantEventWeights[eventName])
                                 # print(len(possibleParticipantEventWeights[eventName]))
                                 # print(list(possibleParticipantEventWeights[eventName].values()).count(0))
-                                if len(possibleParticipantEventWeights[eventName]) - list(possibleParticipantEventWeights[eventName].values()).count(0) < trueNumParticipants[eventName]:
+                                if len(possibleParticipantEventWeights[eventName]) - list(possibleParticipantEventWeights[eventName].values()).count(0) < selectionState.trueNumRoles["participant"][eventName]:
                                     # abort event
                                     continue
                             if DEBUG:
                                 STATSDEBUG["state"] = self.state
-                                STATSDEBUG["indivProb"] = indivProb
-                                STATSDEBUG["eventParticipantWeights"] = eventParticipantWeights[eventName]
+                                STATSDEBUG["indivProb"] = selectionState.indivProb
+                                STATSDEBUG["eventParticipantWeights"] = selectionState.eventWeights["participant"][eventName]
                                 STATSDEBUG["participants"] = (
-                                    baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
+                                    baseEventParticipantWeights, possibleParticipantEventWeights, selectionState.trueNumRoles["participant"])
                                 STATSDEBUG["mainActor"] = contestantKey
                                 STATSDEBUG["eventName"] = eventName
                             # print(possibleParticipantEventWeights[eventName])
-                            participants = selectRoles(
-                                baseEventParticipantWeights, possibleParticipantEventWeights, trueNumParticipants)
-                            sponsorsHere = selectRoles(
-                                baseEventSponsorWeights, eventSponsorWeights, trueNumSponsors, self.sponsors)
+                            participants = selectionState.selectRoles(eventName, "participant", possibleParticipantEventWeights)
+                            sponsorsHere = selectionState.selectRoles(eventName, "sponsor")
                             proceedAsUsual = True
                             resetEvent = False
-                            for override in callbacks["overrideContestantEvent"]:
+                            for override in self.callbacks["overrideContestantEvent"]:
                                 # Be very careful of modifying state here.
                                 proceedAsUsual, resetEvent = override(
                                     contestantKey, thisevent, self.state, participants, victims, sponsorsHere)
@@ -530,12 +580,12 @@ class MegucaArena:
                                     self.contestants[contestantKey], self.state, participants, victims, sponsorsHere)
                                 if not eventOutputs:
                                     # Apparently this event is not valid for this contestant (participants etc. should not be considered)
-                                    indivProb[eventName] = 0
+                                    selectionState.indivProb[eventName] = 0
                                     continue
                                 eventOutputs = list(eventOutputs)
                                 self.allRelationships.processTraitEffect(
                                     thisevent, self.contestants[contestantKey], participants + victims)
-                            for postEvent in callbacks["postEventCallbacks"]:
+                            for postEvent in self.callbacks["postEventCallbacks"]:
                                 postEvent(proceedAsUsual, eventOutputs, thisevent,
                                           self.contestants[contestantKey], self.state, participants, victims, sponsorsHere)
                             desc, descContestants, theDead = eventOutputs[:3]
@@ -546,7 +596,7 @@ class MegucaArena:
                         if PRINTHTML:
                             thisWriter.addEvent(
                                 desc, descContestants, self.state, preEventInjuries)
-                            for callback in callbacks["postEventWriterCallbacks"]:
+                            for callback in self.callbacks["postEventWriterCallbacks"]:
                                 callback(thisWriter, eventOutputs, self.state)
                         else:
                             print(desc)
@@ -558,7 +608,7 @@ class MegucaArena:
                             self.state.update(initialState.copy())
                             self.settings = self.state['settings']
                             self.contestants = self.state['contestants']
-                            callbacks = self.state['callbacks']
+                            self.callbacks = self.state['callbacks']
                             self.sponsors = self.state['sponsors']
                             self.events = self.state['events']
                             self.eventsActive = self.state['eventsActive']
@@ -583,7 +633,7 @@ class MegucaArena:
 
                     if not restartTurn:
                         # conditions for ending the game
-                        for callback in callbacks["endGameConditions"]:
+                        for callback in self.callbacks["endGameConditions"]:
                             if callback(liveContestants, self.state):
                                 if PRINTHTML:
                                     thisWriter.addBigLine(list(liveContestants.values())[
@@ -594,7 +644,7 @@ class MegucaArena:
                                     print(list(liveContestants.values())[
                                           0].name + " survive(s) the game and win(s)!")
 
-                                for callback in callbacks["postGameCallbacks"]:
+                                for callback in self.callbacks["postGameCallbacks"]:
                                     callback(self.state)
                                 return list(liveContestants.values())[0].name, turnNumber[0]
                         if PRINTHTML:
@@ -607,7 +657,7 @@ class MegucaArena:
                             thisWriter.finalWrite(os.path.join("Assets", str(
                                 turnNumber[0]) + " Phase " + thisPhase + ".html"), self.state)
                         break
-            for callback in callbacks["postDayCallbacks"]:
+            for callback in self.callbacks["postDayCallbacks"]:
                 callback(self.state)
             if turnNumber[0] > 200:
                 raise TooManyDays('Way too many days')
@@ -632,7 +682,7 @@ def statCollection():  # expand to count number of days, and fun stuff like epip
     PRINTHTML = False
     for _ in range(0, 100):
         try:
-            winner, day = main()
+            winner, day = MegucaArena(CONFIG_FILE_PATHS).main()
             statDict[winner] += 1
             days.append(day)
         except TooManyDays:
