@@ -123,7 +123,8 @@
      "sponsorInfluence": {"Gladiatorial": {"value": 1.0},
                           "Bloodthirsty": {"value": 1.0, "all": false},
                           "Senate": {"value": 0.5, "all": false},
-                          "Pacifist": {"value": -1.0, "all": false}}
+                          "Pacifist": {"value": -1.0, "all": false}},
+     "contact": true
      },
 "AAmbushesB":
     {"phase": ["Day", "Night"],
@@ -145,7 +146,8 @@
      "sponsorInfluence": {"Gladiatorial": {"value": 1.0},
                           "Bloodthirsty": {"value": 1.0, "all": false},
                           "Senate": {"value": 0.5, "all": false},
-                          "Pacifist": {"value": -1.0, "all": false}}
+                          "Pacifist": {"value": -1.0, "all": false}},
+     "contact": true
      },
 "QuestionsSanity": 
     {"phase": ["Night"],
@@ -191,7 +193,8 @@
                           "Gladiatorial": {"value": 1.0},
                           "Bloodthirsty": {"value": 1.0},
                           "Senate": {"value": 0.5},
-                          "Pacifist": {"value": -1.0}}
+                          "Pacifist": {"value": -1.0}},
+     "contact": true
      },
  "SickWithFever":
     {"phase": ["Day", "Night"],
@@ -539,7 +542,8 @@
      "mainWeight": 3,
      "unique": false,
      "itemRequired": false,
-     "murder": true
+     "murder": true,
+     "contact": true
      },
      "SponsorForceFight":
     {"phase": ["Day", "Night"],
