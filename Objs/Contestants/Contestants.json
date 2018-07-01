@@ -257,10 +257,10 @@
          "meanness": 3,
          "ruthlessness": 4,
          "aggression": 5,
-         "endurance": 6,
+         "endurance": 5,
          "survivalism": 8,
-         "loneliness": 7,
-         "friendliness": 9,
+         "loneliness": 10,
+         "friendliness": 10,
          "cleverness": 7,
          "combat ability": 4
          }
