@@ -88,7 +88,8 @@
      "sponsorInfluence": {"Shipper": {"value": 1.0},
                           "Greater Good": {"value": 1.0},
                           "Senate": {"value": 0.5},
-                          "Bloodthirsty": {"value": -0.5}}
+                          "Bloodthirsty": {"value": -0.5}},
+     "contact": true
      },
 "HuntsForOthers": 
     {"phase": ["Day"],
@@ -320,7 +321,8 @@
      "unique": false,
      "itemRequired": false,
      "sponsorInfluence": {"Harvester": {"value": 1.0},
-                          "Capricious": {"value": 0.5}}
+                          "Capricious": {"value": 0.5}},
+     "contact": true
      },
    "FindAbandonedBuilding":
     {"phase": ["Day"],
@@ -339,7 +341,8 @@
      "loveEffectParticipant": 1.0,
      "murder": true,
      "sponsorInfluence": {"Survivalist": {"value": 1.0},
-                          "Trickster": {"value": 1.0}}
+                          "Trickster": {"value": 1.0}},
+     "contact": true
     },
     "SelfFuneral":
      {"phase": ["Day"],
@@ -349,7 +352,8 @@
      "itemRequired": false,
      "sponsorInfluence": {"Capricious": {"value": 1.0},
                           "Trickster": {"value": 1.0},
-                          "Harvester": {"value": 1.0}}
+                          "Harvester": {"value": 1.0}},
+     "contact": true
      },
     "SponsorGivesTips":
     {"phase": ["Day", "Night"],
@@ -379,7 +383,8 @@
      "neededLoveLevelParticipant": {"relation": true, "value": 1},
      "sponsorInfluence": {"Shipper": {"value": 1.0},
                           "Harvester": {"value": 1.0},
-                          "Capricious": {"value": 1.0}}
+                          "Capricious": {"value": 1.0}},
+     "contact": true
      },
      "ResolvesFeelingConfusion":
     {"phase": ["Night"],
@@ -392,7 +397,8 @@
      "itemRequired": false,
      "sponsorInfluence": {"Shipper": {"value": 2.5},
                           "Harvester": {"value": 1.0},
-                          "Capricious": {"value": 1.0}}
+                          "Capricious": {"value": 1.0}},
+     "contact": true
      },
      "MakeMolotovCocktail":
     {"phase": ["Day", "Night"],
@@ -458,7 +464,8 @@
      "participantHasNeededFriendLevel": {"relation": true, "value": 3},
      "sponsorInfluence": {"Shipper": {"value": 1.0},
                           "Loyalist": {"value": 1.0},
-                          "Greater Good": {"value": 1.0}}
+                          "Greater Good": {"value": 1.0}},
+     "contact": true
      },
      "AWorshipsB":
      {"phase": ["Night"],
@@ -524,7 +531,8 @@
      "participantHasNeededFriendLevel": {"relation": true, "value": 1},
      "sponsorInfluence": {"Shipper": {"value": 1.0},
                           "Loyalist": {"value": 1.0},
-                          "Greater Good": {"value": 1.0}}
+                          "Greater Good": {"value": 1.0}},
+     "contact": true
      },
      "MakeCampfire":
     {"phase": ["Evening"],
@@ -541,7 +549,8 @@
      "friendEffectParticipant": 0,
      "loveEffectParticipant": 0,
      "unique": false,
-     "itemRequired": false
+     "itemRequired": false,
+     "contact": true
      },
      "GangUpFight":
     {"phase": ["Day", "Night"],
@@ -580,7 +589,8 @@
                           "Capricious": {"value": 1.0},
                           "Trickster": {"value": 1.0},
                           "Senate": {"value": 1.0},
-                          "Harvester": {"value": 1.0}}
+                          "Harvester": {"value": 1.0}},
+     "contact": true
      },
     "SetTrap":
     {"phase": ["Day"],
@@ -639,7 +649,8 @@
                           "Senate": {"value": 1.5, "all": false},
                           "Loyalist": {"value": -1.5, "all": false},
                           "Gladiatorial": {"value": -1.0, "all": false}
-                          }
+                          },
+     "contact": true
      },
      "ACooksForB":
     {"phase": ["Day","Night"],
@@ -662,7 +673,8 @@
      "neededLoveLevelParticipant": {"relation": true, "value": 1},
      "sponsorInfluence": {"Harvester": {"value": 1.0},
                           "Shipper": {"value": 1.0},
-                          "Greater Good": {"value": 1.0}}
+                          "Greater Good": {"value": 1.0}},
+     "contact": true
     },
     "ACooksForBButPoison":
     {"phase": ["Day","Night"],
@@ -692,6 +704,7 @@
                           "Loyalist": {"value": -1.5, "all": false},
                           "Capricious": {"value": 1.0},
                           "Bloodthirsty": {"value": 0.5, "all": false},
-                          "Pacifist": {"value": -1.0, "all": false}}
+                          "Pacifist": {"value": -1.0, "all": false}},
+     "contact": true
     }
 }

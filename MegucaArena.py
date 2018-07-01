@@ -371,7 +371,7 @@ class MegucaArena:
             ArenaUtils.logKills
         ]
 
-        postEventWriterCallbacks = [  # For piggy-backing after events if you need to write to the main HTML. Args: thisWriter, eventOutputs, state. Returns: None.
+        postEventWriterCallbacks = [  # For piggy-backing after events if you need to write to the main HTML. Args: thisWriter, eventOutputs, thisEvent, state. Returns: None.
             ArenaUtils.relationshipUpdate
         ]
 
@@ -597,7 +597,7 @@ class MegucaArena:
                             thisWriter.addEvent(
                                 desc, descContestants, self.state, preEventInjuries)
                             for callback in self.callbacks["postEventWriterCallbacks"]:
-                                callback(thisWriter, eventOutputs, self.state)
+                                callback(thisWriter, eventOutputs, thisevent, self.state)
                         else:
                             print(desc)
 
