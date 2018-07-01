@@ -418,7 +418,7 @@
      },
      "KillWithMolotovCocktail":
     {"phase": ["Day", "Night"],
-    "mainWeight": 100.0,
+    "mainWeight": 10.0,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0,
                        "meanness": 0.5},

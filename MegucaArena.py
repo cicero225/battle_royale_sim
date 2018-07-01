@@ -164,8 +164,8 @@ class EventSelectionState:
                     return
                 correctionRoleWeight = sum(
                     weights[eventName].values()) / len(weights)
-                self.indivProb[eventName] *= min(correctionRoleWeight /
-                                                 origIndivWeight, self.state["settings"]["maxParticipantEffect"])
+                self.indivProb[eventName] *= max(min(correctionRoleWeight /
+                                                 origIndivWeight, self.state["settings"]["maxParticipantEffect"]), 1/self.state["settings"]["minParticipantEffect"])
         # the above precalculation fails if some victims or participants are invalid, so an additional check is necessary; Unfortunately this distorts the statistics a little.
         if self.eventWeights["victim"][eventName] and self.eventWeights["participant"][eventName]:
             if self.trueNumRoles["participant"][eventName] + self.trueNumRoles["victim"][eventName] + list(self.eventWeights["victim"][eventName].values()).count(0) + list(self.eventWeights["participant"][eventName].values()).count(0) > len(set(list(self.eventWeights["victim"][eventName]) + list(self.eventWeights["participant"][eventName]))):

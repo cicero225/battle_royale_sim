@@ -9,7 +9,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     probHorrifcFailure = 1 - probNormalFailure - probSuccess
     randValue = random.random()
     if randValue < probSuccess:
-        mainActor.addItem(state["items"]["MolotovCocktail"])
+        mainActor.addItem("MolotovCocktail")
         desc = mainActor.name + ' crafted a Molotov Cocktail.'
         return (desc, [mainActor, state["items"]["MolotovCocktail"]], [])
     elif randValue < probSuccess + probNormalFailure:

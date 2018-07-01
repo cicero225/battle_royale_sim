@@ -650,3 +650,9 @@ def onlyOneLeft(liveContestants, _):
     if len(liveContestants) == 1:
         return True
     return False
+
+    
+ # Debug methods, stored for convenience
+def giveEveryoneItem(item, state):
+    for contestant in state["contestants"].values():
+        contestant.addItem(item)

@@ -6,6 +6,7 @@
  "statInfluence": 0.3,
  "objectInfluence": 1,
  "relationInfluence": 0.1,
+ "minParticipantEffect": 0.1,
  "maxParticipantEffect": 3,
  "statFriendEffect": 0.2,
  "friendCombatEffect": 0.25,

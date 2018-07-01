@@ -197,10 +197,6 @@ class Contestant(object):
     # persistent effects field, but this is left out for now. An item.onRemoval(self) is called on removal, but this will be
     # pass most of the time.
 
-    # Note that for now there is only ever one instance of a given item. In the future if we want items with
-    # changeable properties per contestant, we can add another class specifically to store that and have it include
-    # a reference to the base object class.
-
     def hasThing(self, item):
         item_list = [x for x in self.inventory +
                      self.statuses if str(x) == str(item)]
