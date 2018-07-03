@@ -134,9 +134,11 @@
         {
         },
     "eventsDisabled": {
-        "AAttacksBCOMMENTREMOVETHISWHENACTIVE": {"main": true}
+        "AAttacksB": {"main": true}
         },
-    "stackable": false
+    "stackable": false,
+    "ammo": 10,
+    "ammouse": [2, 5] 
     },
     "Dossier":
     {"imageFile": "Dossier.jpg",

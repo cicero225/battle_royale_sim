@@ -111,6 +111,7 @@ class Item(object):
             self.applyObjectInfluence(self.statChanges)
             self.applyObjectInfluence(self.eventMultipliers)
             self.applyObjectInfluence(self.eventAdditions)
+        self.rawData = inDict
 
     def __str__(self):
         return self.name
