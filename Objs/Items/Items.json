@@ -103,5 +103,87 @@
         "DiesFromFever": {"main": true}
         },
     "stackable": true
+    },
+    "Memento":
+    {"imageFile": "Memento.jpg",
+    "friendly": "a Memento",
+    "statChanges": 
+        {"stability": 5
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
+    },
+    "Rifle":
+    {"imageFile": "Rifle.jpg",
+    "friendly": "a Rifle",
+    "statChanges": 
+        {"aggression": 2,
+         "combat ability": 4
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        "AAttacksBCOMMENTREMOVETHISWHENACTIVE": {"main": true}
+        },
+    "stackable": false
+    },
+    "Dossier":
+    {"imageFile": "Dossier.jpg",
+    "friendly": "a Dossier",
+    "statChanges": 
+        {
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": true
+    },
+    "Medical Kit":
+    {"imageFile": "MedicalKit.jpg",
+    "friendly": "a Medical Kit",
+    "statChanges": 
+        {"endurance": 1
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
+    },
+    "Explosives":
+    {"imageFile": "Explosives.jpg",
+    "friendly": "Explosives",
+    "statChanges": 
+        {"endurance": 1
+         },
+    "eventMultipliers":
+        {
+        },
+    "eventAdditions":
+        {
+        },
+    "eventsDisabled": {
+        },
+    "stackable": false
     }
 }
