@@ -96,6 +96,13 @@ class Contestant(object):
         # These events cannot happen to this contestant. Default False
         self.eventDisabled = ArenaUtils.DefaultOrderedDict(
             collections.OrderedDict)
+            
+    # Necessary to properly apply special modifiers to combat ability taking items into consideration. Only meant for 1v1 consideration.
+    def getCombatAbility(self, otherContestant):
+        base_ca = self.stats["combat ability"]
+        for item in self.inventory:
+            base_ca = item.RealTimeCombatAbilityChange(base_ca, otherContestant)
+        return base_ca
 
     def __str__(self):
         return self.name

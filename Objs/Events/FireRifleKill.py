@@ -4,7 +4,7 @@ import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     probKill = Event.DieOrEscapeProb1v1(mainActor, victims[0], state["settings"], defenseStat=(
-        victims[0].stats['combat ability'] * 0.15 + victims[0].stats['cleverness'] * 0.10))
+        victims[0].getCombatAbility(mainActor) * 0.15 + victims[0].stats['cleverness'] * 0.10))
     tempList = [mainActor, state["items"]["Rifle"], victims[0]]
     # Deteriorate relationship of victim toward participant
     state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, -2)

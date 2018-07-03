@@ -8,7 +8,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, -2)
     state["allRelationships"].IncreaseLoveLevel(victims[0], mainActor, -3)
     probKill = Event.DieOrEscapeProb1v1(mainActor, victims[0], state["settings"], defenseStat=(
-        victims[0].stats['combat ability'] * 0.5 + victims[0].stats['cleverness']))  # this event is mildly rigged against attacker
+        victims[0].getCombatAbility(mainActor) * 0.5 + victims[0].stats['cleverness']))  # this event is mildly rigged against attacker
     if random.random() < probKill:
         victims[0].alive = False
         if mainActor.stats['ruthlessness'] > 6:

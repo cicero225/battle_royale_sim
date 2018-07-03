@@ -4,7 +4,7 @@ import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     probKill = Event.DieOrEscapeProb1v1(mainActor, victims[0], state["settings"], defenseStat=(
-        victims[0].stats['combat ability'] * 0.75 + victims[0].stats['cleverness'] * 0.25))
+        victims[0].getCombatAbility(mainActor) * 0.75 + victims[0].stats['cleverness'] * 0.25))
     spearBroken = random.randint(0, 1)
     tempList = [mainActor, state["items"]["Spear"], victims[0]]
     # Deteriorate relationship of victim toward participant

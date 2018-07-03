@@ -52,7 +52,7 @@ img {
         self.bodylist.insert(1, self.wrap(self.wrap(title, "banner"), "p"))
 
     def massInsertTag(self, desc, findString, insertString):
-        stringList = desc.split(findString)
+        stringList = desc.split(findString)        
         if len(stringList) == 1:
             return desc
         for i in range(len(stringList)):

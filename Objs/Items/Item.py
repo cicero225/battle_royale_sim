@@ -1,5 +1,6 @@
 import collections
 import copy
+from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES
 
 # I wonder if this needs to import Contestant...
 
@@ -15,6 +16,9 @@ class ItemInstanceWithoutIternalItem(Exception):
 
 
 class ItemInstance(object):
+
+    stateStore = [None]
+
     def __init__(self, item, count=1):
         if hasattr(item, "item"):
             raise InstanceInsteadOfMainThing
@@ -22,6 +26,15 @@ class ItemInstance(object):
             self.item = item
             self.count = count
             self.data = collections.OrderedDict()
+            if self.item.name not in ITEM_INITIALIZERS:
+                return
+            ITEM_INITIALIZERS[self.item.name](self)
+    
+    # Processes if the combat ability needs to change for this _particular_ combat (rather than in general)
+    def RealTimeCombatAbilityChange(self, value, otherContestant):
+        if self.item.name not in ITEM_COMBAT_ABILITY_CHANGES:
+            return value
+        return ITEM_COMBAT_ABILITY_CHANGES[self.item.name](self, value, otherContestant)
 
     @classmethod
     def copyOrMakeInstance(cls, item):
@@ -55,12 +68,16 @@ class ItemInstance(object):
 
     def __getattribute__(self, attr):
         try:
-            return getattr(object.__getattribute__(self, "item"), attr)
-        except AttributeError:
             return object.__getattribute__(self, attr)
+        except AttributeError:
+            return getattr(object.__getattribute__(self, "item"), attr)
 
     def __setattr__(self, attr, value):
         if attr == "item" and not hasattr(self, "item"):
+            object.__setattr__(self, attr, value)
+            return
+        # Unique exception, allowing friendly to be overridden for item instances.
+        if attr == "friendly":
             object.__setattr__(self, attr, value)
             return
         if hasattr(self.item, attr):

@@ -5,7 +5,7 @@ import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     probSurvival = (1 - Event.DieOrEscapeProb1v1(mainActor, victims[0], state["settings"], defenseStat=(
-        victims[0].stats['combat ability'] * 0.75 + victims[0].stats['cleverness'] * 0.25))) * 0.5  # This event is rigged against defender
+        victims[0].getCombatAbility(mainActor) * 0.75 + victims[0].stats['cleverness'] * 0.25))) * 0.5  # This event is rigged against defender
     tempList = [mainActor, state["items"]["MolotovCocktail"], victims[0]]
     state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, -4)
     state["allRelationships"].IncreaseLoveLevel(victims[0], mainActor, -6)

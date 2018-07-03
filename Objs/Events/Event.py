@@ -165,9 +165,9 @@ class Event(object):  # Python 2.x compatibility
     # Attacker, victim
     def DieOrEscapeProb1v1(person1, person2, settings, attackStat=None, defenseStat=None):
         if attackStat is None:
-            attackStat = person1.stats['combat ability']
+            attackStat = person1.getCombatAbility(person2)
         if defenseStat is None:
-            defenseStat = person2.stats['combat ability']
+            defenseStat = person2.getCombatAbility(person1)
         # probability of kill
         return 1 / (1 + (1 + settings['combatAbilityEffect'])**(attackStat - defenseStat))
 

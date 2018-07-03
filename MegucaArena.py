@@ -18,7 +18,7 @@ import traceback
 import warnings
 
 from Objs.Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
-from Objs.Items.Item import Item
+from Objs.Items.Item import Item, ItemInstance
 from Objs.Items.Status import Status
 from Objs.Sponsors.Sponsor import Sponsor, contestantIndivActorWithSponsorsCallback
 from Objs.World.World import World
@@ -281,6 +281,7 @@ class MegucaArena:
         # Import and initialize Items -> going to make it dictionary name : (imageName,baseStats...)
         items = ArenaUtils.LoadJSONIntoDictOfObjects(
             os.path.join('Objs', 'Items', 'Items.json'), self.settings, Item)
+        ItemInstance.stateStore[0] = self.state
         statuses = ArenaUtils.LoadJSONIntoDictOfObjects(
             os.path.join('Objs', 'Items', 'Statuses.json'), self.settings, Status)
 
@@ -324,6 +325,8 @@ class MegucaArena:
         startup = [
             ArenaUtils.loggingStartup,
             ArenaUtils.sponsorTraitWrite]
+        # Example debug rig to give an item to everyone: add the functor partial(ArenaUtils.giveEveryoneItem, "Dossier")
+        # to this list.
 
         if PRINTHTML:
             startup.insert(0, ArenaUtils.relationshipWrite)
@@ -619,7 +622,8 @@ class MegucaArena:
                             turnNumber = self.state['turnNumber']
                             callbackStore = self.state['callbackStore']
                             thisWriter = self.state['thisWriter']
-                            Event.stateStore = self.state
+                            Event.Event.stateStore[0] = self.state
+                            ItemInstance.ItemInstance.stateStore[0] = self.state
                             restartTurn = True
                             break
 
