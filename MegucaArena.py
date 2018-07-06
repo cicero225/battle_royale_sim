@@ -386,7 +386,7 @@ class MegucaArena:
         preDayCallbacks = [  # Things that happen before each day. Args: state. Returns: None.
         ]
 
-        # Things that happen after each phase. Args: Phase string, state. Returns: None.
+        # Things that happen after each phase. Args: Phase string, PRINTHTML, state. Returns: None.
         postPhaseCallbacks = [
         ]
         
@@ -468,6 +468,7 @@ class MegucaArena:
                 while True:  # this just allows resetting the iteration
                     if PRINTHTML:
                         thisWriter = HTMLWriter(statuses)
+                        self.state['thisWriter'] = thisWriter
                         thisWriter.addTitle(
                             titleString.replace('#', str(turnNumber[0])))
                     # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
@@ -641,7 +642,7 @@ class MegucaArena:
                             alreadyUsed.update([x.name for x in descContestants])
                     
                     for callback in self.callbacks["postPhaseCallbacks"]:
-                        callback(thisPhase, self.state)                    
+                        callback(thisPhase, PRINTHTML, self.state)                    
                     if not restartTurn:
                         # conditions for ending the game
                         for callback in self.callbacks["endGameConditions"]:

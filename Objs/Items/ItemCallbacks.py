@@ -1,4 +1,5 @@
 from Objs.Items.Item import Item
+from Objs.Events.Event import Event
 import collections
 import random
 
@@ -36,3 +37,23 @@ def spreadDisease(thisWriter, eventOutputs, thisEvent, state):
 
 
 Item.registerInsertedCallback("postEventWriterCallbacks", spreadDisease)
+
+
+# manages the Medkit Evening Healing
+
+def medkitHealing(thisPhase, printHTML, state):
+    if thisPhase != "Evening":
+        return
+    for contestant in state["contestants"].values():
+        if contestant.alive and contestant.hasThing("Medical Kit"):
+            removedStatuses = set()
+            if contestant.removeStatus("Injury"):  # If this is False, they never had it to start with.
+                removedStatuses.add(state["statuses"]["Injury"])
+            if contestant.removeStatus("Fever"):  # If this is False, they never had it to start with.
+                removedStatuses.add(state["statuses"]["Fever"])
+            if removedStatuses and printHTML:
+                desc = contestant.name + " used their Medical Kit to heal their " + Event.englishList(removedStatuses) + "."
+                descContestants = [contestant, *removedStatuses]
+                state['thisWriter'].addEvent(desc, descContestants)
+            
+Item.registerPostPhaseCallback(medkitHealing)
