@@ -137,6 +137,11 @@ class Item(object):
     def registerInsertedCallback(cls, callbackLocation, callback):
         cls.inserted_callbacks.setdefault(
             callbackLocation, []).append(callback)
+    
+    # Convenience methods for common item tasks
+    @classmethod
+    def registerPostPhaseCallback(cls, callback):
+        cls.registerInsertedCallback("postPhaseCallbacks", callback)
 
     def applyObjectInfluence(self, inDict):
         for key in inDict:

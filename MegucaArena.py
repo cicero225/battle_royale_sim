@@ -26,7 +26,7 @@ from Objs.Relationships.Relationship import Relationship
 import Objs.Utilities.ArenaUtils as ArenaUtils
 from Objs.Events import *
 # If we get more stuff here, we're going to have to do something better
-from Objs.Items import DiseaseItems
+from Objs.Items import ItemCallbacks
 from Objs.Display.HTMLWriter import HTMLWriter
 
 PRINTHTML = True
@@ -386,6 +386,10 @@ class MegucaArena:
         preDayCallbacks = [  # Things that happen before each day. Args: state. Returns: None.
         ]
 
+        # Things that happen after each phase. Args: Phase string, state. Returns: None.
+        postPhaseCallbacks = [
+        ]
+        
         postDayCallbacks = [  # Things that happen after each day. Args: state. Returns: None.
             self.allRelationships.decay
         ]
@@ -414,6 +418,7 @@ class MegucaArena:
                                                        "postEventWriterCallbacks": postEventWriterCallbacks,
                                                        "endGameConditions": endGameConditions,
                                                        "preDayCallbacks": preDayCallbacks,
+                                                       "postPhaseCallbacks": postPhaseCallbacks,
                                                        "postDayCallbacks": postDayCallbacks,
                                                        "postGameCallbacks": postGameCallbacks,
                                                        })
@@ -634,7 +639,9 @@ class MegucaArena:
                             alreadyUsed.update([x.name for x in eventOutputs[4]])
                         else:
                             alreadyUsed.update([x.name for x in descContestants])
-
+                    
+                    for callback in self.callbacks["postPhaseCallbacks"]:
+                        callback(thisPhase, self.state)                    
                     if not restartTurn:
                         # conditions for ending the game
                         for callback in self.callbacks["endGameConditions"]:
