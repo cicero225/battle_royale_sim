@@ -735,5 +735,39 @@
                           "Bloodthirsty": {"value": 0.5, "all": false},
                           "Pacifist": {"value": -1.0, "all": false}},
      "contact": true
+    },
+    "SuccessfulSneak":
+    {"phase": ["Cornucopia"],
+     "mainWeight": 1,
+     "mainModifiers": {"survivalism": 0.5,
+                       "cleverness": 1.0},
+     "unique": false,
+     "itemRequired": false,
+     "sponsorInfluence": {"Trickster": {"value": 1.0},
+                          "Gladiatorial": {"value": -1.0},
+                          "Bloodthirsty": {"value": -1.5},
+                          "Pacifist": {"value": 0.5}}
+    },
+    "FightOverItems":
+    {"phase": ["Cornucopia"],
+     "mainWeight": 1.0,
+     "mainModifiers": {},
+     "participantWeight": 0.3,
+     "numParticipants": 1,
+     "numParticipantsExtra": 3,
+     "participantModifiers": {},
+     "unique": false,
+     "itemRequired": false,
+     "mutual": true,
+     "friendEffectParticipant": -0.5,
+     "loveEffectParticipant": -1.0,
+     "friendRequiredParticipant": true,
+     "neededFriendLevelParticipant": {"relation": false, "value": 4},
+     "loveRequiredParticipant": true,
+     "neededLoveLevelParticipant": {"relation": false, "value": 3},
+     "murder": true,
+     "sponsorInfluence": {"Gladiatorial": {"value": 1.0},
+                          "Bloodthirsty": {"value": 1.0}},
+     "contact": true
     }
 }

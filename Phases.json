@@ -1,4 +1,6 @@
 {
  "default": {"phases": ["Day", "Evening", "Night"],
-             "titles": ["Day #", "Evening #", "Night #"]}
+             "titles": ["Day #", "Evening #", "Night #"]},
+ "3": {"phases": ["Cornucopia"],
+     "titles": ["Cornucopia - Day #"]}
 }

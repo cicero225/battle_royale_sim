@@ -209,18 +209,21 @@ class Contestant(object):
                      self.statuses if str(x) == str(item)]
         return item_list
 
+    # Returns a reference to the instance of the item itself, which is useful occasionally (but otherwise let it go out of scope)
     def addItem(self, item, count=1):
         possibleItem = self.hasThing(item)
         if isinstance(item, str):
             item = self.stateStore[0]["items"][item]
         if not possibleItem:
-            self.inventory.append(ItemInstance.takeOrMakeInstance(item))
+            newItem = ItemInstance.takeOrMakeInstance(item)
+            self.inventory.append(newItem)
         elif not item.stackable:
-            return False
+            return None
         else:
             possibleItem[0].count += count
+            newItem = item
         self.refreshEventState()
-        return True
+        return newItem
 
     def removeItem(self, item, count=1):
         possibleItem = self.hasThing(item)

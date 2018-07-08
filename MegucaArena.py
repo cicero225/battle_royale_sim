@@ -453,8 +453,9 @@ class MegucaArena:
             int) if "allEvents" not in STATSDEBUG else STATSDEBUG["allEvents"]
         while True:
             turnNumber[0] += 1
-            if turnNumber[0] in self.phases:
-                thisDay = self.phases[turnNumber[0]]
+            # str(turnNumber[0]) because json doesn't do dicts with number keys...
+            if str(turnNumber[0]) in self.phases:
+                thisDay = self.phases[str(turnNumber[0])]
             else:
                 thisDay = self.phases["default"]
             print("Day " + str(turnNumber[0]))
