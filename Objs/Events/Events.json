@@ -780,5 +780,45 @@
      "sponsorInfluence": {"Gladiatorial": {"value": -1.0},
                           "Bloodthirsty": {"value": -1.5},
                           "Pacifist": {"value": 0.5}}
-    }
+    },
+    "SetExplosiveTrap":
+    {"phase": ["Day"],
+     "mainWeight": 10,
+     "mainModifiers": {"cleverness": 0.3,
+                       "stability": -0.2,
+                       "meanness": 0.7,
+                       "survivalism": 0.3,
+                       "ruthlessness": 0.7,
+                       "aggression":0.5},
+     "unique": false,
+     "itemRequired": true,
+     "necessaryItem": "Explosives",
+     "murder": false,
+     "sponsorInfluence": {"Bloodthirsty": {"value": 0.5},
+                          "Pacifist": {"value": -1.0},
+                          "Capricious": {"value": 1.0},
+                          "Trickster": {"value": 1.0},
+                          "Senate": {"value": 1.0},
+                          "Gladiatorial": {"value": 1.0},
+                          "Survivalist": {"value": 0.5}
+                          }
+    },
+    "DiesFromExplosiveTrap":
+    {"phase": ["Day", "Night"],
+     "mainWeight": 0.5,
+     "mainModifiers": {"cleverness": -0.2,
+                       "survivalism": -0.2},
+     "participantWeight": 0.3,
+     "numParticipants": 0,
+     "numParticipantsExtra": 3,
+     "participantModifiers": {"cleverness": -0.2,
+                       "survivalism": -0.2},
+     "unique": false,
+     "itemRequired": false,
+     "mutual": true,
+     "friendEffectParticipant": 0.5,
+     "loveEffectParticipant": 1.0,
+     "murder": true,
+     "sponsorInfluence": {"Survivalist": {"value": -1.0}}
+     }
 }
