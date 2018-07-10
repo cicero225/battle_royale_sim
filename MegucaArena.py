@@ -603,13 +603,14 @@ class MegucaArena:
 
                         print(eventName)
                         STATSDEBUG["allEvents"][eventName] += 1
-                        if PRINTHTML:
-                            thisWriter.addEvent(
-                                desc, descContestants, self.state, preEventInjuries)
-                            for callback in self.callbacks["postEventWriterCallbacks"]:
-                                callback(thisWriter, eventOutputs, thisevent, self.state)
-                        else:
-                            print(desc)
+                        if desc is not None:
+                            if PRINTHTML:
+                                thisWriter.addEvent(
+                                    desc, descContestants, self.state, preEventInjuries)
+                                for callback in self.callbacks["postEventWriterCallbacks"]:
+                                    callback(thisWriter, eventOutputs, thisevent, self.state)
+                            else:
+                                print(desc)
 
                         # Check if everyone is now dead...
                         if all(not x.alive for x in liveContestants.values()):
@@ -630,7 +631,7 @@ class MegucaArena:
                             callbackStore = self.state['callbackStore']
                             thisWriter = self.state['thisWriter']
                             Event.Event.stateStore[0] = self.state
-                            ItemInstance.ItemInstance.stateStore[0] = self.state
+                            ItemInstance.stateStore[0] = self.state
                             restartTurn = True
                             break
 

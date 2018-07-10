@@ -769,5 +769,16 @@
      "sponsorInfluence": {"Gladiatorial": {"value": 1.0},
                           "Bloodthirsty": {"value": 1.0}},
      "contact": true
+    },
+    "DoNothing":
+    {"phase": ["Cornucopia"],
+     "mainWeight": 3,
+     "mainModifiers": {"gregariousness": -0.5,
+                       "aggression": -1.0},
+     "unique": false,
+     "itemRequired": false,
+     "sponsorInfluence": {"Gladiatorial": {"value": -1.0},
+                          "Bloodthirsty": {"value": -1.5},
+                          "Pacifist": {"value": 0.5}}
     }
 }
