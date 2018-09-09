@@ -118,7 +118,8 @@
         },
     "eventsDisabled": {
         },
-    "stackable": false
+    "stackable": false,
+    "lootable": false
     },
     "Rifle":
     {"imageFile": "Rifle.jpg",

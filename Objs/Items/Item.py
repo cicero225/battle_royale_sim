@@ -124,6 +124,7 @@ class Item(object):
         # This dict (string: bool) stores any events actively disabled by this object. Keys are events, followed by main/participant/victim. If you don't want a subcategory disabled, you can not include a listing, or explicitly have a boolean
         self.eventsDisabled = inDict["eventsDisabled"]
         self.stackable = inDict["stackable"]
+        self.lootable = inDict.get("lootable", True)  # defaults to True.
         if settings["objectInfluence"] != 1:
             self.applyObjectInfluence(self.statChanges)
             self.applyObjectInfluence(self.eventMultipliers)

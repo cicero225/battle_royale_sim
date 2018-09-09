@@ -129,9 +129,9 @@ class Event(object):  # Python 2.x compatibility
     @staticmethod
     def lootAll(looter, looted):
         if hasattr(looted, 'inventory'):
-            itemList = looted.inventory
+            itemList = [x for x in looted.inventory if x.lootable]
         else:
-            itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted]
+            itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted if x.lootable]
         lootList = []
         for loot in itemList:
             if hasattr(looted, 'inventory'):
@@ -144,9 +144,9 @@ class Event(object):  # Python 2.x compatibility
     @staticmethod
     def lootRandom(looters, looted):
         if hasattr(looted, 'inventory'):
-            itemList = looted.inventory
+            itemList = [x for x in looted.inventory if x.lootable]
         else:
-            itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted]
+            itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted if x.lootable]
         lootList = []
         for loot in itemList:
             if hasattr(looted, 'inventory'):
