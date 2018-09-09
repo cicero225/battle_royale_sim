@@ -20,7 +20,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             probViolence = 0.25 - \
                 relationships.groupCohesion(eventPeople) / 200
             if random.random() < probViolence:
-                desc += ' Violence broke out due to frustration, and '
+                desc += ' Violence broke out due to frustration, '
                 fightDesc, fightList, fightDead, allKillers = Event.fight(
                     eventPeople, relationships, state['settings'])
                 desc += fightDesc
