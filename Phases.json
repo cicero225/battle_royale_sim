@@ -1,6 +1,10 @@
 {
  "default": {"phases": ["Day", "Evening", "Night"],
-             "titles": ["Day #", "Evening #", "Night #"]},
- "3": {"phases": ["Cornucopia"],
-     "titles": ["The Sponsors Announce a Cornucopia!<br/><br/>Day #"]}
+             "titles": ["Day #", "Evening #", "Night #"],
+             "prob": 0.4},
+ "random": {"cornucopia": {"phases": ["Cornucopia"],
+                           "titles": ["The Sponsors Announce a Cornucopia!<br/><br/>Day #"],
+                           "range": [2, 5],
+                           "weight": 1,
+                           "max_occurences": 1}}
 }

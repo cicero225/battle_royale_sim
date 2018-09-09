@@ -309,7 +309,8 @@ class MegucaArena:
             "turnNumber": turnNumber,
             "callbackStore": callbackStore,
             "thisWriter": thisWriter,
-            "phases": self.phases
+            "phases": self.phases,
+            "phasesRun": {},
         }))  # Allows for convenient passing of the entire game state to anything that needs it (usually events)
         # An unfortunate bit of split processing
         for sponsor in self.sponsors.values():
@@ -457,7 +458,25 @@ class MegucaArena:
             if str(turnNumber[0]) in self.phases:
                 thisDay = self.phases[str(turnNumber[0])]
             else:
-                thisDay = self.phases["default"]
+                # process random
+                # Default phases have a fixed overall rate of occurence
+                roll = random.random()
+                if roll < self.phases["default"]["prob"]:
+                    thisDay = self.phases["default"]
+                else:
+                    # TODO: implement forcing a phase to occur eventually.
+                    random_candidates = self.phases["random"]
+                    rand_dict = {}
+                    for name, candidate in random_candidates.items():
+                        if (self.state["phasesRun"].get(name, 0) < candidate["max_occurences"]) and (turnNumber[0] >= candidate["range"][0]) and (turnNumber[0] <= candidate["range"][1]):
+                            rand_dict[name] = candidate["weight"]
+                    if rand_dict:
+                        phase_name = ArenaUtils.weightedDictRandom(rand_dict)[0]     
+                        self.state["phasesRun"].setdefault(name, 0)
+                        self.state["phasesRun"][name] += 1
+                        thisDay = random_candidates[name]
+                    else:
+                        thisDay = self.phases["default"]
             print("Day " + str(turnNumber[0]))
             for callback in self.callbacks["preDayCallbacks"]:
                 callback(self.state)
