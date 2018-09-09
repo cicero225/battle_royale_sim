@@ -4,8 +4,9 @@ def cornucopiaEndPhaseCallback(thisPhase, PRINTHTML, state):
     if thisPhase == "Cornucopia":
         state["events"]["DoNothing"].eventStore.setdefault("CornucopiaDoNothing", [])
         skippers = state["events"]["DoNothing"].eventStore["CornucopiaDoNothing"]
-        state["thisWriter"].addEvent("The following contestants chose to skip the Cornucopia: " + Event.englishList(skippers), skippers)
-        skippers.clear()
+        if skippers:
+            state["thisWriter"].addEvent("The following contestants chose to skip the Cornucopia: " + Event.englishList(skippers), skippers)
+            skippers.clear()
 
 Event.registerInsertedCallback(
     "postPhaseCallbacks", cornucopiaEndPhaseCallback)
