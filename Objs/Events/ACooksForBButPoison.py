@@ -63,6 +63,10 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += str(victims[0]) + \
             " ate the meal, blissfully unaware, before falling over dead."
         victims[0].alive = False
+        lootList = Event.lootAll(mainActor, victims[0])
+        if lootList:
+            desc += ' ' + str(mainActor) + ' looted ' + Event.englishList(lootList) + '.'
+            descList.extend(lootList)
 
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     return (desc, descList, [str(victims[0])])

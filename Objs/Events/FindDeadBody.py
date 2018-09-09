@@ -18,9 +18,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc = mainActor.name + ' found ' + body.name + "'s body, "
         if lootList:
             desc += 'and looted ' + Event.englishList(lootList) + '.'
+            tempList.extend(lootList)
         else:
             desc += "but the body had nothing of value."
-        tempList.extend(lootList)
     # Second entry is the contestants named in desc, in order. Third is anyone who died.
     return (desc, tempList, [])
 
