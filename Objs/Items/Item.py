@@ -1,6 +1,6 @@
 import collections
 import copy
-from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES
+from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS
 
 # I wonder if this needs to import Contestant...
 
@@ -102,7 +102,10 @@ class ItemInstance(object):
         for changedStat in self.statChanges:
             contestant.stats[changedStat] = max(min(
                 contestant.stats[changedStat] + self.statChanges[changedStat] * self.count, 10), 0)
-
+                
+    def CheckItemValidity(self, contestant, resetItemAllowed=False):
+        itemCallback = ITEM_RESTRICTIONS.get("self.item.name")
+        return itemCallback is None or itemCallback(self, contestant, resetItemAllowed)
 
 class Item(object):
 
@@ -148,7 +151,7 @@ class Item(object):
         for key in inDict:
             inDict[key] *= self.settings["objectInfluence"]
 
-    def onAcquisition(self, contestant):
+    def onAcquisition(self, contestant, resetItemAllowed=False):
         for eventName, eventModifier in self.eventMultipliers.items():
             for actorType, modifier in eventModifier.items():
                 contestant.fullEventMultipliers[eventName][actorType] *= modifier
@@ -158,7 +161,7 @@ class Item(object):
         for eventName, eventModifier in self.eventsDisabled.items():
             for actorType, modifier in eventModifier.items():
                 contestant.eventDisabled[eventName][actorType] = modifier
-
+            
     def makeInstance(self, count=1, data=None):
         if data is None:
             data = collections.OrderedDict()

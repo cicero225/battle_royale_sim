@@ -138,7 +138,9 @@ class Event(object):  # Python 2.x compatibility
                 looted.removeItem(loot, loot.count)
             # If we wanted to make non-stackable loot acquirable in mass quantity, we'd remove the first check...but what do you even do with two spears?...and it would cause double stats, etc.
             if not looter.hasThing(loot) or loot.stackable:
-                lootList.append(looter.addItem(loot, loot.count))
+                looted = looter.addItem(loot, loot.count)
+                if looted is not None:
+                    lootList.append(looted)
         return lootList
 
     @staticmethod

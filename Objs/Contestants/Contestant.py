@@ -210,12 +210,15 @@ class Contestant(object):
         return item_list
 
     # Returns a reference to the instance of the item itself, which is useful occasionally (but otherwise let it go out of scope)
-    def addItem(self, item, count=1):
+    # Returns None if item invalid.
+    def addItem(self, item, count=1, resetItemAllowed=False):
         possibleItem = self.hasThing(item)
         if isinstance(item, str):
             item = self.stateStore[0]["items"][item]
         if not possibleItem:
             newItem = ItemInstance.takeOrMakeInstance(item)
+            if not newItem.CheckItemValidity(self, resetItemAllowed):
+                return None
             self.inventory.append(newItem)
         elif not item.stackable:
             return None

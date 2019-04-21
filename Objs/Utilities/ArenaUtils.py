@@ -655,4 +655,4 @@ def onlyOneLeft(liveContestants, _):
  # Debug methods, stored for convenience
 def giveEveryoneItem(item, state):
     for contestant in state["contestants"].values():
-        contestant.addItem(item)
+        contestant.addItem(item, True)
