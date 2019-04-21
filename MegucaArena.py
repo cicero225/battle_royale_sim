@@ -498,7 +498,7 @@ class MegucaArena:
                     liveContestants = ArenaUtils.DictToOrderedDict(
                         {x: y for x, y in self.contestants.items() if y.alive})
                     if phaseNum == 0:  # I want to be explicit here
-                        origLiveContestants = copy.copy(liveContestants)
+                        origLiveContestants = copy.deepcopy(liveContestants)
                     # Sample contestants randomly
                     randOrderContestantKeys = random.sample(
                         liveContestants.keys(), len(liveContestants))
