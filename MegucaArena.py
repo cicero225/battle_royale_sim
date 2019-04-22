@@ -498,7 +498,7 @@ class MegucaArena:
                     liveContestants = ArenaUtils.DictToOrderedDict(
                         {x: y for x, y in self.contestants.items() if y.alive})
                     if phaseNum == 0:  # I want to be explicit here
-                        origLiveContestants = copy.deepcopy(liveContestants)
+                        origLiveContestants = set(x for x in liveContestants)
                     # Sample contestants randomly
                     randOrderContestantKeys = random.sample(
                         liveContestants.keys(), len(liveContestants))
@@ -682,8 +682,8 @@ class MegucaArena:
                                 return list(liveContestants.values())[0].name, turnNumber[0]
                         if PRINTHTML:
                             if phaseNum == len(thisDay["phases"]) - 1:
-                                deadThisTurn = set(
-                                    origLiveContestants.values()) - set(liveContestants.values())
+                                deadThisTurnNames = origLiveContestants - set(x for x in liveContestants)
+                                deadThisTurn = [self.contestants[x] for x in deadThisTurnNames]
                                 if deadThisTurn:
                                     thisWriter.addEvent(
                                         "The following names were added to the memorial wall: " + Event.Event.englishList(deadThisTurn), deadThisTurn)
