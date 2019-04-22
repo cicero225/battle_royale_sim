@@ -101,7 +101,7 @@ class Contestant(object):
     def getCombatAbility(self, otherContestant):
         base_ca = self.stats["combat ability"]
         for item in self.inventory:
-            base_ca = item.RealTimeCombatAbilityChange(base_ca, otherContestant)
+            base_ca = item.RealTimeCombatAbilityChange(base_ca, self, otherContestant)
         return base_ca
 
     def __str__(self):
@@ -211,13 +211,13 @@ class Contestant(object):
 
     # Returns a reference to the instance of the item itself, which is useful occasionally (but otherwise let it go out of scope)
     # Returns None if item invalid.
-    def addItem(self, item, count=1, resetItemAllowed=False):
+    def addItem(self, item, count=1, isNew=True, resetItemAllowed=False):
         possibleItem = self.hasThing(item)
         if isinstance(item, str):
             item = self.stateStore[0]["items"][item]
         if not possibleItem:
             newItem = ItemInstance.takeOrMakeInstance(item)
-            if not newItem.CheckItemValidity(self, resetItemAllowed):
+            if not newItem.CheckItemValidity(self, isNew, resetItemAllowed):
                 return None
             self.inventory.append(newItem)
         elif not item.stackable:

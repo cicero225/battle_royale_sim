@@ -31,10 +31,10 @@ class ItemInstance(object):
             ITEM_INITIALIZERS[self.item.name](self)
     
     # Processes if the combat ability needs to change for this _particular_ combat (rather than in general)
-    def RealTimeCombatAbilityChange(self, value, otherContestant):
+    def RealTimeCombatAbilityChange(self, value, thisContestant, otherContestant):
         if self.item.name not in ITEM_COMBAT_ABILITY_CHANGES:
             return value
-        return ITEM_COMBAT_ABILITY_CHANGES[self.item.name](self, value, otherContestant)
+        return ITEM_COMBAT_ABILITY_CHANGES[self.item.name](self, value, thisContestant, otherContestant)
 
     @classmethod
     def copyOrMakeInstance(cls, item):
@@ -103,9 +103,9 @@ class ItemInstance(object):
             contestant.stats[changedStat] = max(min(
                 contestant.stats[changedStat] + self.statChanges[changedStat] * self.count, 10), 0)
                 
-    def CheckItemValidity(self, contestant, resetItemAllowed=False):
+    def CheckItemValidity(self, contestant, isNew, resetItemAllowed=False):
         itemCallback = ITEM_RESTRICTIONS.get("self.item.name")
-        return itemCallback is None or itemCallback(self, contestant, resetItemAllowed)
+        return itemCallback is None or itemCallback(self, contestant, isNew, resetItemAllowed)
 
 class Item(object):
 

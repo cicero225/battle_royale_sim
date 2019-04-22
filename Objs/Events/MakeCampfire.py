@@ -48,7 +48,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             desc += ' Using it, ' + \
                 Event.parseGenderSubject(mainActor) + \
                 ' was able to boil some Clean Water.'
-            mainActor.addItem(state["items"]["Clean Water"])
+            mainActor.addItem(state["items"]["Clean Water"], isNew=True)
             descList = [mainActor, state["items"]["Clean Water"]]
             return (desc, descList, [])
 

@@ -16,8 +16,8 @@ ITEM_INITIALIZERS = collections.OrderedDict({
 "Dossier": DossierInitialization
 })
 
-def DossierCombatChanges(itemInstance, value, otherContestant):
-    if otherContestant.name == itemInstance.data["contestant"].name:
+def DossierCombatChanges(itemInstance, value, thisContestant, otherContestant):
+    if (otherContestant.name == itemInstance.data["contestant"].name) or (thisContestant.name == itemInstance.data["contestant"].name) :
         return value + 4
     return value
 
@@ -31,12 +31,11 @@ ITEM_COMBAT_ABILITY_CHANGES = collections.OrderedDict({
 # TODO: Some items may not be able to properly reset even if resetItemAllowed is True. Support for return False in those
 # cases should be added elsewhere.
 
-def DossierRestrictions(itemInstance, contestant, resetItemAllowed):
-    if itemInstance.data["contestant"] == contestant:
-        if resetItemAllowed:
-            DossierInitialization(itemInstance, remake=True)
-            return True
+def DossierRestrictions(itemInstance, contestant, isNew, resetItemAllowed):
+    if isNew and itemInstance.data["contestant"] == contestant and not resetItemAllowed:
         return False
+    if resetItemAllowed:
+        DossierInitialization(itemInstance, remake=True)
     return True
 
 ITEM_RESTRICTIONS = collections.OrderedDict({

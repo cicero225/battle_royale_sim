@@ -138,9 +138,12 @@ class Event(object):  # Python 2.x compatibility
                 looted.removeItem(loot, loot.count)
             # If we wanted to make non-stackable loot acquirable in mass quantity, we'd remove the first check...but what do you even do with two spears?...and it would cause double stats, etc.
             if not looter.hasThing(loot) or loot.stackable:
-                looted = looter.addItem(loot, loot.count)
-                if looted is not None:
-                    lootList.append(looted)
+                lootref = looter.addItem(loot, loot.count, isNew=False)
+                if lootref is None:
+                    # We actually have to return it to keep the object from disappearing
+                    looted.addItem(loot, loot.count, isNew=False)
+                else:
+                    lootList.append(lootref)
         return lootList
 
     @staticmethod
@@ -159,8 +162,12 @@ class Event(object):  # Python 2.x compatibility
                 for _ in range(loot.count):
                     # TODO : We do not yet properly handle loot with potential different properties (i.e. two different non-stackable spears). That means the name output here is incorrect.
                     trueLooter = random.choice(maybeLooters)
-                    trueLooter.addItem(loot)
-                lootList.append(loot)
+                    lootref = trueLooter.addItem(loot, isNew=False)
+                    if lootref is None:
+                        # We actually have to return it to keep the object from disappearing, and retrying this random.choice loop is risky
+                        looted.addItem(lootref, isNew=False)
+                    elif lootList and lootList[-1].name != loot.name:
+                        lootList.append(loot)
         return lootList
 
     @staticmethod

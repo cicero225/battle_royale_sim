@@ -82,11 +82,11 @@ class ContestantTest(object):
             x.callFlags["onRemoval"] = 1
         dummyItem.onRemoval = func3
         # This is simple enough that for now I'm okay not testing the less likely to fail bits
-        self.contestant.addItem(dummyItem)
+        self.contestant.addItem(dummyItem, isNew=True)
         assert self.contestant.callFlags["applyObjectStatChanges"] == 1
         assert self.contestant.callFlags["onAcquisition"] == 1
         assert not self.contestant.addItem(
-            dummyItem)  # will fail on adding twice
+            dummyItem, isNew=True)  # will fail on adding twice
         # TODO: when dummy event set is made, test that EventModifiers are correct
         self.contestant.removeItem(dummyItem)
         assert self.contestant.callFlags["onRemoval"] == 1

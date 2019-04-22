@@ -8,7 +8,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         0.03 + mainActor.stats["survivalism"] * 0.03
     descList = [mainActor]
     if random.random() < probSuccess:
-        mainActor.addItem(state["items"]["Bow and Arrow"])
+        mainActor.addItem(state["items"]["Bow and Arrow"], isNew=True)
         descList.append(state["items"]["Bow and Arrow"])
         desc = mainActor.name + ' crafted a Bow and Arrow set.'
     else:

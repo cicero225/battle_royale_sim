@@ -8,7 +8,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     if not options:
         return None  # Pick a different event
     gift = random.choice(options)
-    itemInstance = mainActor.addItem(gift, True)
+    itemInstance = mainActor.addItem(gift, isNew=True, resetItemAllowed=True)
     # To get the actual item name, we need to get the name of the item INSTANCE
     friendlyName = itemInstance.friendly
     state["allRelationships"].IncreaseFriendLevel(

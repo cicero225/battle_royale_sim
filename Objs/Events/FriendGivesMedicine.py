@@ -15,9 +15,10 @@ Event.registerInsertedCallback(
 
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-    if not participants[0].removeItem(state["items"]["Medicine"]):
+    potential_drugs = participants[0].removeItem(state["items"]["Medicine"])
+    if not potential_drugs:
         return None  # In a rare scenario, the person giving the medicine uses it before this event happens. In that case, the event is waived and, unfortunately, blocked entirely for this Actor for the turn. Fortunately rare.
-    mainActor.addItem(state["items"]["Medicine"])
+    mainActor.addItem(potential_drugs, isNew=False)
     state["allRelationships"].IncreaseFriendLevel(
         mainActor, participants[0], random.randint(3, 4))
     state["allRelationships"].IncreaseLoveLevel(
