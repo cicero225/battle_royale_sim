@@ -629,8 +629,24 @@ def relationshipWrite(state):
     loveWriter.finalWrite(os.path.join("Assets", str(
         state["turnNumber"][0]) + " Romances.html"), state)
 
+def starterItemAllocation(state):
+    if state["settings"]["presetStarterItems"]:
+        for contestant in state["contestants"].values():
+            for newItemName in contestant.starterItems:
+                contestant.addItem(newItemName, isNew=True, resetItemAllowed=True)
+    if state["settings"]["randomStarterItems"] > 0:
+        allItemStrings = set(str(x) for x in state["items"].values())
+        for contestant in state["contestants"].values():
+            options = sorted(allItemStrings - set(str(x) for x in contestant.inventory if not x.stackable), key=lambda x: str(x))
+            for _ in range(state["settings"]["randomStarterItems"]):
+                if not options:
+                    continue
+                choice = random.choice(options)
+                itemInstance = contestant.addItem(choice, isNew=True, resetItemAllowed=True)
+                if not itemInstance.stackable:
+                    options.remove(choice)
+        
 # Rig it so the same event never happens twice to the same person in consecutive turns (makes game feel better)
-
 
 def eventMayNotRepeat(actor, origProb, event, state):
     # in case a phase only has one event (special phases, among other things)

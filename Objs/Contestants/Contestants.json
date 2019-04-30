@@ -35,7 +35,8 @@
          "friendliness": 8,
          "cleverness": 9,
          "combat ability": 7
-         }
+         },
+    "starterItems": ["Rifle"]
     },
 "Trilicon":
     {"imageFile": "Trilicon.png",

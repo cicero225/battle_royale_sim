@@ -325,12 +325,15 @@ class MegucaArena:
         # Run once before the start of the game. Expected args: state. Modify in place.
         startup = [
             ArenaUtils.loggingStartup,
-            ArenaUtils.sponsorTraitWrite]
+            ArenaUtils.sponsorTraitWrite,
+            ArenaUtils.starterItemAllocation]
         # Example debug rig to give an item to everyone: add the functor partial(ArenaUtils.giveEveryoneItem, "Dossier")
         # to this list.
 
         if PRINTHTML:
             startup.insert(0, ArenaUtils.relationshipWrite)
+        if self.settings["presetStarterItems"] or self.settings["randomStarterItems"] > 0:
+            startup.append(ArenaUtils.injuryAndStatusWrite)
 
         # modifyBaseWeights: Expected args: liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state. Modify in place.
             # Also a good time to do any beginning of turn stuff

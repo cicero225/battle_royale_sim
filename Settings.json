@@ -18,5 +18,7 @@
  "relationshipRandomizer": 0.5,
  "deathImpactOnStability": 1,
  "fullRandomStats": false,
- "meanNumInitialRelationships": 1
+ "meanNumInitialRelationships": 1,
+ "presetStarterItems": true,
+ "randomStarterItems": 2
 }

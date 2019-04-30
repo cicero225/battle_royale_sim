@@ -80,6 +80,7 @@ class Contestant(object):
         # Note that this is not a deepcopy.
         self.alive = True
         self.events = None
+        self.starterItems = inDict.get('starterItems', [])  # list of strings - we don't process the Items now because Items may not yet be loaded.
         # For efficiency, each contestant stores information about how their
         self.statEventMultipliers = ArenaUtils.DefaultOrderedDict(
             collections.OrderedDict)
