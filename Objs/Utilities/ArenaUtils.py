@@ -349,12 +349,11 @@ def resetKillFlag(liveContestants, baseEventActorWeights, baseEventParticipantWe
 
 
 def killWrite(state):
-    # TODO: look up how html tables work when you have internet... And make this include everyone (not just successful killers)
     from Objs.Events.Event import Event
     killWriter = HTMLWriter(state["statuses"])
     killWriter.addTitle("Day " + str(state["turnNumber"][0]) + " Kills")
     for contestant, kills in state["callbackStore"]["killCounter"].items():
-        desc = 'Kills: ' + str(len(kills)) + '<br/>' + Event.englishList(kills, False)
+        desc = str(contestant) + '<br/>Kills: ' + str(len(kills)) + '<br/>' + Event.englishList(kills, False)
         descContestant = state["contestants"][contestant]
         if not descContestant.alive:
             desc = '(DEAD) ' + desc
