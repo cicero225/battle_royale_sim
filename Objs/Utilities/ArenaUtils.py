@@ -637,7 +637,7 @@ def starterItemAllocation(state):
         allItemStrings = set(str(x) for x in state["items"].values())
         for contestant in state["contestants"].values():
             options = sorted(allItemStrings - set(str(x) for x in contestant.inventory if not x.stackable), key=lambda x: str(x))
-            for _ in range(state["settings"]["randomStarterItems"]):
+            for _ in range(max(state["settings"]["randomStarterItems"] - len(contestant.inventory), 0)):
                 if not options:
                     continue
                 choice = random.choice(options)
