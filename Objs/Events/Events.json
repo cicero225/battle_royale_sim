@@ -652,7 +652,7 @@
      "murder": true,
      "sponsorInfluence": {"Survivalist": {"value": -1.0}}
      },
-    "BetrayPushOffCliff":
+    "BetrayFriendGuaranteedDeath":
     {"phase": ["Day", "Night"],
     "mainWeight": 1.0,
      "mainModifiers": {"stability": -0.5,
