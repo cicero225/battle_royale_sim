@@ -212,10 +212,10 @@ class Contestant(object):
 
     # Returns a reference to the instance of the item itself, which is useful occasionally (but otherwise let it go out of scope)
     # Returns None if item invalid.
-    def addItem(self, item, count=1, isNew=True, resetItemAllowed=False):
-        possibleItem = self.hasThing(item)
+    def addItem(self, item, count=1, isNew=True, resetItemAllowed=False, extraArguments=None):
         if isinstance(item, str):
             item = self.stateStore[0]["items"][item]
+        possibleItem = self.hasThing(item)
         if not possibleItem:
             newItem = ItemInstance.takeOrMakeInstance(item)
             if not newItem.CheckItemValidity(self, isNew, resetItemAllowed):

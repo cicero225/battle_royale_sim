@@ -7,10 +7,15 @@ import random
 
 def DossierInitialization(itemInstance, remake=False):
     if not remake and "contestant" in itemInstance.data:
-        return
-    chosenContestant = random.choice([v for v in itemInstance.stateStore[0]["contestants"].values() if v.alive])
+        return True
+    lookupList = [v for k, v in itemInstance.stateStore[0]["contestants"].items() if v.alive and ("contestant" not in itemInstance.data or itemInstance.data["contestant"].name != k)]
+    if not lookupList:  # edge case, only one person is still alive.
+        return False
+    chosenContestant = random.choice(lookupList)
+    itemInstance.data.clear()
     itemInstance.data["contestant"] = chosenContestant
-    itemInstance.friendly += " for " + chosenContestant.name
+    itemInstance.friendly = itemInstance.item.friendly + " for " + chosenContestant.name
+    return True
     
 ITEM_INITIALIZERS = collections.OrderedDict({
 "Dossier": DossierInitialization
@@ -34,8 +39,8 @@ ITEM_COMBAT_ABILITY_CHANGES = collections.OrderedDict({
 def DossierRestrictions(itemInstance, contestant, isNew, resetItemAllowed):
     if isNew and itemInstance.data["contestant"] == contestant and not resetItemAllowed:
         return False
-    if resetItemAllowed:
-        DossierInitialization(itemInstance, remake=True)
+    if itemInstance.data["contestant"] == contestant and resetItemAllowed:
+        return DossierInitialization(itemInstance, remake=True)
     return True
 
 ITEM_RESTRICTIONS = collections.OrderedDict({

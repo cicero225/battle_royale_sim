@@ -7,8 +7,10 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     )) - set(str(x) for x in mainActor.inventory if not x.stackable), key=lambda x: str(x))
     if not options:
         return None  # Pick a different event
-    gift = random.choice(options)
-    itemInstance = mainActor.addItem(gift, isNew=True, resetItemAllowed=True)
+    itemInstance = None
+    while itemInstance is None:
+        gift = random.choice(options)
+        itemInstance = mainActor.addItem(gift, isNew=True, resetItemAllowed=True)
     # To get the actual item name, we need to get the name of the item INSTANCE
     friendlyName = itemInstance.friendly
     state["allRelationships"].IncreaseFriendLevel(

@@ -104,7 +104,7 @@ class ItemInstance(object):
                 contestant.stats[changedStat] + self.statChanges[changedStat] * self.count, 10), 0)
                 
     def CheckItemValidity(self, contestant, isNew, resetItemAllowed=False):
-        itemCallback = ITEM_RESTRICTIONS.get("self.item.name")
+        itemCallback = ITEM_RESTRICTIONS.get(self.item.name)
         return itemCallback is None or itemCallback(self, contestant, isNew, resetItemAllowed)
 
 class Item(object):
