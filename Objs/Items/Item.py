@@ -1,6 +1,6 @@
 import collections
 import copy
-from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS
+from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS
 
 # I wonder if this needs to import Contestant...
 
@@ -103,9 +103,13 @@ class ItemInstance(object):
             contestant.stats[changedStat] = max(min(
                 contestant.stats[changedStat] + self.statChanges[changedStat] * self.count, 10), 0)
                 
-    def CheckItemValidity(self, contestant, isNew, resetItemAllowed=False):
+    def checkItemValidity(self, contestant, isNew, resetItemAllowed=False):
         itemCallback = ITEM_RESTRICTIONS.get(self.item.name)
         return itemCallback is None or itemCallback(self, contestant, isNew, resetItemAllowed)
+    
+    def parseExtraArguments(self, extraArguments):
+        itemCallback = ITEM_EXTRA_ARGUMENTS.get(self.item.name)
+        return itemCallback is None or itemCallback(self, extraArguments)
 
 class Item(object):
 

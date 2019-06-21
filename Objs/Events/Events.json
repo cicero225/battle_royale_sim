@@ -820,5 +820,30 @@
      "loveEffectParticipant": 1.0,
      "murder": true,
      "sponsorInfluence": {"Survivalist": {"value": -1.0}}
+     },
+     "StalkEnemy":
+    {"phase": ["Evening", "Night"],
+     "mainWeight": 1,
+     "phaseModifiers": {"Evening": 1e-3},
+     "mainModifiers": {"ruthlessness": 0.5,
+                       "survivalism": -1.0,
+                       "cleverness": 0.5},
+     "victimWeight": 1,
+     "numVictims": 1,
+     "victimModifiers": {"survivalism": -1,
+                         "cleverness": -1},
+     "unique": false,
+     "itemRequired": false,
+     "friendEffectVictim": -1.0,
+     "loveEffectVictim": -2.0,
+     "friendRequiredVictim": true,
+     "neededFriendLevelVictim": {"relation": false, "value": 5},
+     "loveRequiredVictim": true,
+     "neededLoveLevelVictim": {"relation": false, "value": 4},
+     "sponsorInfluence": {"Gladiatorial": {"value": 0.5, "all": false},
+                          "Bloodthirsty": {"value": 0.5, "all": false},
+                          "Senate": {"value": 1.0, "all": false},
+                          "Pacifist": {"value": -0.5, "all": false},
+                          "Trickster": {"value": 0.5, "all": false}}
      }
 }

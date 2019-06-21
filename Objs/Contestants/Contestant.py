@@ -210,7 +210,7 @@ class Contestant(object):
                      self.statuses if str(x) == str(item)]
         return item_list
 
-    # Returns a reference to the instance of the item itself, which is useful occasionally (but otherwise let it go out of scope)
+    # Returns a reference to the instance of the item itself, which is useful occasionally (but otherwise lets it go out of scope)
     # Returns None if item invalid.
     def addItem(self, item, count=1, isNew=True, resetItemAllowed=False, extraArguments=None):
         if isinstance(item, str):
@@ -218,8 +218,10 @@ class Contestant(object):
         possibleItem = self.hasThing(item)
         if not possibleItem:
             newItem = ItemInstance.takeOrMakeInstance(item)
-            if not newItem.CheckItemValidity(self, isNew, resetItemAllowed):
+            if not newItem.checkItemValidity(self, isNew, resetItemAllowed):
                 return None
+            if extraArguments is not None:
+                newItem.parseExtraArguments(extraArguments)
             self.inventory.append(newItem)
         elif not item.stackable:
             return None

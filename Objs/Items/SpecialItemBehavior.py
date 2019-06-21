@@ -5,13 +5,14 @@ import random
 # (e.g. it needs to be factored into the Item or ItemInstance constructor). Try not to use this for behavior that could
 # be incorporated in some other way.
 
-def DossierInitialization(itemInstance, remake=False):
-    if not remake and "contestant" in itemInstance.data:
-        return True
-    lookupList = [v for k, v in itemInstance.stateStore[0]["contestants"].items() if v.alive and ("contestant" not in itemInstance.data or itemInstance.data["contestant"].name != k)]
-    if not lookupList:  # edge case, only one person is still alive.
-        return False
-    chosenContestant = random.choice(lookupList)
+def DossierInitialization(itemInstance, remake=False, chosenContestant=None):
+    if chosenContestant is None:
+        if not remake and "contestant" in itemInstance.data:
+            return True
+        lookupList = [v for k, v in itemInstance.stateStore[0]["contestants"].items() if v.alive and ("contestant" not in itemInstance.data or itemInstance.data["contestant"].name != k)]
+        if not lookupList:  # edge case, only one person is still alive.
+            return False
+        chosenContestant = random.choice(lookupList) 
     itemInstance.data.clear()
     itemInstance.data["contestant"] = chosenContestant
     itemInstance.friendly = itemInstance.item.friendly + " for " + chosenContestant.name
@@ -45,4 +46,14 @@ def DossierRestrictions(itemInstance, contestant, isNew, resetItemAllowed):
 
 ITEM_RESTRICTIONS = collections.OrderedDict({
 "Dossier": DossierRestrictions
+})
+
+# This section allows items to accept extra arguments (as a dict) at creation time. Note that this must be explicitly provided in the
+# code - if an item may be made arbitrarily, it cannot strictly depend on this being called to function.
+
+def DossierExtraArguments(itemInstance, extraArguments):
+    DossierInitialization(itemInstance, chosenContestant=extraArguments["contestant"])
+
+ITEM_EXTRA_ARGUMENTS = collections.OrderedDict({
+"Dossier": DossierExtraArguments,
 })

@@ -507,7 +507,7 @@ class MegucaArena:
                         liveContestants.keys(), len(liveContestants))
                     # Get base event weights (now is the time to shove in the effects of any special turn, whenever that gets implemented)
                     baseEventActorWeights = ArenaUtils.DictToOrderedDict(
-                        {x: y.baseProps["mainWeight"] if x in self.eventsActive and self.eventsActive[x] else 0 for x, y in self.events.items()})
+                        {x: y.baseProps["mainWeight"]*y.baseProps.get("phaseModifiers", {}).get(thisPhase, 1) if x in self.eventsActive and self.eventsActive[x] else 0 for x, y in self.events.items()})
                     baseEventParticipantWeights = ArenaUtils.DictToOrderedDict(
                         {x: y.baseProps["participantWeight"] for x, y in self.events.items() if "participantWeight" in y.baseProps})
                     baseEventVictimWeights = ArenaUtils.DictToOrderedDict(
