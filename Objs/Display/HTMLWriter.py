@@ -21,6 +21,15 @@ contestant {
 item {
     color: Red;
 }
+negative {
+    color: Red;
+}
+positive {
+    color: Green;
+}
+status {
+    color: Brown;
+}
 sponsor {
     color: DarkGoldenRod;
 }
@@ -45,11 +54,12 @@ img {
     def reset(self):
         self.bodylist = [self.header]
 
-    def wrap(self, text, wrapname):
+    @staticmethod
+    def wrap(text, wrapname):
         return "<" + wrapname + ">\n" + text + "\n</" + wrapname + ">\n"
 
     def addTitle(self, title):
-        self.bodylist.insert(1, self.wrap(self.wrap(title, "banner"), "p"))
+        self.bodylist.insert(1, HTMLWriter.wrap(HTMLWriter.wrap(title, "banner"), "p"))
 
     def massInsertTag(self, desc, findString, insertString):
         stringList = desc.split(findString)        
@@ -73,6 +83,8 @@ img {
             desc = self.massInsertTag(desc, x, "sponsor")
         for x in state["items"].values():
             desc = self.massInsertTag(desc, x.friendly, "item")
+        for x in state["statuses"].values():
+            desc = self.massInsertTag(desc, x.friendly, "status")
         return desc
 
     def addEvent(self, desc, descContestants, state=None, preEventInjuries=None):
@@ -89,8 +101,8 @@ img {
                 desc = insertionString.join(tempList)
             tempStringList.append("<img src='" + contestant.imageFile + "'>")
         tempStringList.append("<br>")
-        tempStringList.append(self.wrap(desc, "eventnormal"))
-        self.bodylist.append(self.wrap('\n'.join(tempStringList), "p"))
+        tempStringList.append(HTMLWriter.wrap(desc, "eventnormal"))
+        self.bodylist.append(HTMLWriter.wrap('\n'.join(tempStringList), "p"))
 
     def finalWrite(self, filepath, state):
         self.bodylist.append(self.footer)
@@ -99,4 +111,4 @@ img {
                 target.write(self.colorize(line, state))
 
     def addBigLine(self, line):
-        self.bodylist.append(self.wrap(line, "p"))
+        self.bodylist.append(HTMLWriter.wrap(line, "p"))

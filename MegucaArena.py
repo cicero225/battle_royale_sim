@@ -332,6 +332,7 @@ class MegucaArena:
 
         if PRINTHTML:
             startup.insert(0, ArenaUtils.relationshipWrite)
+            startup.append(ArenaUtils.ContestantStatWrite)
         if self.settings["presetStarterItems"] or self.settings["randomStarterItems"] > 0:
             startup.append(ArenaUtils.injuryAndStatusWrite)
 
@@ -399,6 +400,7 @@ class MegucaArena:
         ]
 
         if PRINTHTML:
+            postDayCallbacks.insert(0, ArenaUtils.ContestantStatWrite)
             postDayCallbacks.insert(0, ArenaUtils.injuryAndStatusWrite)
             postDayCallbacks.insert(0, ArenaUtils.killWrite)
             postDayCallbacks.insert(0, ArenaUtils.relationshipWrite)

@@ -46,7 +46,7 @@ class ContestantTest(object):
         for key, value in self.contestant.stats.items():
             assert value >= 0 and value <= 10
             assert abs(
-                value - self.contestant.originalStats[key]) <= self.settings["traitRandomness"]
+                value - self.contestant.baseStats[key]) <= self.settings["traitRandomness"]
 
     def testRandomContestant(self):
         Contestant.makeRandomContestant(

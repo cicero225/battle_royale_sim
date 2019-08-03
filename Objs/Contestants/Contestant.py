@@ -75,7 +75,9 @@ class Contestant(object):
         self.settings = settings
         if not self.settings["statNormalization"]:
             self.contestantStatRandomize()
-        # NOT a reference, but an actual copy. Probably useful for some events.
+        # NOT a reference, but an actual copy. Used to store character stats that are not from items, etc.
+        self.baseStats = self.stats.copy()
+        # The actual original stats, useful for comparisons, and won't be changed after this.
         self.originalStats = self.stats.copy()
         # Note that this is not a deepcopy.
         self.alive = True
@@ -118,7 +120,9 @@ class Contestant(object):
         # We need a deteriministic order.
         for x in sorted(list(statsTemplate)):
             if x not in self.stats:
-                self.stats[x] = random.randint(0, 10)
+                self.baseStats[x] = random.randint(0, 10)
+                self.originalStats[x] = self.baseStats[x]
+                self.stats[x] = self.baseStats[x]
 
     @classmethod
     def makeRandomContestant(cls, name, gender, imageFile, statstemplate, settings):
@@ -160,6 +164,7 @@ class Contestant(object):
                 self.stats[chosen] += move
                 if not valid(self.stats[chosen]):
                     validList.remove(chosen)
+        self.baseStats = self.stats.copy()
         self.originalStats = self.stats.copy()
 
     # Note that each event carries information about which stats affect them
@@ -201,7 +206,7 @@ class Contestant(object):
 
     # Note that at the moment a full refresh of the contestant is done each time an item is added or removed. This
     # prevents items from having permanent effects after they are lost (outside of edge cases like directly manipulating
-    # self.originalStats, etc. In the future, this could be done by adding a
+    # self.baseStats, etc. In the future, this could be done by adding a
     # persistent effects field, but this is left out for now. An item.onRemoval(self) is called on removal, but this will be
     # pass most of the time.
 
@@ -286,7 +291,7 @@ class Contestant(object):
         return True
 
     def refreshEventState(self):
-        self.stats = self.originalStats.copy()
+        self.stats = self.baseStats.copy()
         self.InitializeEventModifiers(self.events)
         for item in self.inventory + self.statuses:
             item.applyObjectStatChanges(self)
@@ -296,8 +301,8 @@ class Contestant(object):
     def permStatChange(self, dictOfChanges):  # NOT to be called by items!
         """dictOfChanges is statName -> change"""
         for statName, change in dictOfChanges.items():
-            self.originalStats[statName] += change
-        for statName, stat in self.originalStats.items():
-            self.originalStats[statName] = max(
-                min(self.originalStats[statName], 10), 0)
+            self.baseStats[statName] += round(change)
+        for statName, stat in self.baseStats.items():
+            self.baseStats[statName] = max(
+                min(self.baseStats[statName], 10), 0)
         self.refreshEventState()

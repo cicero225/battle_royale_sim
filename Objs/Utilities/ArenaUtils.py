@@ -395,7 +395,6 @@ def sponsorTraitWrite(state):
 
 # Adds a Shipping Update immediately after a relevant event.
 
-
 def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
     new_loves, lost_loves, new_hates, lost_hates = state["allRelationships"].reportChanges(
     )
@@ -479,6 +478,28 @@ def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
             thisWriter.addEvent(contestant_tuple[0] + " no longer hates " + contestant_tuple[1], [
                                 contestants[contestant_tuple[0]], swordsbroken, arrow, contestants[contestant_tuple[1]]])
 
+def ContestantStatWrite(state):
+    from Objs.Events.Event import Event
+
+    statWriter = HTMLWriter(state["statuses"])
+    statWriter.addTitle("Contestant Summary")
+    for contestant in state["contestants"].values():
+        if not contestant.alive:
+            continue
+        # Construct stats and items line
+        eventLine = str(contestant) + "<br/>" + \
+            Event.englishList(contestant.inventory + contestant.statuses)
+        for statname, curstat in contestant.stats.items():
+            origstat = contestant.originalStats[statname]
+            eventLine += "<br/>" + statname + ": " + str(origstat)
+            diff = curstat - origstat
+            if diff > 0:
+                eventLine += " " + HTMLWriter.wrap("+" + str(diff), "positive")
+            elif diff < 0:
+                eventLine += " " + HTMLWriter.wrap("-" + str(-diff), "negative")
+        statWriter.addEvent(eventLine, [contestant])
+    statWriter.finalWrite(os.path.join("Assets", str(
+        state["turnNumber"][0]) + " Stats.html"), state)
 
 def relationshipWrite(state):
     relationships = state["allRelationships"]
