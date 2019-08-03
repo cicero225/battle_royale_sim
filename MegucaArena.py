@@ -665,7 +665,7 @@ class MegucaArena:
                         if len(eventOutputs) > 4 and eventOutputs[4]:
                             alreadyUsed.update([x.name for x in eventOutputs[4]])
                         else:
-                            alreadyUsed.update([x.name for x in descContestants])
+                            alreadyUsed.update([x.name for x in descContestants if isinstance(x, Contestant)])
                     
                     for callback in self.callbacks["postPhaseCallbacks"]:
                         callback(thisPhase, PRINTHTML, self.state)                    

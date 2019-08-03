@@ -15,7 +15,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         mainActor.addStatus("Hypothermia")
     
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-    return (desc, descList, [])
+    return (desc, descList, [], None, [mainActor])
 
 
 Event.registerEvent("StalkEnemy", func)

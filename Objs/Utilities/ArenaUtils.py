@@ -669,8 +669,8 @@ def starterItemAllocation(state):
 # Rig it so the same event never happens twice to the same person in consecutive turns (makes game feel better)
 
 def eventMayNotRepeat(actor, origProb, event, state):
-    # in case a phase only has one event (special phases, among other things)
-    if sum(1 for x in state['events'].values() if "phase" not in x.baseProps or state["curPhase"] in x.baseProps["phase"]) == 1:
+    # This process doesn't work at all for phases with only one event, so exclude those too
+    if (state["curPhase"] not in state["phases"]["deduplicate"]) or (sum(1 for x in state['events'].values() if "phase" not in x.baseProps or state["curPhase"] in x.baseProps["phase"]) == 1):
         return origProb, True
     # Since defaultdict, this would work fine even without this check, but this makes it more explicit (and is more robust to future changes)
     if state["turnNumber"][0] > 1:

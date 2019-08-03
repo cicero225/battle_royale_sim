@@ -47,7 +47,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     desc = 'In a delirious state, ' + mainActor.name + \
         ' had a religious epiphany, realizing that ' + \
         chosen + ' is the avatar of a divine being.'
-    return (desc, [mainActor, state["contestants"][chosen]], [])
+    return (desc, [mainActor, state["contestants"][chosen]], [], None, [mainActor])
 
 
 Event.registerEvent("AWorshipsB", func)
