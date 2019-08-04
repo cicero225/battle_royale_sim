@@ -13,6 +13,10 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             mainActor) + ' watched ' + Event.parseGenderObject(victims[0]) + ' die.'
         mainActor.permStatChange({'stability': -1})
     tempList = [mainActor, victims[0]]
+    lootList = Event.lootAll(mainActor, victims[0])
+    if lootList:
+        desc += ' ' + str(mainActor) + ' looted ' + Event.englishList(lootList) + '.'
+        tempList.extend(lootList)
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     return (desc, tempList, [victims[0].name])
 

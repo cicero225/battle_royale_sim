@@ -165,7 +165,7 @@ class Event(object):  # Python 2.x compatibility
                     if lootref is None:
                         # We actually have to return it to keep the object from disappearing, and retrying this random.choice loop is risky
                         looted.addItem(lootref, isNew=False)
-                    elif lootList and lootList[-1].name != loot.name:
+                    if not lootList or lootList[-1].name != loot.name:
                         lootList.append(loot)
         return lootList
 
