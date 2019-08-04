@@ -308,3 +308,19 @@ class Relationship(object):
                 possibleParticipantWeights[participantName] *= (
                     (1 + self.settings["relationInfluence"])**(friendlevel * event.baseProps["participantFriendEffectVictim"] if "participantFriendEffectVictim" in event.baseProps else 1) *
                     (1 + self.settings["relationInfluence"])**(lovelevel * event.baseProps["participantLoveEffectVictim"] if "participantLoveEffectVictim" in event.baseProps else 1))
+                    
+    def returnBestRomancesDescending(self, contestant):
+        liveLoves = {x: y for x, y in self.loveships[str(contestant)].items(
+            ) if x in self.contestants and self.contestants[x].alive}
+        liveLoves.update({x: y for x, y in self.loveships[str(
+            contestant)].items() if x in self.sponsors})
+        sortLoves = collections.OrderedDict()
+        for x in sorted(liveLoves, key=liveLoves.get, reverse=True):
+            sortLoves[x] = liveLoves[x]
+        candidates = {}
+        for key, value in sortLoves.items():
+            if value >= 4:
+                if relationships.loveships[key][str(contestant)] >= 4:
+                    candidates[key] = relationships.loveships[key][str(contestant)] + value
+        best_candidate_key_value = sorted(candidates.items(), key=lambda x: x[1], reverse=True)
+        return best_candidate_key_value

@@ -401,42 +401,57 @@ def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
     heart = state["statuses"]["Love"]
     arrow = state["statuses"]["RightArrow"]
     heartbroken = state["statuses"]["LoveBroken"]
+
+    # TODO(This code needs considerable simplification)
     skiptuples = set()
     for contestant_tuple, old_backwards_exists in new_loves.items():
-        if contestant_tuple in skiptuples:
+        # We only check for new romances or crushes if a contestant does not already have one.
+        if contestant_tuple in skiptuples or contestants[contestant_tuple[0]].hasThing("Love") or contestants[contestant_tuple[1]].hasThing("Love"):
             continue
         reverse_tuple = (contestant_tuple[1], contestant_tuple[0])
-        if old_backwards_exists:
-            if reverse_tuple not in lost_loves:
-                thisWriter.addEvent(contestant_tuple[0] + " and " + contestant_tuple[1] + " are now in a romance.", [
-                                    contestants[contestant_tuple[0]], heart, contestants[contestant_tuple[1]]])
-                continue
-            thisWriter.addEvent(contestant_tuple[0] + " now has a crush on " + contestant_tuple[1], [
-                                contestants[contestant_tuple[0]], heart, arrow, contestants[contestant_tuple[1]]])
-        else:
-            if reverse_tuple in new_loves:
-                thisWriter.addEvent(contestant_tuple[0] + " and " + contestant_tuple[1] + " are now in a romance.", [
-                                    contestants[contestant_tuple[0]], heart, contestants[contestant_tuple[1]]])
-                skiptuples.add(reverse_tuple)
-                continue
-            thisWriter.addEvent(contestant_tuple[0] + " now has a crush on " + contestant_tuple[1], [
-                                contestants[contestant_tuple[0]], heart, arrow, contestants[contestant_tuple[1]]])
+        if reverse_tuple not in lost_loves:
+            contestants[contestant_tuple[0]].removeStatus("LoveBroken")
+            contestants[contestant_tuple[1]].removeStatus("LoveBroken")
+            contestants[contestant_tuple[0]].addStatus("Love", target=contestants[contestant_tuple[1]])
+            contestants[contestant_tuple[1]].addStatus("Love", target=contestants[contestant_tuple[0]])
+            thisWriter.addEvent(contestant_tuple[0] + " and " + contestant_tuple[1] + " are now in a romance.", [
+                                contestants[contestant_tuple[0]], heart, contestants[contestant_tuple[1]]])
+            continue
+        thisWriter.addEvent(contestant_tuple[0] + " now has a crush on " + contestant_tuple[1], [
+                            contestants[contestant_tuple[0]], heart, arrow, contestants[contestant_tuple[1]]])
+    
     skiptuples = set()
     for contestant_tuple, old_backwards_exists in lost_loves.items():
         if contestant_tuple in skiptuples:
             continue
         reverse_tuple = (contestant_tuple[1], contestant_tuple[0])
-        if old_backwards_exists:
+        if old_backwards_exists and not contestants[contestant_tuple[0]].hasThing("Love"):
             thisWriter.addEvent(contestant_tuple[0] + " no longer has a crush on " + contestant_tuple[1], [
                                 contestants[contestant_tuple[0]], heartbroken, arrow, contestants[contestant_tuple[1]]])
-        else:
+        elif not old_backwards_exists and contestants[contestant_tuple[0]].hasThing("Love"):
             if reverse_tuple in lost_loves:
                 thisWriter.addEvent(contestant_tuple[0] + " and " + contestant_tuple[1] + " are no longer in a romance.", [
                                     contestants[contestant_tuple[0]], heartbroken, contestants[contestant_tuple[1]]])
                 skiptuples.add(reverse_tuple)
+                input()
+                # Check for new candidate romances
+                def GetNewRomance(broken_lover):
+                    new_lover = None
+                    candidate_list = state["allRelationships"].returnBestRomancesDescending(broken_lover)
+                    for candidate, _ in candidate_list:
+                        if not contestants[candidate].hasThing("Love"):
+                            new_lover = contestants[candidate]
+                            new_lover.addStatus("Love", target=contestants[broken_lover])
+                            break
+                    if new_lover is None:
+                        contestants[broken_lover].removeStatus("Love")
+                        contestants[broken_lover].addStatus("LoveBroken")
+                    thisWriter.addEvent(broken_lover + " is now in a romance with " + str(new_lover), [contestants[broken_lover], heart, new_lover])
+                GetNewRomance(contestant_tuple[0])
+                GetNewRomance(contestant_tuple[1])
                 continue
-            thisWriter.addEvent(contestant_tuple[0] + " no longer loves " + contestant_tuple[1], [
-                                contestants[contestant_tuple[0]], heartbroken, arrow, contestants[contestant_tuple[1]]])
+            thisWriter.addEvent(contestant_tuple[0] + " no longer has a crush on " + contestant_tuple[1], [
+                                contestants[contestant_tuple[0]], heartbroken, arrow, contestants[contestant_tuple[1]]])    
 
     swords = state["statuses"]["Swords"]
     swordsbroken = state["statuses"]["SwordsBroken"]

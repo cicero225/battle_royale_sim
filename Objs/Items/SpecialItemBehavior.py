@@ -13,8 +13,14 @@ def DossierInitialization(itemInstance, remake=False):
         itemInstance.target = random.choice(lookupList) 
     itemInstance.friendly = itemInstance.item.friendly + " for " + itemInstance.target.name
     return True
+  
+def LoveInitialization(itemInstance, remake=False):
+    itemInstance.friendly = itemInstance.item.friendly + " for " + itemInstance.target.name
+    return True
+  
 ITEM_INITIALIZERS = collections.OrderedDict({
-"Dossier": DossierInitialization
+"Dossier": DossierInitialization,
+"Love": LoveInitialization
 })
 
 def DossierCombatChanges(itemInstance, value, thisContestant, otherContestant):

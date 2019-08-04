@@ -160,12 +160,15 @@ class Item(object):
     def onAcquisition(self, contestant, resetItemAllowed=False):
         for eventName, eventModifier in self.eventMultipliers.items():
             for actorType, modifier in eventModifier.items():
+                contestant.fullEventMultipliers[eventName].setdefault(actorType, 1)
                 contestant.fullEventMultipliers[eventName][actorType] *= modifier
         for eventName, eventModifier in self.eventAdditions.items():
             for actorType, modifier in eventModifier.items():
+                contestant.eventAdditions[eventName].setdefault(actorType, 1)
                 contestant.eventAdditions[eventName][actorType] += modifier
         for eventName, eventModifier in self.eventsDisabled.items():
             for actorType, modifier in eventModifier.items():
+                contestant.eventDisabled[eventName].setdefault(actorType, False)
                 contestant.eventDisabled[eventName][actorType] = modifier
             
     def makeInstance(self, count=1, data=None):

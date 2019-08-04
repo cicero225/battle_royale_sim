@@ -52,9 +52,17 @@
     "Love":
     {"imageFile": "Love.png",
     "statChanges": 
-        {},
+        {"stability": 4,
+         "loyalty": 4,
+         "endurance": 3,
+         "loneliness": -5,
+         "friendliness": 2},
     "eventMultipliers":
-        {
+        {"ShareStoryofLife": {"main": 5},
+         "ShareIntimateConversation": {"main": 10},
+         "ResolvesFeelingConfusion": {"main": 10},
+         "ACooksForB": {"main": 7},     
+         "AWorshipsB": {"main": 2}
         },
     "eventAdditions":
         {
@@ -65,11 +73,25 @@
     },
     "LoveBroken":
     {"imageFile": "LoveBroken.png",
+    "friendly": "a Broken Heart",
     "statChanges": 
-        {},
+        {"gregariousness": -3,
+         "stability": -6,
+         "forgiveness": -3,
+         "loyalty": -3,
+         "meanness": 3,
+         "ruthlessness": 3,
+         "aggression": 3,
+         "endurance": -3,
+         "loneliness": 3,
+         "friendliness": -3},
     "eventMultipliers":
-        {
-        },
+        {"ShareIntimateConversation": {"main": 0.3},
+         "ResolvesFeelingConfusion": {"main": 0.3},
+         "ACooksForB": {"main": 0.3}, 
+         "PTSD": {"main": 3},
+         "QuestionsSanity": {"main": 3},
+         "SelfFuneral": {"main": 3}},
     "eventAdditions":
         {
         },
