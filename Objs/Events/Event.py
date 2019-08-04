@@ -412,3 +412,8 @@ class Event(object):  # Python 2.x compatibility
             return stringGetter(thingList[0]) + ' and ' + stringGetter(thingList[1])
         else:
             return ', '.join(stringGetter(x) for x in thingList[:-1]) + ' and ' + stringGetter(thingList[-1])
+
+    # Puts a message in the display queue that will be consumed after the current event runs. No order guarantee is provided.
+    # The entries are identical to the arguments for HTMLWriter.addEvent. Provide state if you want (injured) annotations.
+    def announce(self, desc, descContestants, state=None, preEventInjuries=None):
+        self.stateStore["announcementQueue"].append((desc, descContestants, state, preEventInjuries))

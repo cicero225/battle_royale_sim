@@ -19,6 +19,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         participants[0], mainActor, random.randint(1, 3))
     state["allRelationships"].IncreaseLoveLevel(
         participants[0], mainActor, random.randint(0, 2))
+    participants[0].permStatChange({"endurance": 1})
 
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     return (desc, [mainActor, participants[0]], [])

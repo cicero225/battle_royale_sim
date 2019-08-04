@@ -311,6 +311,7 @@ class MegucaArena:
             "thisWriter": thisWriter,
             "phases": self.phases,
             "phasesRun": {},
+            "announcementQueue": []
         }))  # Allows for convenient passing of the entire game state to anything that needs it (usually events)
         # An unfortunate bit of split processing
         for sponsor in self.sponsors.values():
@@ -631,6 +632,10 @@ class MegucaArena:
                             if PRINTHTML:
                                 thisWriter.addEvent(
                                     desc, descContestants, self.state, preEventInjuries)
+                                # Consume the announcement queue.
+                                for announcement in self.state["announcementQueue"]:
+                                    thisWriter.addEvent(*announcement)
+                                self.state["announcementQueue"].clear()
                                 for callback in self.callbacks["postEventWriterCallbacks"]:
                                     callback(thisWriter, eventOutputs, thisevent, self.state)
                             else:
