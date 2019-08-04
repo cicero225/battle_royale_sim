@@ -5,25 +5,20 @@ import random
 # (e.g. it needs to be factored into the Item or ItemInstance constructor). Try not to use this for behavior that could
 # be incorporated in some other way.
 
-def DossierInitialization(itemInstance, remake=False, chosenContestant=None):
-    if chosenContestant is None:
-        if not remake and "contestant" in itemInstance.data:
-            return True
-        lookupList = [v for k, v in itemInstance.stateStore[0]["contestants"].items() if v.alive and ("contestant" not in itemInstance.data or itemInstance.data["contestant"].name != k)]
+def DossierInitialization(itemInstance, remake=False):
+    if itemInstance.target is None:
+        lookupList = [v for k, v in itemInstance.stateStore[0]["contestants"].items() if v.alive and (itemInstance.target is None or itemInstance.target.name != k)]
         if not lookupList:  # edge case, only one person is still alive.
             return False
-        chosenContestant = random.choice(lookupList) 
-    itemInstance.data.clear()
-    itemInstance.data["contestant"] = chosenContestant
-    itemInstance.friendly = itemInstance.item.friendly + " for " + chosenContestant.name
+        itemInstance.target = random.choice(lookupList) 
+    itemInstance.friendly = itemInstance.item.friendly + " for " + itemInstance.target.name
     return True
-    
 ITEM_INITIALIZERS = collections.OrderedDict({
 "Dossier": DossierInitialization
 })
 
 def DossierCombatChanges(itemInstance, value, thisContestant, otherContestant):
-    if (otherContestant.name == itemInstance.data["contestant"].name) or (thisContestant.name == itemInstance.data["contestant"].name) :
+    if (otherContestant.name == itemInstance.target.name) or (thisContestant.name == itemInstance.target.name) :
         return value + 4
     return value
 
@@ -38,9 +33,9 @@ ITEM_COMBAT_ABILITY_CHANGES = collections.OrderedDict({
 # cases should be added elsewhere.
 
 def DossierRestrictions(itemInstance, contestant, isNew, resetItemAllowed):
-    if isNew and itemInstance.data["contestant"] == contestant and not resetItemAllowed:
+    if isNew and itemInstance.target == contestant and not resetItemAllowed:
         return False
-    if itemInstance.data["contestant"] == contestant and resetItemAllowed:
+    if itemInstance.target == contestant and resetItemAllowed:
         return DossierInitialization(itemInstance, remake=True)
     return True
 
@@ -51,9 +46,4 @@ ITEM_RESTRICTIONS = collections.OrderedDict({
 # This section allows items to accept extra arguments (as a dict) at creation time. Note that this must be explicitly provided in the
 # code - if an item may be made arbitrarily, it cannot strictly depend on this being called to function.
 
-def DossierExtraArguments(itemInstance, extraArguments):
-    DossierInitialization(itemInstance, chosenContestant=extraArguments["contestant"])
-
-ITEM_EXTRA_ARGUMENTS = collections.OrderedDict({
-"Dossier": DossierExtraArguments,
-})
+ITEM_EXTRA_ARGUMENTS = collections.OrderedDict({})

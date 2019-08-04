@@ -19,13 +19,14 @@ class ItemInstance(object):
 
     stateStore = [None]
 
-    def __init__(self, item, count=1):
+    def __init__(self, item, count=1, target=None):
         if hasattr(item, "item"):
             raise InstanceInsteadOfMainThing
         else:
             self.item = item
             self.count = count
-            self.data = collections.OrderedDict()
+            self.target = target  # The "Target" of the item, if any. Note that this will only ever be shallow copied, so be careful with dicts, etc.
+            self.data = collections.OrderedDict()  # Note that this may be deepcopied, so be careful using this.
             if self.item.name not in ITEM_INITIALIZERS:
                 return
             ITEM_INITIALIZERS[self.item.name](self)
@@ -37,27 +38,27 @@ class ItemInstance(object):
         return ITEM_COMBAT_ABILITY_CHANGES[self.item.name](self, value, thisContestant, otherContestant)
 
     @classmethod
-    def copyOrMakeInstance(cls, item):
+    def copyOrMakeInstance(cls, item, count=1, target=None):
         if hasattr(item, "item"):
             newItem = copy.copy(item)
             newItem.data = copy.deepcopy(item.data)
         else:
-            newItem = cls(item)
+            newItem = cls(item, count=count, target=target)
         return newItem
 
     @classmethod
-    def takeOrMakeInstance(cls, item):
+    def takeOrMakeInstance(cls, item, count=1, target=None):
         if hasattr(item, "item"):
             newItem = item
         else:
-            newItem = cls(item)
+            newItem = cls(item, count=count, target=target)
         return newItem
 
     def isInstanceOf(self, item):
         return (self.item == item)
 
     def __copy__(self):
-        newInstance = type(self)(self.item, self.count)
+        newInstance = type(self)(self.item, self.count, self.target)
         newInstance.data = self.data
         return newInstance
 

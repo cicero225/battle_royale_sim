@@ -5,7 +5,7 @@ import random
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     desc = mainActor.name + ' stalked ' + \
         victims[0].name + ' from the shadows, building an understanding of ' + Event.parseGenderPossessive(victims[0]) + ' behavior and skills.'
-    mainActor.addItem(state["items"]["Dossier"], isNew=True, extraArguments={"contestant": victims[0]})
+    mainActor.addItem(state["items"]["Dossier"], isNew=True, target=victims[0])
     
     descList = [mainActor, victims[0]]
     # If it's evening, mainActor gains hypothermia from not making a fire.
