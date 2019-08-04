@@ -217,12 +217,16 @@ class Contestant(object):
 
     # Returns a reference to the instance of the item itself, which is useful occasionally (but otherwise lets it go out of scope)
     # Returns None if item invalid.
-    def addItem(self, item, count=1, isNew=True, resetItemAllowed=False, extraArguments=None):
+    def addItem(self, item, count=1, isNew=True, resetItemAllowed=False, extraArguments=None, target=None):
         if isinstance(item, str):
             item = self.stateStore[0]["items"][item]
         possibleItem = self.hasThing(item)
-        if not possibleItem:
-            newItem = ItemInstance.takeOrMakeInstance(item)
+        if not possibleItem or item.distinct:
+            for already_targeted in possibleItem:
+                if target == already_targeted.target:
+                    return None
+                    # TODO: Distinct items might want to impose other rules restructing duplication.
+            newItem = ItemInstance.takeOrMakeInstance(item, count=count, target=target)
             if not newItem.checkItemValidity(self, isNew, resetItemAllowed):
                 return None
             if extraArguments is not None:
@@ -253,7 +257,7 @@ class Contestant(object):
         return True
 
     def removeAndGet(self, item):
-        if item.stackable:
+        if item.stackable and not item.distinct:
             raise CannotTakeInstanceOfStackableThing
         possibleItem = self.hasThing(item)
         if not possibleItem:
@@ -261,12 +265,12 @@ class Contestant(object):
         self.inventory.remove(possibleItem[0])
         return possibleItem[0]
 
-    def addStatus(self, status, count=1):
+    def addStatus(self, status, count=1, target=None):
         possibleStatus = self.hasThing(status)
         if isinstance(status, str):
             status = self.stateStore[0]["statuses"][status]
-        if not possibleStatus:
-            self.statuses.append(StatusInstance.takeOrMakeInstance(status))
+        if not possibleStatus or status.distinct:
+            self.statuses.append(StatusInstance.takeOrMakeInstance(status, count=count, target=target))
         elif not status.stackable:
             return False
         else:

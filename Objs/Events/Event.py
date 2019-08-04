@@ -125,7 +125,6 @@ class Event(object):  # Python 2.x compatibility
         # If you ever intend to remove this callback, it's a good idea to keep track of this.
         return anonfunc
 
-    # TODO : We do not yet properly handle loot with potential different properties (i.e. two different non-stackable spears)
     @staticmethod
     def lootAll(looter, looted):
         if hasattr(looted, 'inventory'):

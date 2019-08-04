@@ -155,7 +155,8 @@
         },
     "eventsDisabled": {
         },
-    "stackable": false
+    "stackable": true,
+    "distinct": true
     },
     "Medical Kit":
     {"imageFile": "MedicalKit.jpg",
