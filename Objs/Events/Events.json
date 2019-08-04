@@ -4,7 +4,7 @@
      "unique": false,
      "itemRequired": false
      },
-     "PTSD":
+"PTSD":
 {"phase": ["Night"],
      "mainWeight": 0.25,
      "mainModifiers": {"stability": -1.0},

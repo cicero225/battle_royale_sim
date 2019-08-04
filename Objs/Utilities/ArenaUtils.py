@@ -394,7 +394,6 @@ def sponsorTraitWrite(state):
         "Assets", "Sponsor Traits.html"), state)
 
 # Adds a Shipping Update immediately after a relevant event.
-
 def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
     new_loves, lost_loves, new_hates, lost_hates = state["allRelationships"].reportChanges(
     )
