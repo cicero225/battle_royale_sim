@@ -11,7 +11,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         victims[0].getCombatAbility(mainActor) + victims[0].stats['cleverness'] * 0.5))  # this event is mildly rigged against attacker
     descList = [mainActor, victims[0]]
     if random.random() < probKill:
-        victims[0].alive = False
+        victims[0].kill()
         if mainActor.stats['ruthlessness'] > 6:
             desc = mainActor.name + ' assaulted ' + \
                 victims[0].name + ', killing ' + \

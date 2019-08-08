@@ -52,17 +52,17 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         dead = mainActor if random.randint(0, 1) else participants[0]
         desc += 'Instead of fighting, the two contestants attempt to escape, but ' + \
             dead.name + ' is caught and killed by the sponsors!'
-        dead.alive = False
+        dead.kill()
         return(desc, [mainActor, participants[0]], [dead.name])
     if chosen == 'actorSuicide':
         desc += "Rather than be forced to fight " + Event.parseGenderPossessive(
             mainActor) + " loved one, " + str(mainActor) + " committed suicide!"
-        mainActor.alive = False
+        mainActor.kill()
         return(desc, [mainActor, participants[0]], [mainActor.name])
     if chosen == 'participantSuicide':
         desc += "Rather than be forced to fight " + Event.parseGenderPossessive(
             participants[0]) + " loved one, " + str(participants[0]) + " committed suicide!"
-        participants[0].alive = False
+        participants[0].kill()
         return(desc, [mainActor, participants[0]], [participants[0].name])
     if chosen == 'actorBegToKill':
         desc += str(mainActor) + " begged " + \
@@ -71,12 +71,12 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         if state['allRelationships'].loveships[str(participants[0])][str(mainActor)] < 4 or random.random() > 0.5:
             desc += ', forcing ' + \
                 str(participants[0]) + ' to go through with it.'
-            mainActor.alive = False
+            mainActor.kill()
             deadList = [mainActor.name]
         else:
             desc += ', but ' + Event.parseGenderSubject(
                 participants[0]) + ' refused, killing ' + Event.parseGenderReflexive(participants[0]) + ' instead!'
-            participants[0].alive = False
+            participants[0].kill()
             deadList = [participants[0].name]
         return(desc, [mainActor, participants[0]], deadList)
     if chosen == 'participantBegToKill':
@@ -85,11 +85,11 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         if state['allRelationships'].loveships[str(mainActor)][str(participants[0])] < 4 or random.random() > 0.5:
             desc += ', forcing ' + str(mainActor) + ' to go through with it.'
             deadList = [participants[0].name]
-            participants[0].alive = False
+            participants[0].kill()
         else:
             desc += ', but ' + Event.parseGenderSubject(
                 mainActor) + ' refused, killing ' + Event.parseGenderReflexive(mainActor) + ' instead!'
-            mainActor.alive = False
+            mainActor.kill()
             deadList = [mainActor.name]
         return(desc, [mainActor, participants[0]], deadList)
     raise AssertionError("This should not happen! " + chosen)

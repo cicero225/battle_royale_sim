@@ -4,7 +4,7 @@ import random
 
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-    mainActor.alive = False
+    mainActor.kill()
     if random.randint(0, 1):
         desc = sponsors[0].name + ' cheated, killing ' + \
             mainActor.name + " while no one was looking."

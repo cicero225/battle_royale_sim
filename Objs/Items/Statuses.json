@@ -72,7 +72,7 @@
     "stackable": false
     },
     "LoveBroken":
-    {"imageFile": "LoveBroken.png",
+    {"imageFile": "HeartBroken.png",
     "friendly": "a Broken Heart",
     "statChanges": 
         {"gregariousness": -3,

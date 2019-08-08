@@ -29,7 +29,7 @@ Event.registerInsertedCallback(
 
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
-    mainActor.alive = False
+    mainActor.kill()
     desc = mainActor.name + " died horribly of dysentery."
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     return (desc, [mainActor], [mainActor.name])

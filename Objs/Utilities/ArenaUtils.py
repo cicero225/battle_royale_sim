@@ -362,28 +362,6 @@ def killWrite(state):
         state["turnNumber"][0]) + " Kills.html"), state)
     return False
 
-
-def injuryAndStatusWrite(state):
-    # aren't circular import dependencies fun...
-    from Objs.Events.Event import Event
-
-    def writeObjectInventory(filename, inventory_attr_name):
-        Writer = HTMLWriter(state["statuses"])
-        Writer.addTitle(
-            "Day " + str(state["turnNumber"][0]) + " " + filename + " Accumulated")
-        for contestant in state["contestants"].values():
-            if not contestant.alive or not getattr(contestant, inventory_attr_name):
-                continue
-            eventLine = str(contestant) + ": " + \
-                Event.englishList(getattr(contestant, inventory_attr_name))
-            Writer.addEvent(eventLine, [contestant] +
-                            getattr(contestant, inventory_attr_name))
-        Writer.finalWrite(os.path.join("Assets", str(
-            state["turnNumber"][0]) + " " + filename + ".html"), state)
-    writeObjectInventory("Items", "inventory")
-    writeObjectInventory("Statuses", "statuses")
-
-
 def sponsorTraitWrite(state):
     sponsorWriter = HTMLWriter(state["statuses"])
     sponsorWriter.addTitle("Sponsor Traits")
@@ -392,6 +370,14 @@ def sponsorTraitWrite(state):
                                "<br> Secondary Trait: " + sponsor.secondary_trait, [sponsor])
     sponsorWriter.finalWrite(os.path.join(
         "Assets", "Sponsor Traits.html"), state)
+
+def initializeRomances(state):
+    relationships = state["allRelationships"]
+    # Deliberate copy
+    new_list = list(state["contestants"].values())
+    random.shuffle(new_list)  # Otherwise, candidates earlier in the alphabet by file name will get inapparopriate bias towards romances.
+    for contestant in new_list:
+        relationships.SetNewRomance(contestant, initial=True)
 
 # Adds a Shipping Update immediately after a relevant event.
 def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
@@ -433,22 +419,12 @@ def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
                 thisWriter.addEvent(contestant_tuple[0] + " and " + contestant_tuple[1] + " are no longer in a romance.", [
                                     contestants[contestant_tuple[0]], heartbroken, contestants[contestant_tuple[1]]])
                 skiptuples.add(reverse_tuple)
-                input()
-                # Check for new candidate romances
-                def GetNewRomance(broken_lover):
-                    new_lover = None
-                    candidate_list = state["allRelationships"].returnBestRomancesDescending(broken_lover)
-                    for candidate, _ in candidate_list:
-                        if not contestants[candidate].hasThing("Love"):
-                            new_lover = contestants[candidate]
-                            new_lover.addStatus("Love", target=contestants[broken_lover])
-                            break
-                    if new_lover is None:
-                        contestants[broken_lover].removeStatus("Love")
-                        contestants[broken_lover].addStatus("LoveBroken")
-                    thisWriter.addEvent(broken_lover + " is now in a romance with " + str(new_lover), [contestants[broken_lover], heart, new_lover])
-                GetNewRomance(contestant_tuple[0])
-                GetNewRomance(contestant_tuple[1])
+                new_lover = state["allRelationships"].SetNewRomance(contestant_tuple[0])
+                if new_lover:
+                    thisWriter.addEvent(contestant_tuple[0] + " is now in a romance with " + str(new_lover), [contestants[contestant_tuple[0]], heart, new_lover])
+                new_lover = state["allRelationships"].SetNewRomance(contestant_tuple[1])
+                if new_lover:
+                    thisWriter.addEvent(contestant_tuple[1] + " is now in a romance with " + str(new_lover), [contestants[contestant_tuple[1]], heart, new_lover])
                 continue
             thisWriter.addEvent(contestant_tuple[0] + " no longer has a crush on " + contestant_tuple[1], [
                                 contestants[contestant_tuple[0]], heartbroken, arrow, contestants[contestant_tuple[1]]])    
@@ -514,6 +490,52 @@ def ContestantStatWrite(state):
         statWriter.addEvent(eventLine, [contestant])
     statWriter.finalWrite(os.path.join("Assets", str(
         state["turnNumber"][0]) + " Stats.html"), state)
+
+def starterItemAllocation(state):
+    if state["settings"]["presetStarterItems"]:
+        for contestant in state["contestants"].values():
+            for newItemName in contestant.starterItems:
+                contestant.addItem(newItemName, isNew=True, resetItemAllowed=True)
+    if state["settings"]["randomStarterItems"] > 0:
+        allItemStrings = set(str(x) for x in state["items"].values())
+        for contestant in state["contestants"].values():
+            options = sorted(allItemStrings - set(str(x) for x in contestant.inventory if not x.stackable), key=lambda x: str(x))
+            for _ in range(max(state["settings"]["randomStarterItems"] - len(contestant.inventory), 0)):
+                if not options:
+                    continue
+                choice = random.choice(options)
+                itemInstance = contestant.addItem(choice, isNew=True, resetItemAllowed=True)
+                if not itemInstance.stackable:
+                    options.remove(choice)
+        
+# Rig it so the same event never happens twice to the same person in consecutive turns (makes game feel better)
+
+def eventMayNotRepeat(actor, origProb, event, state):
+    # This process doesn't work at all for phases with only one event, so exclude those too
+    if (state["curPhase"] not in state["phases"]["deduplicate"]) or (sum(1 for x in state['events'].values() if "phase" not in x.baseProps or state["curPhase"] in x.baseProps["phase"]) == 1):
+        return origProb, True
+    # Since defaultdict, this would work fine even without this check, but this makes it more explicit (and is more robust to future changes)
+    if state["turnNumber"][0] > 1:
+        for x in state["callbackStore"]["eventLog"][state["turnNumber"][0] - 1].values():
+            if x[actor.name] == event.name:
+                return 0, False
+    return origProb, True
+
+# Ends the game if only one contestant left
+
+def onlyOneLeft(liveContestants, _):
+    if len(liveContestants) == 1:
+        return True
+    return False
+
+    
+ # Debug methods, stored for convenience
+def giveEveryoneItem(item, state):
+    for contestant in state["contestants"].values():
+        contestant.addItem(item, isNew=True, resetItemAllowed=True)
+        
+        
+# Legacy, should be removed eventually
 
 def relationshipWrite(state):
     relationships = state["allRelationships"]
@@ -662,47 +684,23 @@ def relationshipWrite(state):
         state["turnNumber"][0]) + " Friendships.html"), state)
     loveWriter.finalWrite(os.path.join("Assets", str(
         state["turnNumber"][0]) + " Romances.html"), state)
-
-def starterItemAllocation(state):
-    if state["settings"]["presetStarterItems"]:
-        for contestant in state["contestants"].values():
-            for newItemName in contestant.starterItems:
-                contestant.addItem(newItemName, isNew=True, resetItemAllowed=True)
-    if state["settings"]["randomStarterItems"] > 0:
-        allItemStrings = set(str(x) for x in state["items"].values())
-        for contestant in state["contestants"].values():
-            options = sorted(allItemStrings - set(str(x) for x in contestant.inventory if not x.stackable), key=lambda x: str(x))
-            for _ in range(max(state["settings"]["randomStarterItems"] - len(contestant.inventory), 0)):
-                if not options:
-                    continue
-                choice = random.choice(options)
-                itemInstance = contestant.addItem(choice, isNew=True, resetItemAllowed=True)
-                if not itemInstance.stackable:
-                    options.remove(choice)
         
-# Rig it so the same event never happens twice to the same person in consecutive turns (makes game feel better)
+def injuryAndStatusWrite(state):
+    # aren't circular import dependencies fun...
+    from Objs.Events.Event import Event
 
-def eventMayNotRepeat(actor, origProb, event, state):
-    # This process doesn't work at all for phases with only one event, so exclude those too
-    if (state["curPhase"] not in state["phases"]["deduplicate"]) or (sum(1 for x in state['events'].values() if "phase" not in x.baseProps or state["curPhase"] in x.baseProps["phase"]) == 1):
-        return origProb, True
-    # Since defaultdict, this would work fine even without this check, but this makes it more explicit (and is more robust to future changes)
-    if state["turnNumber"][0] > 1:
-        for x in state["callbackStore"]["eventLog"][state["turnNumber"][0] - 1].values():
-            if x[actor.name] == event.name:
-                return 0, False
-    return origProb, True
-
-# Ends the game if only one contestant left
-
-
-def onlyOneLeft(liveContestants, _):
-    if len(liveContestants) == 1:
-        return True
-    return False
-
-    
- # Debug methods, stored for convenience
-def giveEveryoneItem(item, state):
-    for contestant in state["contestants"].values():
-        contestant.addItem(item, isNew=True, resetItemAllowed=True)
+    def writeObjectInventory(filename, inventory_attr_name):
+        Writer = HTMLWriter(state["statuses"])
+        Writer.addTitle(
+            "Day " + str(state["turnNumber"][0]) + " " + filename + " Accumulated")
+        for contestant in state["contestants"].values():
+            if not contestant.alive or not getattr(contestant, inventory_attr_name):
+                continue
+            eventLine = str(contestant) + ": " + \
+                Event.englishList(getattr(contestant, inventory_attr_name))
+            Writer.addEvent(eventLine, [contestant] +
+                            getattr(contestant, inventory_attr_name))
+        Writer.finalWrite(os.path.join("Assets", str(
+            state["turnNumber"][0]) + " " + filename + ".html"), state)
+    writeObjectInventory("Items", "inventory")
+    writeObjectInventory("Statuses", "statuses")

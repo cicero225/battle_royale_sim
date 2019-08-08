@@ -11,7 +11,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, -2)
     state["allRelationships"].IncreaseLoveLevel(victims[0], mainActor, -3)
     if random.random() < probKill:
-        victims[0].alive = False
+        victims[0].kill()
         deadList = [victims[0].name]
         desc = mainActor.name + ' threw a spear through ' + \
             victims[0].name + "'s neck and killed " + \

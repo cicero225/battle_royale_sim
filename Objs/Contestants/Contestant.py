@@ -63,6 +63,7 @@ def contestantIndivActorWithVictimsCallback(_, victim, baseEventVictimWeight, ev
 class Contestant(object):
 
     stateStore = [None]
+    onDeathCallbacks = []
 
     # In this case, best to bake the stats as its own thing in the json...
     def __init__(self, name, inDict, settings):
@@ -99,7 +100,12 @@ class Contestant(object):
         # These events cannot happen to this contestant. Default False
         self.eventDisabled = ArenaUtils.DefaultOrderedDict(
             collections.OrderedDict)
-            
+    
+    def kill(self):
+        self.alive = False
+        for callback in self.onDeathCallbacks:
+            callback(self, self.stateStore[0])
+    
     # Necessary to properly apply special modifiers to combat ability taking items into consideration. Only meant for 1v1 consideration.
     def getCombatAbility(self, otherContestant):
         base_ca = self.stats["combat ability"]

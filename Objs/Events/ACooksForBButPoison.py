@@ -62,7 +62,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     else:
         desc += str(victims[0]) + \
             " ate the meal, blissfully unaware, before falling over dead."
-        victims[0].alive = False
+        victims[0].kill()
         lootList = Event.lootAll(mainActor, victims[0])
         if lootList:
             desc += ' ' + str(mainActor) + ' looted ' + Event.englishList(lootList) + '.'

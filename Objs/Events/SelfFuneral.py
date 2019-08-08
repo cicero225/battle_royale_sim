@@ -26,7 +26,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             desc += "choking " + \
                 Event.parseGenderReflexive(
                     mainActor) + " in a long, arduous experience."
-        mainActor.alive = False
+        mainActor.kill()
         return desc, [mainActor], [mainActor.name]
     if alt == 1:
         desc += 'before trying to bury ' + Event.parseGenderReflexive(

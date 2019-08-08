@@ -68,7 +68,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             "VICTRE", Event.parseGenderReflexive(mainActor)).replace("SOURCE", trapSource).replace("VICTPOS", Event.parseGenderPossessive(mainActor))
         descList = [mainActor, state["contestants"][trapSource]]
 
-    mainActor.alive = False
+    mainActor.kill()
 
     self.eventStore["trapCounter"][chosen] -= 1
     self.eventStore["trapMakerCounter"][trapSource][chosen] -= 1

@@ -5,7 +5,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     mainActor.removeStatus("Fever")
     desc = mainActor.name + " died from " + \
         Event.parseGenderPossessive(mainActor) + " fever!"
-    mainActor.alive = False
+    mainActor.kill()
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     return (desc, [mainActor], [mainActor.name])
 

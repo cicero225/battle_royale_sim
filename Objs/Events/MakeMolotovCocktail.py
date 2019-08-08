@@ -22,7 +22,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     else:
         desc = mainActor.name + ' tried to make a Molotov Cocktail, but lit ' + \
             Event.parseGenderReflexive(mainActor) + ' on fire, dying horribly.'
-        mainActor.alive = False
+        mainActor.kill()
         return (desc, [mainActor], [mainActor.name])
 
 

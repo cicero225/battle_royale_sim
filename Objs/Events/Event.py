@@ -180,7 +180,7 @@ class Event(object):  # Python 2.x compatibility
         return 1 / (1 + (1 + settings['combatAbilityEffect'])**(attackStat - defenseStat))
 
     @staticmethod
-    def fight(people, relationships, settings):
+    def fight(people, relationships, settings, deferActualKilling=False):
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
         alreadyInjured = sorted(
             list(set(str(person) for person in people if person.hasThing("Injury"))))
@@ -231,7 +231,8 @@ class Event(object):  # Python 2.x compatibility
                 fightDict[i] - meanAbilityTot / (len(people) - 1)))
             if random.random() < probDeath:
                 deadList.append(person1)
-                person1.alive = False
+                if not deferActualKilling:
+                    person1.kill()
             else:
                 liveList.append(person1)
                 if str(person1) not in alreadyInjured and random.random() < probInjury:
@@ -317,7 +318,7 @@ class Event(object):  # Python 2.x compatibility
             # Sigmoid probability! woo...
             if random.random() < faction1ProbDeath:
                 faction1DeadList.append(person1)
-                person1.alive = False
+                person1.kill()
             else:
                 faction1LiveList.append(person1)
                 if str(person1) not in alreadyInjured and random.random() < faction1ProbInjury:
@@ -327,7 +328,7 @@ class Event(object):  # Python 2.x compatibility
         for person2 in faction2:
             if random.random() < faction2ProbDeath:
                 faction2DeadList.append(person2)
-                person2.alive = False
+                person2.kill()
             else:
                 faction2LiveList.append(person2)
                 if str(person2) not in alreadyInjured and random.random() < faction2ProbInjury:
@@ -414,5 +415,6 @@ class Event(object):  # Python 2.x compatibility
 
     # Puts a message in the display queue that will be consumed after the current event runs. No order guarantee is provided.
     # The entries are identical to the arguments for HTMLWriter.addEvent. Provide state if you want (injured) annotations.
-    def announce(self, desc, descContestants, state=None, preEventInjuries=None):
-        self.stateStore[0]["announcementQueue"].append((desc, descContestants, state, preEventInjuries))
+    @classmethod
+    def announce(cls, desc, descContestants, state=None, preEventInjuries=None):
+        cls.stateStore[0]["announcementQueue"].append((desc, descContestants, state, preEventInjuries))

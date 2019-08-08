@@ -19,6 +19,7 @@ import warnings
 
 from Objs.Contestants.Contestant import Contestant, contestantIndivActorCallback, contestantIndivActorWithParticipantsCallback, contestantIndivActorWithVictimsCallback
 from Objs.Items.Item import Item, ItemInstance
+from Objs.Items.SpecialItemBehavior import PRE_GAME_ITEM_RULES
 from Objs.Items.Status import Status
 from Objs.Sponsors.Sponsor import Sponsor, contestantIndivActorWithSponsorsCallback
 from Objs.World.World import World
@@ -197,12 +198,7 @@ class MegucaArena:
         self.loadParametersFromJSON()
          # TODO: Now that the item stats etc. are relatively set, should have the object loaders inspect the final dictionaries for correctness (no misspellings etc.) (since json doesn't have a mechanism for checking)
         self.initializeEvents(eventClass)
-        self.initializeContestants(contestantClass)
-        # Import and initialize sponsors -> going to make it dictionary name : (imageName,baseStats...)
-        # baseStats =  weight (probability relative to other sponsors, default 1), objectPrefs (any biases towards or away any \
-        # from any type of object gift, otherwise 1, Anything else we think of)
-        # No placeholder sponsors because of the way it is handled.
-        self.sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["sponsors"], self.settings, sponsorClass)
+        self.initializeContestantsAndSponsors(contestantClass, sponsorClass)
         self.allRelationships = relationshipClass(self.contestants, self.sponsors, self.settings)
         
     def loadParametersFromJSON(self):
@@ -218,7 +214,7 @@ class MegucaArena:
         # This dict allows for absolute disabling of events by setting False.
         self.eventsActive = ArenaUtils.DictToOrderedDict({x: True for x in self.events})
 
-    def initializeContestants(self, contestantClass):
+    def initializeContestantsAndSponsors(self, contestantClass, sponsorClass):
         contestantClass.stateStore[0] = self.state
         # Import and initialize contestants -> going to make it dictionary name : (imageName, baseStats...)
         self.contestants = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["contestants"], self.settings, contestantClass)
@@ -260,7 +256,11 @@ class MegucaArena:
         for contestant in self.contestants.values():
             if self.settings["statNormalization"]:
                 contestant.contestantStatNormalizer(targetSum)
-            contestant.InitializeEventModifiers(self.events)        
+            contestant.InitializeEventModifiers(self.events)
+        self.sponsors = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["sponsors"], self.settings, sponsorClass)
+        for sponsor in self.sponsors.values():  # This is necessary so sponsors can have limited behavior like holding items.
+            sponsor.contestantStatFill(statTemplate)
+            sponsor.InitializeEventModifiers(self.events) 
         
     def main(self):
         """The main for the battle royale sim"""
@@ -327,15 +327,14 @@ class MegucaArena:
         startup = [
             ArenaUtils.loggingStartup,
             ArenaUtils.sponsorTraitWrite,
-            ArenaUtils.starterItemAllocation]
+            ArenaUtils.starterItemAllocation,
+            ArenaUtils.initializeRomances]
+        startup.extend(PRE_GAME_ITEM_RULES)
         # Example debug rig to give an item to everyone: add the functor partial(ArenaUtils.giveEveryoneItem, "Dossier")
         # to this list.
 
         if PRINTHTML:
-            startup.insert(0, ArenaUtils.relationshipWrite)
             startup.append(ArenaUtils.ContestantStatWrite)
-        if self.settings["presetStarterItems"] or self.settings["randomStarterItems"] > 0:
-            startup.append(ArenaUtils.injuryAndStatusWrite)
 
         # modifyBaseWeights: Expected args: liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state. Modify in place.
             # Also a good time to do any beginning of turn stuff
@@ -402,16 +401,13 @@ class MegucaArena:
 
         if PRINTHTML:
             postDayCallbacks.insert(0, ArenaUtils.ContestantStatWrite)
-            postDayCallbacks.insert(0, ArenaUtils.injuryAndStatusWrite)
             postDayCallbacks.insert(0, ArenaUtils.killWrite)
-            postDayCallbacks.insert(0, ArenaUtils.relationshipWrite)
 
         postGameCallbacks = [
         ]
 
         if PRINTHTML:
             postGameCallbacks.insert(0, ArenaUtils.killWrite)
-            postGameCallbacks.insert(0, ArenaUtils.relationshipWrite)
 
         self.callbacks = ArenaUtils.DictToOrderedDict({"startup": startup,
                                                        "modifyBaseWeights": modifyBaseWeights,

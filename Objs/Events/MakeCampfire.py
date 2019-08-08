@@ -95,30 +95,33 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
 
     desc += ' After a moment, ' + contestant.name + ' attacked. A fight started, '
     (fightDesc, fightDescList, fightDeadList, allKillers) = Event.fight(
-        descList, state["allRelationships"], state["settings"])
+        descList, state["allRelationships"], state["settings"], deferActualKilling=True)
     # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot.
-    if len(fightDeadList) == 1 and random.random() < 0.33:
-        # revive the loser
-        fightDeadList[0].alive = True
-        fightDeadList[0].addStatus(state["statuses"]["Injury"])
-        if fightDeadList[0] == mainActor:
-            self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
-            desc += ' and ' + mainActor.name + ' was injured and forced to flee.'
-            mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(
-                data={"day": state["turnNumber"][0]}))
-            contestant.removeStatus("Hypothermia")
-            if fightDescList:
-                desc += ' ' + Event.parseGenderSubject(mainActor).capitalize(
-                ) + ' left behind ' + Event.englishList(fightDescList) + '.'
+    if len(fightDeadList) == 1:
+        if random.random() > 0.33:
+            # kill him anyway.
+            fightDeadList[0].kill()
         else:
-            desc += ' but ' + contestant.name + ' was injured and forced to flee.'
-            contestant.addStatus(state["statuses"]["Hypothermia"].makeInstance(
-                data={"day": state["turnNumber"][0]}))
-            if fightDescList:
-                desc += ' ' + Event.parseGenderSubject(contestant).capitalize(
-                ) + ' left behind ' + Event.englishList(fightDescList) + '.'
-        descList.extend(fightDescList)
-        return (desc, descList, [])
+            # Injure the loser and divert the event outcome
+            fightDeadList[0].addStatus(state["statuses"]["Injury"])
+            if fightDeadList[0] == mainActor:
+                self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
+                desc += ' and ' + mainActor.name + ' was injured and forced to flee.'
+                mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(
+                    data={"day": state["turnNumber"][0]}))
+                contestant.removeStatus("Hypothermia")
+                if fightDescList:
+                    desc += ' ' + Event.parseGenderSubject(mainActor).capitalize(
+                    ) + ' left behind ' + Event.englishList(fightDescList) + '.'
+            else:
+                desc += ' but ' + contestant.name + ' was injured and forced to flee.'
+                contestant.addStatus(state["statuses"]["Hypothermia"].makeInstance(
+                    data={"day": state["turnNumber"][0]}))
+                if fightDescList:
+                    desc += ' ' + Event.parseGenderSubject(contestant).capitalize(
+                    ) + ' left behind ' + Event.englishList(fightDescList) + '.'
+            descList.extend(fightDescList)
+            return (desc, descList, [])
 
     # If nobody was hurt, they just give up and use the fire together.
     if not fightDeadList:

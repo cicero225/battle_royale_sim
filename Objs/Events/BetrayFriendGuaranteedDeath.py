@@ -7,7 +7,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     desc = CLIFF_DESCRIPTIONS[random.randint(0, len(CLIFF_DESCRIPTIONS) - 1)](mainActor, victims[0])
     state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, -4)
     state["allRelationships"].IncreaseLoveLevel(victims[0], mainActor, -6)
-    victims[0].alive = False
+    victims[0].kill()
     if mainActor.stats["stability"] < 3:
         desc += ' ' + Event.parseGenderSubject(mainActor).capitalize() + ' smiled as ' + Event.parseGenderSubject(
             mainActor) + ' watched ' + Event.parseGenderObject(victims[0]) + ' die.'

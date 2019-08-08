@@ -49,7 +49,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         break
     desc += " and they all died in the ensuing detonation!" if (len(everyone) > 1) else " and " + Event.parseGenderSubject(mainActor) + " died in the ensuing detonation!"
     for person in everyone:
-        person.alive = False
+        person.kill()
     self.eventStore["trapCounter"] -= 1
     self.eventStore["trapMakerCounter"][trapSource] -= 1
     descList = [mainActor] + participants

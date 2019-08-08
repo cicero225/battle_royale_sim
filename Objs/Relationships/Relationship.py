@@ -320,7 +320,27 @@ class Relationship(object):
         candidates = {}
         for key, value in sortLoves.items():
             if value >= 4:
-                if relationships.loveships[key][str(contestant)] >= 4:
-                    candidates[key] = relationships.loveships[key][str(contestant)] + value
+                if self.loveships[key][str(contestant)] >= 4:
+                    candidates[key] = self.loveships[key][str(contestant)] + value
         best_candidate_key_value = sorted(candidates.items(), key=lambda x: x[1], reverse=True)
         return best_candidate_key_value
+        
+    # Check for candidate romances, given an existing lover.
+    # If initial is true, will assume we are starting from a blank slate (no broken hearts)
+    def SetNewRomance(self, lover, initial=False):
+        if isinstance(lover, str):
+            lover = self.contestants[lover]
+        new_lover = None
+        candidate_list = self.returnBestRomancesDescending(lover)
+        for candidate, _ in candidate_list:
+            potential_lover = self.contestants.get(candidate, self.sponsors.get(candidate, None))
+            if not potential_lover.hasThing("Love"):
+                new_lover = potential_lover
+                new_lover.addStatus("Love", target=lover)
+                lover.removeStatus("Love")
+                lover.addStatus("Love", target=new_lover)
+                break
+        if not initial and new_lover is None:
+            lover.removeStatus("Love")
+            lover.addStatus("LoveBroken")
+        return new_lover

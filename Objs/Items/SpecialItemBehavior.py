@@ -1,6 +1,27 @@
 import collections
 import random
 
+# This will be placed into game startup and enables arbitrary item-related modifications.
+def LoveGlobalDeathRule(state):
+    from Objs.Events.Event import Event
+    def BreakHeartForDead(contestant, state):
+        potential_love = contestant.hasThing("Love")
+        if not potential_love:
+            return
+        lover = potential_love[0].target
+        # if lover is also dead, return immediately.
+        if not lover.alive:
+            return
+        new_lover = state["allRelationships"].SetNewRomance(lover)
+        if new_lover is None:
+            Event.announce(str(lover) + " was heartbroken by the death of " + str(contestant), [lover, state["statuses"]["LoveBroken"]])
+        else:
+            Event.announce("Because of " + str(contestant) + "'s death, " + str(lover) + " is now in a romance with " + str(new_lover), [lover, state["statuses"]["Love"], new_lover])       
+    from Objs.Contestants.Contestant import Contestant
+    Contestant.onDeathCallbacks.append(BreakHeartForDead)
+
+PRE_GAME_ITEM_RULES = [LoveGlobalDeathRule]
+
 # This section provides special setup behavior etc. for certain class of items that cannot be added any other way
 # (e.g. it needs to be factored into the Item or ItemInstance constructor). Try not to use this for behavior that could
 # be incorporated in some other way.
