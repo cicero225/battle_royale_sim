@@ -1,6 +1,6 @@
 import collections
 import copy
-from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS
+from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS, ITEM_ON_ACQUISITION, ITEM_ON_REMOVAL
 
 # I wonder if this needs to import Contestant...
 
@@ -25,7 +25,9 @@ class ItemInstance(object):
         else:
             self.item = item
             self.count = count
+            self.owner = None  # The owner is responsible for keeping this updated, using onAcquisition (NOT direct setting)
             self.target = target  # The "Target" of the item, if any. Note that this will only ever be shallow copied, so be careful with dicts, etc.
+            self.eventHandlers = {}  # This _will_ be deepcopied along with the item.
             self.data = collections.OrderedDict()  # Note that this may be deepcopied, so be careful using this.
             if self.item.name not in ITEM_INITIALIZERS:
                 return
@@ -42,6 +44,7 @@ class ItemInstance(object):
         if hasattr(item, "item"):
             newItem = copy.copy(item)
             newItem.data = copy.deepcopy(item.data)
+            newItem.eventHandlers = copy.deepcopy(item.eventHandlers)
         else:
             newItem = cls(item, count=count, target=target)
         return newItem
@@ -60,11 +63,13 @@ class ItemInstance(object):
     def __copy__(self):
         newInstance = type(self)(self.item, self.count, self.target)
         newInstance.data = self.data
+        newInstance.eventHandlers = self.eventHandlers
         return newInstance
 
     def __deepcopy__(self, memo):
         newInstance = copy.copy(self)  # Might as well economize
         newInstance.data = copy.deepcopy(self.data, memo)
+        newInstance.eventHandlers = copy.deepcopy(self.eventHandlers, memo)
         return newInstance
 
     def __getattribute__(self, attr):
@@ -95,7 +100,18 @@ class ItemInstance(object):
     def __str__(self):  # we need another copy because __ methods completely bypass __getattribute__
         return self.name
 
+    def onAcquisition(self, contestant, resetItemAllowed=False):
+        self.item.onAcquisition(contestant, resetItemAllowed)
+        self.owner = contestant
+        if self.item.name not in ITEM_ON_ACQUISITION:
+            return
+        ITEM_ON_ACQUISITION[self.item.name](self, contestant, self.stateStore[0])
+
     def onRemoval(self, contestant):
+        self.owner = None
+        if self.item.name not in ITEM_ON_REMOVAL:
+            return
+        ITEM_ON_REMOVAL[self.item.name](self, contestant, self.stateStore[0])
         pass
 
     # this has to be processed before anything else...

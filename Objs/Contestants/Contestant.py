@@ -213,8 +213,7 @@ class Contestant(object):
     # Note that at the moment a full refresh of the contestant is done each time an item is added or removed. This
     # prevents items from having permanent effects after they are lost (outside of edge cases like directly manipulating
     # self.baseStats, etc. In the future, this could be done by adding a
-    # persistent effects field, but this is left out for now. An item.onRemoval(self) is called on removal, but this will be
-    # pass most of the time.
+    # persistent effects field, but this is left out for now. An item.onRemoval(self) is called on removal.
 
     def hasThing(self, item):
         item_list = [x for x in self.inventory +

@@ -70,6 +70,25 @@ ITEM_RESTRICTIONS = collections.OrderedDict({
 "Dossier": DossierRestrictions
 })
 
+def LoveOnAcquisition(itemInstance, contestant, state):
+    itemInstance.eventHandlers.pop("Love", None)
+    from Objs.Events.IndividualEventHandler import IndividualEventHandler
+    newHandler = IndividualEventHandler(state)
+    newHandler.banMurderEventsAtoB(str(contestant), itemInstance.target)
+    itemInstance.eventHandlers["Love"] = newHandler
+
+ITEM_ON_ACQUISITION = collections.OrderedDict({
+"Love": LoveOnAcquisition
+})
+
+def LoveOnRemoval(itemInstance, contestant, state):
+    itemInstance.eventHandlers.pop("Love", None)
+
+ITEM_ON_REMOVAL = collections.OrderedDict({
+"Love": LoveOnRemoval
+})
+
+
 # This section allows items to accept extra arguments (as a dict) at creation time. Note that this must be explicitly provided in the
 # code - if an item may be made arbitrarily, it cannot strictly depend on this being called to function.
 

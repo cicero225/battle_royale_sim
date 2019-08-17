@@ -53,40 +53,52 @@ class IndividualEventHandler(object):
         self.registerEvent("modifyIndivActorWeights", anonfunc)
         return anonfunc  # Just in case it's needed by the calling function
 
-    def bindRoleForContestantAndEvent(self, roleName, fixedRoleList, relevantActor, eventName):
+    def bindRoleForContestantAndEvent(self, roleName, fixedRoleList, relevantActor, eventName, useOtherConstestantsIfNotAvailable=False):
         anonfunc = partial(self.fixedRoleCallback, roleName,
-                           fixedRoleList, relevantActor, eventName)
+                           fixedRoleList, relevantActor, eventName, useOtherConstestantsIfNotAvailable)
         anonfunc.eventName = eventName  # Notes on the functor for debug purposes
         anonfunc.relevantActor = relevantActor
         anonfunc.fixedRoleList = fixedRoleList
         self.registerEvent("overrideContestantEvent", anonfunc)
+        
         # It must _also_ be checked that the people bound all still live. This has be done before the event is selected, to prevent the selection
-        # of invalid events.
+        # of invalid events. Note that this is only necessary if useOtherConstestantsIfNotAvailable is False.
+        if not useOtherConstestantsIfNotAvailable:
+            def func(actor, origWeight, event):  # Black magic
+                if event.name == eventName and actor.name == relevantActor.name:
+                    for person in fixedRoleList:
+                        if not person.alive:
+                            return (0, False)
+                return (origWeight, True)
 
-        def func(actor, origWeight, event):  # Black magic
-            if event.name == eventName and actor.name == relevantActor.name:
-                for person in fixedRoleList:
-                    if not person.alive:
-                        return (0, False)
-            return (origWeight, True)
+            # this anonymizes func, giving a new reference each time this is called
+            def anonfunc2(actor, origWeight, event): return func(
+                actor, origWeight, event)
+            # This needs to be at beginning for proper processing
+            self.registerEvent("modifyIndivActorWeights", anonfunc2, False)
 
-        # this anonymizes func, giving a new reference each time this is called
-        def anonfunc2(actor, origWeight, event): return func(
-            actor, origWeight, event)
-        # This needs to be at beginning for proper processing
-        self.registerEvent("modifyIndivActorWeights", anonfunc2, False)
         return anonfunc, anonfunc2  # Just in case it's needed by the calling function
 
     @staticmethod
-    def fixedRoleCallback(roleName, fixedRoleList, relevantActor, eventName, contestantKey, thisevent, state, participants, victims, sponsorsHere):
+    def fixedRoleCallback(roleName, fixedRoleList, relevantActor, eventName, useOtherConstestantsIfNotAvailable, contestantKey, thisevent, state, participants, victims, sponsorsHere):
         # Avoiding eval here
         roleDict = DictToOrderedDict({"participants": participants,
                                       "victims": victims,
                                       "sponsors": sponsorsHere})
         if thisevent.name == eventName and relevantActor.name == contestantKey:
-            # Have to clear the list BUT keep the reference
-            del roleDict[roleName][:]
-            roleDict[roleName].extend(fixedRoleList)
+            newRolelist = []
+            if len(fixedRoleList) < len(roleDict[roleName]):  # Not enough people to fill the roleDict
+                if not useOtherConstestantsIfNotAvailable:
+                    raise AssertionError("Not enough fixed role contestants for event: " + eventName)
+                newRolelist = random.sample(roleDict[roleName], len(roleDict[roleName]) - len(fixedRoleList))
+                # Have to clear the list BUT keep the reference
+                del roleDict[roleName][:]
+                newRolelist.extend(newRolelist)
+                newRolelist.extend(fixedRoleList)
+            else:
+                # Have to clear the list BUT keep the reference
+                del roleDict[roleName][:]
+                roleDict[roleName].extend(random.sample(fixedRoleList, len(roleDict[roleName])))
         return True, False
 
     def banEventForSingleContestant(self, eventName, contestantName, state):
