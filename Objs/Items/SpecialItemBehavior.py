@@ -75,6 +75,13 @@ def LoveOnAcquisition(itemInstance, contestant, state):
     from Objs.Events.IndividualEventHandler import IndividualEventHandler
     newHandler = IndividualEventHandler(state)
     newHandler.banMurderEventsAtoB(str(contestant), itemInstance.target)
+    newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "ShareStoryofLife", True)
+    newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "ShareIntimateConversation", True)
+    newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "FriendGivesMedicine", True)
+    newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "AWorshipsB", True)
+    newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "FriendHelpsInjury", True)
+    newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "GangUpFight", True)
+    newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "ACooksForB", True)
     itemInstance.eventHandlers["Love"] = newHandler
 
 ITEM_ON_ACQUISITION = collections.OrderedDict({

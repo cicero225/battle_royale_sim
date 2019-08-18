@@ -115,6 +115,10 @@ class Contestant(object):
 
     def __str__(self):
         return self.name
+        
+    @property
+    def id(self):
+        return id(self)
 
     def contestantStatRandomize(self):
         for statName in self.stats:

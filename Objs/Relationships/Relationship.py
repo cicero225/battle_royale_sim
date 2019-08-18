@@ -84,10 +84,13 @@ class Relationship(object):
 
         def processSingleTrait(trait_name, sponsor):
             if trait_name in event.baseProps["sponsorInfluence"]:
-                self.IncreaseFriendLevel(
-                    sponsor, actor, event.baseProps["sponsorInfluence"][trait_name]["value"])
+                if sponsor is not actor:  # We're deliberately checking same object
+                    self.IncreaseFriendLevel(
+                        sponsor, actor, event.baseProps["sponsorInfluence"][trait_name]["value"])
                 if "all" not in event.baseProps["sponsorInfluence"][trait_name] or event.baseProps["sponsorInfluence"][trait_name]["all"]:
                     for contestant in others:
+                        if sponsor is contestant:
+                            continue
                         self.IncreaseFriendLevel(
                             sponsor, contestant, event.baseProps["sponsorInfluence"][trait_name]["value"])
         for sponsor in self.sponsors.values():
