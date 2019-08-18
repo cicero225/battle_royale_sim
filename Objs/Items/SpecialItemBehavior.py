@@ -72,6 +72,9 @@ ITEM_RESTRICTIONS = collections.OrderedDict({
 
 def LoveOnAcquisition(itemInstance, contestant, state):
     itemInstance.eventHandlers.pop("Love", None)
+    from Objs.Sponsors.Sponsor import Sponsor
+    if isinstance(contestant, Sponsor) or isinstance(itemInstance.target, Sponsor):
+        return
     from Objs.Events.IndividualEventHandler import IndividualEventHandler
     newHandler = IndividualEventHandler(state)
     newHandler.banMurderEventsAtoB(str(contestant), itemInstance.target)

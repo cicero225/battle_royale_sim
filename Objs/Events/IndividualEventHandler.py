@@ -10,13 +10,13 @@ from functools import partial
 import random
 import warnings
 from Objs.Contestants.Contestant import Contestant
-from Objs.Utilities.ArenaUtils import DictToOrderedDict
+from Objs.Utilities.ArenaUtils import DictToOrderedDict, OrderedSet
 
 
 class IndividualEventHandler(object):
     # Regulating the participants in multi-participant events stresses the event model
     # and requires detailed tracking. Thie dict tracks who has been bound to what on global
-    # basis. Subdict is assumed to be symmetric and consistent. All contestants stored by id.
+    # basis. Subdict is assumed to be symmetric and consistent. All contestants stored by name--In the future we should really use some kind of unique ID or something...
     BOUND_PARTICIPANTS_DICT = {}  # Eventname: Actor: Other participants.
 
     def __init__(self, state):
@@ -61,24 +61,23 @@ class IndividualEventHandler(object):
         return anonfunc  # Just in case it's needed by the calling function
 
     def bindRoleForContestantAndEvent(self, roleName, fixedRoleList, relevantActor, eventName, useOtherConstestantsIfNotAvailable=False):
+        if not isinstance(fixedRoleList, list):
+            fixedRoleList = [fixedRoleList]
         anonfunc = partial(self.fixedRoleCallback, roleName,
-                           fixedRoleList, relevantActor, eventName, BOUND_PARTICIPANTS_DICT, useOtherConstestantsIfNotAvailable)
+                           fixedRoleList, relevantActor, eventName, self.BOUND_PARTICIPANTS_DICT, useOtherConstestantsIfNotAvailable)
         anonfunc.eventName = eventName  # Notes on the functor for debug purposes
         anonfunc.relevantActor = relevantActor
         anonfunc.fixedRoleList = fixedRoleList
         self.registerEvent("overrideContestantEvent", anonfunc)
         
-        if not isinstance(fixedRoleList, list):
-            fixedRoleList = [fixedRoleList]
-        new_group = set(x.id for x in fixedRoleList)
-        # BOUND_PARTICIPANTS_DICT.setdefault(eventName, dict()).setdefault(relevantActor.id, set()).update(new_group)
-        new_group.update(relevantActor.id)
+        new_group = OrderedSet(str(x) for x in fixedRoleList)
+        new_group.add(str(relevantActor))
         total_union = copy(new_group)
         for x in new_group:  # depth 1 is fine if we always do this.
-            total_union.update(BOUND_PARTICIPANTS_DICT[eventName].setdefault(x, set()))
+            total_union.update(self.BOUND_PARTICIPANTS_DICT.setdefault(eventName, dict()).setdefault(x, OrderedSet()))
         for x in new_group:
             # Internally this will all be the same set.
-            BOUND_PARTICIPANTS_DICT[eventName][x] = total_union
+            self.BOUND_PARTICIPANTS_DICT[eventName][x] = total_union
         
         # It must _also_ be checked that the people bound all still live. This has be done before the event is selected, to prevent the selection
         # of invalid events. Note that this is only necessary if useOtherConstestantsIfNotAvailable is False.
@@ -106,31 +105,50 @@ class IndividualEventHandler(object):
                                       "victims": victims,
                                       "sponsors": sponsorsHere})
         if thisevent.name == eventName:
-            this_participant_Dict = bound_participants_dict[eventName]
             if relevantActor.name == contestantKey:
                 numRoles = len(roleDict[roleName])
                 liveFixedRoleList = [x for x in fixedRoleList if x.alive]
                 if len(liveFixedRoleList) < numRoles:  # Not enough people to fill the roleDict
                     if not useOtherConstestantsIfNotAvailable:
                         return False, True
-                    newRolelist = random.sample(roleDict[roleName], numRoles - len(liveFixedRoleList))
+                    valid_addins = [x for x in roleDict[roleName] if x not in liveFixedRoleList]
+                    if len(valid_addins) < numRoles - len(liveFixedRoleList):
+                        return False, True
+                    newRolelist = random.sample(valid_addins, numRoles - len(liveFixedRoleList))
                     # Have to clear the list BUT keep the reference
-                    del roleDict[roleName][:]
+                    roleDict[roleName].clear()
                     roleDict[roleName].extend(newRolelist)
                     roleDict[roleName].extend(liveFixedRoleList)                
                 else:
                     # Have to clear the list BUT keep the reference
-                    del roleDict[roleName][:]
+                    roleDict[roleName].clear()
                     roleDict[roleName].extend(random.sample(liveFixedRoleList, numRoles))
-            if roleName == "participants" :
+            if roleName == "participants" and useOtherConstestantsIfNotAvailable:
                 # We need to parse the participants list and see if some participants must
                 # be added. In the worst case reset event.
+                thisParticipantDict = bound_participants_dict[eventName]
+                numParticipants = len(participants)
+                already_seen = OrderedSet([contestantKey])  # We also use this to rebuilt the participants list.
                 for participant in participants:
-                    possible_list = this_participant_Dict.get(participant.id)
-                    if possible_list is not None:
-                        if not useOtherConstestantsIfNotAvailable:
-                            return False, True
-                            
+                    if len(already_seen) == numParticipants + 1:
+                        break
+                    already_seen.add(str(participant))
+                    possible_list = thisParticipantDict.get(str(participant))
+                    if possible_list is None:
+                        continue
+                    liveParticipantList = [x for x in possible_list if state["contestants"][x].alive and x not in already_seen]
+                    if not liveParticipantList:
+                        continue
+                    if len(liveParticipantList) > numParticipants - len(already_seen) + 1:
+                        # Won't fit. We'll drop this participant and there's a chance it will still be fine in the end.
+                        already_seen.remove(str(participant))
+                        continue
+                    for participantString in liveParticipantList:
+                        already_seen.add(participantString)
+                if len(already_seen) < numParticipants + 1:                    
+                    return False, True        
+                participants.clear() 
+                participants.extend(state["contestants"][x] for x in already_seen if x != str(contestantKey))
         return True, False
 
     def banEventForSingleContestant(self, eventName, contestantName, state):
