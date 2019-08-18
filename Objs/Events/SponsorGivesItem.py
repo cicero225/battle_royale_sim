@@ -16,7 +16,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     state["allRelationships"].IncreaseFriendLevel(
         mainActor, sponsors[0], random.randint(1, 2))
     choice = random.randint(0, 1)
-    if choice:
+    potential_love = sponsors[0].hasThing("Love")
+    if choice or (potential_love and str(potential_love[0].target) == str(mainActor)):
         desc = sponsors[0].name + ' gave ' + \
             friendlyName + ' to ' + mainActor.name + "."
         return (desc, [sponsors[0], itemInstance, mainActor], [])
