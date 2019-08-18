@@ -1,0 +1,12 @@
+Look at feelings of confusion event line
+Look at medicine giving in fever event
+Sponsor gives item event
+Sponsor gives tips event
+Sponsor Cheat kill
+Sponsor kills bad worshippers
+Find abandoned building
+Fight over items
+self-funeral
+MakeCampfire
+
+StalkEnemy -> ban event for pair of contestants
