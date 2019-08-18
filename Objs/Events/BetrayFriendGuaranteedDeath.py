@@ -26,7 +26,7 @@ CLIFF_DESCRIPTIONS = [
     lambda mainActor, victim : mainActor.name + ' invited ' + str(victim) + ' to spar together, but betrayed ' + Event.parseGenderObject(
         victim) + ', stabbing them during an opportune moment in the fight.',
     lambda mainActor, victim : mainActor.name + ' offered to watch ' + str(victim) + "'s back while sneaking up on a clearing, then betrayed " + Event.parseGenderObject(
-        victim) + ', stabbing them in back.'      
+        victim) + ', stabbing ' + Event.parseGenderObject(victim) + ' in the back.'      
 ]
 
 Event.registerEvent("BetrayFriendGuaranteedDeath", func)
