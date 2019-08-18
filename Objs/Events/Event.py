@@ -36,11 +36,11 @@ class Event(object):  # Python 2.x compatibility
         # usually just 1 or -1). If there is a good way to make the json thing give dict(string)->float instead that'd be
         # preferred
 
-        # Randomize baseWeight a little
         self.name = name
         # screw it, everyone gets a copy of what they need. Python stores by reference anyway.
         self.settings = settings
         # This is kind of a dumb way to do it, but being more general is a pain
+        # Randomize baseWeight a little
         for multiplierType in ['main', 'participant', 'victim']:
             if multiplierType + 'Weight' in self.baseProps:
                 self.eventRandomize(multiplierType + 'Weight')

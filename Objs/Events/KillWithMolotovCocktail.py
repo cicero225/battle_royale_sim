@@ -15,7 +15,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             Event.parseGenderSubject(victims[0]) + " escaped!"
         return (desc, tempList, [])
     else:
-        victims[0].alive = False
+        victims[0].kill()
         desc = mainActor.name + ' threw a molotov cocktail at ' + \
             victims[0].name + " and burned " + \
             Event.parseGenderObject(victims[0]) + " alive."

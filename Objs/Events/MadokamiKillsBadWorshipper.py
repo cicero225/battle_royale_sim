@@ -17,7 +17,7 @@ Event.registerInsertedCallback(
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     success = random.randint(0, 1)
     if success:
-        mainActor.alive = False
+        mainActor.alive.kill()
         desc = sponsors[0].name + ' struck down ' + mainActor.name + " for " + \
             Event.parseGenderPossessive(mainActor) + " blasphemous beliefs."
         tempList = [sponsors[0], mainActor]

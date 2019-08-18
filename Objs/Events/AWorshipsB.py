@@ -27,7 +27,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     eventHandler = IndividualEventHandler(state)
     eventHandler.banMurderEventsAtoB(mainActor.name, chosen)
     eventHandler.banEventForSingleContestant(
-        "AWorshipsB", mainActor.name, state)
+        "AWorshipsB", mainActor.name)
     self.eventStore.setdefault("permanent", collections.OrderedDict())[
         mainActor.name] = eventHandler
     if chosen == "Kaname Madoka":

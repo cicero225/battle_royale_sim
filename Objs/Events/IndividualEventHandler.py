@@ -70,14 +70,15 @@ class IndividualEventHandler(object):
         anonfunc.fixedRoleList = fixedRoleList
         self.registerEvent("overrideContestantEvent", anonfunc)
         
-        new_group = OrderedSet(str(x) for x in fixedRoleList)
-        new_group.add(str(relevantActor))
-        total_union = copy(new_group)
-        for x in new_group:  # depth 1 is fine if we always do this.
-            total_union.update(self.BOUND_PARTICIPANTS_DICT.setdefault(eventName, dict()).setdefault(x, OrderedSet()))
-        for x in new_group:
-            # Internally this will all be the same set.
-            self.BOUND_PARTICIPANTS_DICT[eventName][x] = total_union
+        if roleName == "participants":
+            new_group = OrderedSet(str(x) for x in fixedRoleList)
+            new_group.add(str(relevantActor))
+            total_union = copy(new_group)
+            for x in new_group:  # depth 1 is fine if we always do this.
+                total_union.update(self.BOUND_PARTICIPANTS_DICT.setdefault(eventName, dict()).setdefault(x, OrderedSet()))
+            for x in new_group:
+                # Internally this will all be the same set.
+                self.BOUND_PARTICIPANTS_DICT[eventName][x] = total_union
         
         # It must _also_ be checked that the people bound all still live. This has be done before the event is selected, to prevent the selection
         # of invalid events. Note that this is only necessary if useOtherConstestantsIfNotAvailable is False.
@@ -123,6 +124,9 @@ class IndividualEventHandler(object):
                     # Have to clear the list BUT keep the reference
                     roleDict[roleName].clear()
                     roleDict[roleName].extend(random.sample(liveFixedRoleList, numRoles))
+            # TODO: Right now this does not handle if there are multiple victims/sponsors who need this kind of functionality
+            # (multi-vistim or multi-sponsor events where certain people must appear together). These events do not currently
+            # existed but this will have to be expanded to included them if needed.
             if roleName == "participants" and useOtherConstestantsIfNotAvailable:
                 # We need to parse the participants list and see if some participants must
                 # be added. In the worst case reset event.
@@ -151,10 +155,11 @@ class IndividualEventHandler(object):
                 participants.extend(state["contestants"][x] for x in already_seen if x != str(contestantKey))
         return True, False
 
-    def banEventForSingleContestant(self, eventName, contestantName, state):
+    def banEventForSingleContestant(self, eventName, contestantName):
         self.setEventWeightForSingleContestant(
-            eventName, contestantName, 0, state)
+            eventName, contestantName, 0, self.state)
 
+    # TODO: This does not currently handle unusual events where the victim is not a "victim" (e.g. sponsor kills)
     def banMurderEventsAtoB(self, cannotKill, cannotBeVictim):
         def func(contestantKey, thisevent, state, participants, victims, sponsorsHere):
             if "murder" in thisevent.baseProps and thisevent.baseProps["murder"] and contestantKey == str(cannotKill):

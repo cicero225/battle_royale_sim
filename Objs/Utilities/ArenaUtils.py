@@ -457,7 +457,8 @@ def initializeRomances(state):
     new_list = list(state["contestants"].values())
     random.shuffle(new_list)  # Otherwise, candidates earlier in the alphabet by file name will get inapparopriate bias towards romances.
     for contestant in new_list:
-        relationships.SetNewRomance(contestant, initial=True)
+        if not contestant.hasThing("Love"):
+            relationships.SetNewRomance(contestant, initial=True)
 
 # Adds a Shipping Update immediately after a relevant event.
 def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
@@ -494,10 +495,12 @@ def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
         lover2 = contestants[contestant_tuple[1]]
         reverse_tuple = (contestant_tuple[1], contestant_tuple[0])
         potential_love = lover1.hasThing("Love")
-        if old_backwards_exists and potential_love is None:
+        if potential_love:
+            potential_love = potential_love[0]
+        if old_backwards_exists and not potential_love:
             thisWriter.addEvent(contestant_tuple[0] + " no longer has a crush on " + contestant_tuple[1], [
                                 lover1, heartbroken, arrow, lover2])
-        elif not old_backwards_exists and potential_love is not None and potential_love.target == contestant_tuple[1]:
+        elif not old_backwards_exists and potential_love and potential_love.target == contestant_tuple[1]:
             thisWriter.addEvent(contestant_tuple[0] + " and " + contestant_tuple[1] + " are no longer in a romance.", [
                                 lover1, heartbroken, lover2])
             skiptuples.add(reverse_tuple)
