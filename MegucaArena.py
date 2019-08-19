@@ -220,9 +220,9 @@ class MegucaArena:
         self.contestants = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["contestants"], self.settings, contestantClass)
         # Initialize stats
         # Deduce stats from the union of all contestants - if there are any typos this is a problem.
-        statTemplate = set()
+        statTemplate = ArenaUtils.OrderedSet()
         for x in self.contestants.values():
-            statTemplate |= set(list(x.stats.keys()))
+            statTemplate.update(x.stats.keys())
         # This is kind of dumb, but easiest: If we want pure random stats, any stats in the file are directly overwritten.
         if self.settings['fullRandomStats']:
             for key, value in self.contestants.items():

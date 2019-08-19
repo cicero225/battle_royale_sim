@@ -137,9 +137,9 @@ class Contestant(object):
     @classmethod
     def makeRandomContestant(cls, name, gender, imageFile, statstemplate, settings):
         inDict = collections.OrderedDict()
-        inDict['imageFile'] = imageFile,
-        inDict['stats'] = collections.OrderedDict(),
-        inDict['gender'] = gender,
+        inDict['imageFile'] = imageFile
+        inDict['stats'] = collections.OrderedDict()
+        inDict['gender'] = gender
         for key in statstemplate:
             inDict['stats'][key] = random.randint(0, 10)
         return cls(name, inDict, settings)
