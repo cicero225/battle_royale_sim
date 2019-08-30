@@ -269,7 +269,11 @@ def weightedDictRandom(inDict, num_sel=1):
         return list(inDict.keys())
     keys = []
     allkeys = list(inDict.keys())
-    allvalues = list(inDict.values())
+    # Minimize floating point precision problems by scaling the lower probabilities if necessary.
+    max_value = max(inDict.values())
+    allvalues = []
+    for x in inDict.values():
+        allvalues.append(x if x > max_value*1e-15 else max_value*1e-15)
     cumsum = [0]
     for weight in allvalues:
         if weight < 0:
@@ -278,7 +282,7 @@ def weightedDictRandom(inDict, num_sel=1):
         cumsum.append(cumsum[-1] + weight)
     for dummy in range(num_sel):
         # The 1e-100 is important for numerical reasons
-        thisrand = random.uniform(1e-100, cumsum[-1] - 1e-100)
+        thisrand = random.uniform(cumsum[1]*1e-100, cumsum[-1]*(1 - 1e-100))
         selected = bisect.bisect_left(cumsum, thisrand) - 1
         keys.append(allkeys.pop(selected))
         if dummy != num_sel - 1:
