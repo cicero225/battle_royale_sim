@@ -24,13 +24,16 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         lover.removeStatus("Hypothermia")
         self.eventStore[str(lover)] = True
         self.eventStore[str(mainActor)] = True
+        #Need to prevent lover from showing up in events again.
+        self.eventStore["turnRecord"][lover.name] = state["turnNumber"][0]
+        descList = [mainActor, lover]
         if not mainActor.hasThing("Clean Water") or not lover.hasThing("Clean Water"):
             if random.random() > 0.5:
                 desc += ' Using it, they was able to boil some Clean Water.'
                 mainActor.addItem(state["items"]["Clean Water"], isNew=True)
                 lover.addItem(state["items"]["Clean Water"], isNew=True)
-                descList = [mainActor, lover, state["items"]["Clean Water"]]
-                return (desc, descList, [])  
+                descList.append(state["items"]["Clean Water"])
+        return (desc, descList, [])
     
     if str(mainActor) not in self.eventStore or not self.eventStore[str(mainActor)]:
         # base is 50%. unless the character has already done it before in which case success is assured
@@ -72,7 +75,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
 
     # 50% chance here that nothing happens, unless it just ain't possible for something to happen (other participant must not have already done this event this turn or already have a fire)
     possibleFireSharers = [x for x in state["contestants"].values(
-    ) if x.alive and not self.eventStore["turnRecord"][x.name] == state["turnNumber"][0]]
+    ) if x.alive and not self.eventStore["turnRecord"][x.name] == state["turnNumber"][0] and not x.hasThing("Love")]
     if not possibleFireSharers or random.random() > 0.5:
         desc += ' ' + Event.parseGenderSubject(mainActor).capitalize(
         ) + ' was able to spend the night in comfort.'
