@@ -14,6 +14,24 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     # It's okay to overwrite since we only care if it happened this turn
     self.eventStore.setdefault('turnRecord', defaultdict(
         lambda: -1))[mainActor.name] = state["turnNumber"][0]
+    
+    # If mainActor has a lover, divert this into light romance.
+    possible_love = mainActor.hasThing("Love")
+    if possible_love:
+        lover = possible_love[0].target
+        desc = str(mainActor) + ' and ' + str(lover) + ' successfully started a fire together.'
+        mainActor.removeStatus("Hypothermia")
+        lover.removeStatus("Hypothermia")
+        self.eventStore[str(lover)] = True
+        self.eventStore[str(mainActor)] = True
+        if not mainActor.hasThing("Clean Water") or not lover.hasThing("Clean Water"):
+            if random.random() > 0.5:
+                desc += ' Using it, they was able to boil some Clean Water.'
+                mainActor.addItem(state["items"]["Clean Water"], isNew=True)
+                lover.addItem(state["items"]["Clean Water"], isNew=True)
+                descList = [mainActor, lover, state["items"]["Clean Water"]]
+                return (desc, descList, [])  
+    
     if str(mainActor) not in self.eventStore or not self.eventStore[str(mainActor)]:
         # base is 50%. unless the character has already done it before in which case success is assured
         # Yes this can overload past 1
@@ -50,7 +68,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                 ' was able to boil some Clean Water.'
             mainActor.addItem(state["items"]["Clean Water"], isNew=True)
             descList = [mainActor, state["items"]["Clean Water"]]
-            return (desc, descList, [])
+            return (desc, descList, [])      
 
     # 50% chance here that nothing happens, unless it just ain't possible for something to happen (other participant must not have already done this event this turn or already have a fire)
     possibleFireSharers = [x for x in state["contestants"].values(

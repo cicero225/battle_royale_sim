@@ -1,6 +1,16 @@
 from Objs.Events.Event import Event
 import random
 
+def checkParticipantLove(actor, participant, baseEventActorWeight, event):
+    if event.name != "StalkEnemy":
+        return baseEventActorWeight, True
+    possible_love = actor.hasThing("Love")
+    if not possible_love or str(possible_love[0].target) != str(participant):    
+        return baseEventActorWeight, True
+    return 0, False
+
+Event.registerInsertedCallback(
+    "modifyIndivActorWeightsWithParticipants", checkParticipantLove)
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     desc = mainActor.name + ' stalked ' + \

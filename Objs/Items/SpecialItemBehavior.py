@@ -92,7 +92,7 @@ def LoveOnAcquisition(itemInstance, contestant, state):
                                                                                                         state, participants, victims, sponsorsHere)  # this anonymizes func, giving a new reference each time this is called
         newHandler.registerEvent("overrideContestantEvent", anonfunc)
     else:
-        newHandler.banMurderEventsAtoB(str(contestant), itemInstance.target)
+        newHandler.banMurderEventsAtoB(str(contestant), itemInstance.target, ["FightOverItems", "FindAbandonedBuilding"])
         newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "ShareStoryofLife", True)
         newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "ShareIntimateConversation", True)
         newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "FriendGivesMedicine", True)
@@ -100,6 +100,8 @@ def LoveOnAcquisition(itemInstance, contestant, state):
         newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "AWorshipsB", True)
         newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "GangUpFight", True)
         newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "ACooksForB", True)
+        newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "FightOverItems", True)
+        newHandler.bindRoleForContestantAndEvent("participants", contestant, itemInstance.target, "FindAbandonedBuilding", True)
 
     itemInstance.eventHandlers["Love"] = newHandler
    

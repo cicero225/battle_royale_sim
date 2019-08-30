@@ -153,6 +153,9 @@ class IndividualEventHandler(object):
                     return False, True        
                 participants.clear() 
                 participants.extend(state["contestants"][x] for x in already_seen if x != str(contestantKey))
+        # Final sanity check: Confirm that victims and participants do not overlap, which is possible because of the participant insertion above.
+        if (set(str(x) for x in participants) & set(str(x) for x in victims)):
+            return False, True
         return True, False
 
     def banEventForSingleContestant(self, eventName, contestantName):
@@ -160,8 +163,10 @@ class IndividualEventHandler(object):
             eventName, contestantName, 0, self.state)
 
     # TODO: This does not currently handle unusual events where the victim is not a "victim" (e.g. sponsor kills)
-    def banMurderEventsAtoB(self, cannotKill, cannotBeVictim):
+    def banMurderEventsAtoB(self, cannotKill, cannotBeVictim, exceptions=None):
         def func(contestantKey, thisevent, state, participants, victims, sponsorsHere):
+            if exceptions is not None and str(thisevent) in exceptions:
+                return True, False
             if "murder" in thisevent.baseProps and thisevent.baseProps["murder"] and contestantKey == str(cannotKill):
                 if cannotBeVictim in victims or (not victims) and cannotBeVictim in participants:
                     return False, True

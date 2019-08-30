@@ -9,10 +9,24 @@ def checkParticipantMedicine(actor, participant, baseEventActorWeight, event):
         return 0, False
     return baseEventActorWeight, True
 
+def checkParticipantLove(actor, participant, baseEventActorWeight, event):
+    if event.name != "FriendGivesMedicine":
+        return baseEventActorWeight, True
+    possible_love = actor.hasThing("Love")
+    if not possible_love or str(possible_love[0].target) != str(participant):    
+        return baseEventActorWeight, True
+    return baseEventActorWeight*event.stateStore[0]["settings"]["relationInfluence"], True
 
 Event.registerInsertedCallback(
     "modifyIndivActorWeightsWithParticipants", checkParticipantMedicine)
+Event.registerInsertedCallback(
+    "modifyIndivActorWeightsWithParticipants", checkParticipantLove)
 
+def checkActorLove(actor, origWeight, event):
+    if event.name == "FriendGivesMedicine" and actor.hasThing("Love"):
+        return (origWeight*event.stateStore[0]["settings"]["relationInfluence"]/3, True)
+
+Event.registerEvent("modifyIndivActorWeights", checkActorLove)
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     if not participants[0].removeItem(state["items"]["Medicine"]):

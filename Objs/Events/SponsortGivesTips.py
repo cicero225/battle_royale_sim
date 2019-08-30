@@ -2,6 +2,22 @@ from Objs.Events.Event import Event
 from Objs.Events.IndividualEventHandler import IndividualEventHandler
 import random
 
+def checkSponsorLove(actor, sponsor, baseEventActorWeight, event):
+    if event.name != "SponsorGivesTips":
+        return baseEventActorWeight, True
+    possible_love = actor.hasThing("Love")
+    if not possible_love or str(possible_love[0].target) != str(sponsor):    
+        return baseEventActorWeight, True
+    return baseEventActorWeight*event.stateStore[0]["settings"]["relationInfluence"], True
+
+Event.registerInsertedCallback(
+    "modifyIndivActorWeightsWithSponsors", checkSponsorLove)
+
+def checkActorLove(actor, origWeight, event):
+    if event.name == "SponsorGivesTips" and actor.hasThing("Love"):
+        return (origWeight*event.stateStore[0]["settings"]["relationInfluence"]/3, True)
+
+Event.registerEvent("modifyIndivActorWeights", checkActorLove)
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     state["allRelationships"].IncreaseFriendLevel(

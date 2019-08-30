@@ -11,23 +11,27 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     else:
         desc = mainActor.name + " attempted to hang " + \
             Event.parseGenderReflexive(mainActor) + " with a makeshift noose, "
-    potentialRescuers = [x for x in state['contestants'].values() if (x.alive and x != mainActor and (
-        state['allRelationships'].friendships[x.name][mainActor.name] >= 3 or state['allRelationships'].loveships[x.name][mainActor.name] >= 2))]
-    random.shuffle(potentialRescuers)
-    for rescuer in potentialRescuers:
-        if random.random() < 0.25:
-            trueRescuer = rescuer
-            break
-    else:
-        if alt == 1:
-            desc += 'before burying ' + \
-                Event.parseGenderReflexive(mainActor) + ' alive.'
+    possible_love = mainActor.hasThing("Love")
+    if not possible_love:
+        potentialRescuers = [x for x in state['contestants'].values() if (x.alive and x != mainActor and (
+            state['allRelationships'].friendships[x.name][mainActor.name] >= 3 or state['allRelationships'].loveships[x.name][mainActor.name] >= 2))]
+        random.shuffle(potentialRescuers)
+        for rescuer in potentialRescuers:
+            if random.random() < 0.25:
+                trueRescuer = rescuer
+                break
         else:
-            desc += "choking " + \
-                Event.parseGenderReflexive(
-                    mainActor) + " in a long, arduous experience."
-        mainActor.kill()
-        return desc, [mainActor], [mainActor.name]
+            if alt == 1:
+                desc += 'before burying ' + \
+                    Event.parseGenderReflexive(mainActor) + ' alive.'
+            else:
+                desc += "choking " + \
+                    Event.parseGenderReflexive(
+                        mainActor) + " in a long, arduous experience."
+            mainActor.kill()
+            return desc, [mainActor], [mainActor.name]
+    else:
+        trueRescuer = possible_love[0].target
     if alt == 1:
         desc += 'before trying to bury ' + Event.parseGenderReflexive(
             mainActor) + ' alive. However, ' + trueRescuer.name + ' was able to stop ' + Event.parseGenderObject(mainActor) + ' in time.'

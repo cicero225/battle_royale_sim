@@ -16,6 +16,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     Event.lootRandom(eventPeople, itemsFound)
     fightDesc, fightList, fightDead, allKillers = Event.fight(
         eventPeople, state["allRelationships"], state['settings'])
+    if fightDesc is None:
+        return None
     desc = Event.englishList(eventPeople) + " stumbled across " + Event.englishList(itemsFound) + " at the same time. A fight broke out, " + fightDesc
     descList += fightList
     

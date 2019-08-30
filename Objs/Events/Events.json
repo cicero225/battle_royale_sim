@@ -354,7 +354,7 @@
      },
    "FindAbandonedBuilding":
     {"phase": ["Day"],
-     "mainWeight": 0.3,
+     "mainWeight": 1,
      "mainModifiers": {"survivalism": 1.0,
                        "cleverness": 1.0},
      "participantWeight": 0.3,

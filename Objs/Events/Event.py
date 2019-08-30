@@ -179,8 +179,10 @@ class Event(object):  # Python 2.x compatibility
         # probability of kill
         return 1 / (1 + (1 + settings['combatAbilityEffect'])**(attackStat - defenseStat))
 
-    @staticmethod
-    def fight(people, relationships, settings, deferActualKilling=False):
+    # If it is possible for people in relationships (or other murder banning conditions) to trigger this method, you must handle
+    # the edge case where this fails to find a working result and returns None, None, None, None
+    @staticmethod  
+    def fight(people, relationships, settings, deferActualKilling=False, forceRelationshipFight=False):
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
         alreadyInjured = sorted(
             list(set(str(person) for person in people if person.hasThing("Injury"))))
@@ -188,8 +190,11 @@ class Event(object):  # Python 2.x compatibility
         # Fights shouldn't cause everyone's mutual friendship to go down, because sometimes it might be 2v2, but this is really hard to model, so rng
         relHitNum = random.randint(1, len(people) - 1)
         for person in people:
+            possible_love = person.hasThing("Love")
             relDict = DictToOrderedDict({i: 6 - (relationships.friendships[x.name][person.name] + relationships.friendships[person.name][x.name] + 2 * (
-                relationships.loveships[person.name][x.name] + relationships.loveships[x.name][person.name])) / 6 for i, x in enumerate(people) if x != person})
+                relationships.loveships[person.name][x.name] + relationships.loveships[x.name][person.name])) / 6 for i, x in enumerate(people) if x != person and (
+                not possible_love or (str(x) != str(possible_love[0].target)))})
+            relHitNum = min(relHitNum, len(relDict))
             chosen = weightedDictRandom(relDict, relHitNum)
             for index in chosen:
                 relationships.IncreaseFriendLevel(
@@ -231,8 +236,6 @@ class Event(object):  # Python 2.x compatibility
                 fightDict[i] - meanAbilityTot / (len(people) - 1)))
             if random.random() < probDeath:
                 deadList.append(person1)
-                if not deferActualKilling:
-                    person1.kill()
             else:
                 liveList.append(person1)
                 if str(person1) not in alreadyInjured and random.random() < probInjury:
@@ -264,9 +267,17 @@ class Event(object):  # Python 2.x compatibility
         # decide a killer for anyone killed. This is unusual and needs to be handled here
         allKillers = defaultdict(str)
         for dead in deadList:
+            possible_love = dead.hasThing("Love")
             killDict = DictToOrderedDict({x: 1.1**(relationships.friendships[str(x)][str(
-                dead)] + 2 * relationships.loveships[str(x)][str(dead)]) for x in people if x is not dead})
+                dead)] + 2 * relationships.loveships[str(x)][str(dead)]) for x in people if x is not dead and (
+                forceRelationshipFight or not possible_love or (str(possible_love[0].target) != str(x)))})
+            if not killDict:
+                # This event is impossible as rng'd. The cleanest solution is to just bail.
+                return None, None, None, None
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
+        for dead in deadList:
+            if not deferActualKilling:
+                dead.kill()
         return(desc, descList, deadList, allKillers)
 
     @staticmethod
