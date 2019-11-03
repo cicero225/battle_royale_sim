@@ -4,11 +4,11 @@ from Objs.Display.HTMLWriter import HTMLWriter
 from functools import partial
 
 import json
+import html
 import os
 import random
 import bisect
 import collections
-import html
 import copy
 import math
 from weakref import proxy
@@ -40,7 +40,7 @@ class DefaultOrderedDict(collections.OrderedDict):
         if self.default_factory is None:
             args = tuple()
         else:
-            args = self.default_factory,
+            args = (self.default_factory,)
         return type(self), args, None, None, self.items()
 
     def copy(self):
@@ -50,7 +50,6 @@ class DefaultOrderedDict(collections.OrderedDict):
         return type(self)(self.default_factory, self)
 
     def __deepcopy__(self, memo):
-        import copy
         return type(self)(self.default_factory,
                           copy.deepcopy(list(self.items()), memo))
 
@@ -316,15 +315,15 @@ def JSONOrderedLoad(path):
         fromFile = json.load(path)
 
     def SortListOrDict(thing):
-        if type(thing) == dict:
+        if isinstance(thing, dict):
             thing = DictToOrderedDict(thing)
             for sub, value in thing.items():
-                if (type(value) == list) or (type(value) == dict):
+                if isinstance(value, (list, dict)):
                     thing[sub] = SortListOrDict(value)
         else:
             thing = sorted(thing)
             for i, value in enumerate(thing):
-                if (type(value) == list) or (type(value) == dict):
+                if isinstance(value, (list, dict)):
                     thing[i] = SortListOrDict(value)
         return thing
     return SortListOrDict(fromFile)
@@ -437,11 +436,11 @@ def killWrite(state):
     killWriter = HTMLWriter(state["statuses"])
     killWriter.addTitle("Day " + str(state["turnNumber"][0]) + " Kills")
     for contestant, kills in state["callbackStore"]["killCounter"].items():
-        desc = str(contestant) + '<br/>Kills: ' + str(len(kills)) + '<br/>' + Event.englishList(kills, False)
+        desc = html.escape(str(contestant)) + '<br/>Kills: ' + str(len(kills)) + '<br/>' + html.escape(Event.englishList(kills, False))
         descContestant = state["contestants"][contestant]
         if not descContestant.alive:
             desc = '(DEAD) ' + desc
-        killWriter.addEvent(desc, [descContestant])
+        killWriter.addEvent(desc, [descContestant], escape=False)
     killWriter.finalWrite(os.path.join("Assets", str(
         state["turnNumber"][0]) + " Kills.html"), state)
     return False
@@ -451,7 +450,7 @@ def sponsorTraitWrite(state):
     sponsorWriter.addTitle("Sponsor Traits")
     for sponsor in state["sponsors"].values():
         sponsorWriter.addEvent("Primary Trait: " + sponsor.primary_trait +
-                               "<br> Secondary Trait: " + sponsor.secondary_trait, [sponsor])
+                               "<br> Secondary Trait: " + sponsor.secondary_trait, [sponsor], escape=False)
     sponsorWriter.finalWrite(os.path.join(
         "Assets", "Sponsor Traits.html"), state)
 
@@ -564,8 +563,8 @@ def ContestantStatWrite(state):
         if not contestant.alive:
             continue
         # Construct stats and items line
-        eventLine = str(contestant) + "<br/>" + \
-            Event.englishList(contestant.inventory + contestant.statuses)
+        eventLine = html.escape(str(contestant)) + "<br/>" + \
+            html.escape(Event.englishList(contestant.inventory + contestant.statuses))
         for statname, curstat in contestant.stats.items():
             origstat = contestant.originalStats[statname]
             eventLine += "<br/>" + statname + ": " + str(origstat)
@@ -574,7 +573,7 @@ def ContestantStatWrite(state):
                 eventLine += " " + HTMLWriter.wrap("+" + str(diff), "positive")
             elif diff < 0:
                 eventLine += " " + HTMLWriter.wrap("-" + str(-diff), "negative")
-        statWriter.addEvent(eventLine, [contestant])
+        statWriter.addEvent(eventLine, [contestant], escape=False)
     statWriter.finalWrite(os.path.join("Assets", str(
         state["turnNumber"][0]) + " Stats.html"), state)
 

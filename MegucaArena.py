@@ -6,7 +6,6 @@ from __future__ import division
 
 import sys
 import copy
-import json
 import os
 # Used to backup and potentially restore the random seed, for debugging purposes.
 import pickle
@@ -474,9 +473,9 @@ class MegucaArena:
                             rand_dict[name] = candidate["weight"]
                     if rand_dict:
                         phase_name = ArenaUtils.weightedDictRandom(rand_dict)[0]     
-                        self.state["phasesRun"].setdefault(name, 0)
-                        self.state["phasesRun"][name] += 1
-                        thisDay = random_candidates[name]
+                        self.state["phasesRun"].setdefault(phase_name, 0)
+                        self.state["phasesRun"][phase_name] += 1
+                        thisDay = random_candidates[phase_name]
                     else:
                         thisDay = self.phases["default"]
             print("Day " + str(turnNumber[0]))
@@ -492,7 +491,7 @@ class MegucaArena:
                         thisWriter = HTMLWriter(statuses)
                         self.state['thisWriter'] = thisWriter
                         thisWriter.addTitle(
-                            titleString.replace('#', str(turnNumber[0])))
+                            titleString.replace('#', str(turnNumber[0])), escape=False)
                     # If set to true, this runs end of turn processing. Otherwise it reloops immediately. Only used if turn is reset.
                     restartTurn = False
                     # Obviously very klunky and memory-intensive, but only clean way to allow resets under the current paradigm. The other option is to force the last event in a turn to never kill the last contestant.
@@ -575,7 +574,7 @@ class MegucaArena:
                             for x in victims:
                                 possibleParticipantEventWeights[eventName][x.name] = 0
                             # some participants need adjustment based on the chosen victim(s)
-                            aborted = self.allRelationships.reprocessParticipantWeightsForVictims(
+                            self.allRelationships.reprocessParticipantWeightsForVictims(
                                 possibleParticipantEventWeights, victims, self.events[eventName])
                             # check if enough possible participants are left to satisfy the event, presuming it has participants
                             if "numParticipants" in thisevent.baseProps:
@@ -709,7 +708,7 @@ def postmortem():
     if not DEBUG:
         return
     import pdb
-    type, value, tb = sys.exc_info()
+    _, _, tb = sys.exc_info()
     traceback.print_exc()
     pdb.post_mortem(tb)
 
