@@ -17,7 +17,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     
     # If mainActor has a lover, divert this into light romance.
     possible_love = mainActor.hasThing("Love")
-    if possible_love:
+    if possible_love and not str(possible_love[0].target) in state["sponsors"]:
         lover = possible_love[0].target
         desc = str(mainActor) + ' and ' + str(lover) + ' successfully started a fire together.'
         mainActor.removeStatus("Hypothermia")
