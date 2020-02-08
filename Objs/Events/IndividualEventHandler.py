@@ -100,7 +100,7 @@ class IndividualEventHandler(object):
         return anonfunc, anonfunc2  # Just in case it's needed by the calling function
 
     @staticmethod
-    def fixedRoleCallback(roleName, fixedRoleList, relevantActor, eventName, bound_participants_dict, useOtherConstestantsIfNotAvailable, contestantKey, thisevent, state, participants, victims, sponsorsHere):
+    def fixedRoleCallback(roleName, fixedRoleList, relevantActor, eventName, bound_participants_dict, useOtherConstestantsIfNotAvailable, contestantKey, thisevent, state, participants, victims, sponsorsHere, alreadyUsed):
         # Avoiding eval here
         roleDict = DictToOrderedDict({"participants": participants,
                                       "victims": victims,
@@ -108,7 +108,7 @@ class IndividualEventHandler(object):
         if thisevent.name == eventName:
             if relevantActor.name == contestantKey:
                 numRoles = len(roleDict[roleName])
-                liveFixedRoleList = [x for x in fixedRoleList if x.alive]
+                liveFixedRoleList = [x for x in fixedRoleList if x.alive and x.name not in alreadyUsed]
                 if len(liveFixedRoleList) < numRoles:  # Not enough people to fill the roleDict
                     if not useOtherConstestantsIfNotAvailable:
                         return False, True
@@ -164,7 +164,7 @@ class IndividualEventHandler(object):
 
     # TODO: This does not currently handle unusual events where the victim is not a "victim" (e.g. sponsor kills)
     def banMurderEventsAtoB(self, cannotKill, cannotBeVictim, exceptions=None):
-        def func(contestantKey, thisevent, state, participants, victims, sponsorsHere):
+        def func(contestantKey, thisevent, state, participants, victims, sponsorsHere, alreadyUsed):
             if exceptions is not None and str(thisevent) in exceptions:
                 return True, False
             if "murder" in thisevent.baseProps and thisevent.baseProps["murder"] and contestantKey == str(cannotKill):
@@ -172,8 +172,8 @@ class IndividualEventHandler(object):
                     return False, True
             return True, False
 
-        def anonfunc(contestantKey, thisevent, state, participants, victims, sponsorsHere): return func(contestantKey, thisevent,
-                                                                                                        state, participants, victims, sponsorsHere)  # this anonymizes func, giving a new reference each time this is called
+        def anonfunc(contestantKey, thisevent, state, participants, victims, sponsorsHere, alreadyUsed): return func(contestantKey, thisevent,
+                                                                                                        state, participants, victims, sponsorsHere, alreadyUsed)  # this anonymizes func, giving a new reference each time this is called
         anonfunc.cannotKill = cannotKill  # Notes on the functor for debug purposes
         anonfunc.cannotBeVictim = cannotBeVictim
         # This needs to be at beginning for proper processing

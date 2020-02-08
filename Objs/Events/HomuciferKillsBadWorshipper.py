@@ -3,7 +3,7 @@ from Objs.Events.Event import Event
 import random
 
 
-def fixedHomuciferCallback(contestantKey, thisevent, state, participants, victims, sponsorsHere):
+def fixedHomuciferCallback(contestantKey, thisevent, state, participants, victims, sponsorsHere, alreadyUsed):
     if thisevent.name == "HomuciferKillsBadWorshipper":
         del sponsorsHere[:]  # Have to clear the list BUT keep the reference
         sponsorsHere.append(state["sponsors"]["Akuma Homura"])

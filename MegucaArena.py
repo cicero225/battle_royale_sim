@@ -600,7 +600,7 @@ class MegucaArena:
                             for override in self.callbacks["overrideContestantEvent"]:
                                 # Be very careful of modifying state here.
                                 proceedAsUsual, resetEvent = override(
-                                    contestantKey, thisevent, self.state, participants, victims, sponsorsHere)
+                                    contestantKey, thisevent, self.state, participants, victims, sponsorsHere, alreadyUsed)
                                 if not proceedAsUsual or resetEvent:
                                     break
                             if resetEvent:

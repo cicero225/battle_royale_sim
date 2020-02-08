@@ -81,15 +81,15 @@ def LoveOnAcquisition(itemInstance, contestant, state):
     if isinstance(itemInstance.target, Sponsor):
         newHandler.banEventForSingleContestant("ShareIntimateConversation", str(contestant))
         # This is done manually, but should be systematized if this becomes a common need.
-        def func(contestantKey, thisevent, state, participants, victims, sponsorsHere):
+        def func(contestantKey, thisevent, state, participants, victims, sponsorsHere, alreadyUsed):
             if thisevent.name in ["SponsorCheatKill", "MadokamiKillsBadWorshipper", "HomuciferKillsBadWorshipper"] and contestantKey == str(contestant) and str(sponsorsHere[0]) == str(itemInstance.target):
                 return False, True
             if thisevent.name == "ShareIntimateConversation"  and str(participants[0]) == str(contestant):
                 return False, True
             return True, False
 
-        def anonfunc(contestantKey, thisevent, state, participants, victims, sponsorsHere): return func(contestantKey, thisevent,
-                                                                                                        state, participants, victims, sponsorsHere)  # this anonymizes func, giving a new reference each time this is called
+        def anonfunc(contestantKey, thisevent, state, participants, victims, sponsorsHere, alreadyUsed): return func(contestantKey, thisevent,
+                                                                                                        state, participants, victims, sponsorsHere, alreadyUsed)  # this anonymizes func, giving a new reference each time this is called
         newHandler.registerEvent("overrideContestantEvent", anonfunc)
     else:
         newHandler.banMurderEventsAtoB(str(contestant), itemInstance.target, ["FightOverItems", "FindAbandonedBuilding"])
