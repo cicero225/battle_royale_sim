@@ -53,7 +53,8 @@
      "unique": false,
      "itemRequired": false,
      "sponsorInfluence": {"Likes Weak": {"value": 1.0},
-                          "Survivalist": {"value": -1.0}}
+                          "Survivalist": {"value": -1.0}},
+     "winString": "because of the Oregon Trail"
      },
 "MamiDecap":
     {"phase": ["Day", "Night"],
@@ -65,7 +66,8 @@
      "mainNeededFriendLevel": {"relation": true, "value": 5},
      "mainLoveEffect": 1.0,
      "mainNeededLoveLevel": {"relation": true, "value": 4},
-     "sponsorInfluence": {"Survivalist": {"value": -1.0}}
+     "sponsorInfluence": {"Survivalist": {"value": -1.0}},
+     "winString": "because Mami got ahead of herself"
      },
 "ShareStoryofLife":
     {"phase": ["Night"],
@@ -225,7 +227,8 @@
      "itemRequired": false,
      "statusRequired": true,
      "necessaryStatus": "Fever",
-     "sponsorInfluence": {"Likes Weak": {"value": 1.0}}
+     "sponsorInfluence": {"Likes Weak": {"value": 1.0}},
+     "winString": "because of the Coronavirus"
      },
  "SponsorGivesItem":
     {"phase": ["Day", "Night"],
@@ -381,7 +384,8 @@
      "sponsorInfluence": {"Capricious": {"value": 1.0},
                           "Trickster": {"value": 1.0},
                           "Harvester": {"value": 1.0}},
-     "contact": true
+     "contact": true,
+     "winString": "because an opponent killed themselves"
      },
     "SponsorGivesTips":
     {"phase": ["Day", "Night"],
@@ -473,7 +477,8 @@
      "sponsorHasFriendRequired": true,
      "sponsorHasNeededFriendLevel": {"relation": false, "value": 0},
      "sponsorHasLoveRequired": true,
-     "sponsorHasNeededLoveLevel": {"relation": false, "value": 0}
+     "sponsorHasNeededLoveLevel": {"relation": false, "value": 0},
+     "winString": "because the game is rigged"
      },
      "FriendGivesMedicine":
     {"phase": ["Day", "Night"],
@@ -539,7 +544,8 @@
      "unique": false,
      "itemRequired": false,
      "sponsorInfluence": {"Gladiatorial": {"value": 1.0},
-                          "Bloodthirsty": {"value": 0.5}}
+                          "Bloodthirsty": {"value": 0.5}},
+     "winString": "because the game is rigged"
      },
      "FriendHelpsInjury":
     {"phase": ["Day", "Night"],
@@ -568,7 +574,8 @@
      "unique": false,
      "itemRequired": false,
      "murder": true,
-     "contact": true
+     "contact": true,
+     "winString": "because people fought over a damn fire"
      },
      "SponsorForceFight":
     {"phase": ["Day", "Night"],
@@ -579,7 +586,8 @@
      "loveEffectParticipant": 0,
      "unique": false,
      "itemRequired": false,
-     "contact": true
+     "contact": true,
+     "additionalWinString": "But was it really worth it?"
      },
      "GangUpFight":
     {"phase": ["Day", "Night"],
@@ -679,7 +687,8 @@
                           "Loyalist": {"value": -1.5, "all": false},
                           "Gladiatorial": {"value": -1.0, "all": false}
                           },
-     "contact": true
+     "contact": true,
+     "winString": "thanks to backstabbing"
      },
      "ACooksForB":
     {"phase": ["Day","Night"],
@@ -734,7 +743,8 @@
                           "Capricious": {"value": 1.0},
                           "Bloodthirsty": {"value": 0.5, "all": false},
                           "Pacifist": {"value": -1.0, "all": false}},
-     "contact": true
+     "contact": true,
+     "winString": "thanks to backstabbing"
     },
     "SuccessfulSneak":
     {"phase": ["Cornucopia"],
@@ -779,7 +789,8 @@
      "itemRequired": false,
      "sponsorInfluence": {"Gladiatorial": {"value": -1.0},
                           "Bloodthirsty": {"value": -1.5},
-                          "Pacifist": {"value": 0.5}}
+                          "Pacifist": {"value": 0.5}},
+     "winString": "by doing nothing"
     },
     "SetExplosiveTrap":
     {"phase": ["Day"],

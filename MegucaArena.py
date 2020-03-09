@@ -486,6 +486,7 @@ class MegucaArena:
                 self.state["curPhase"] = thisPhase
                 self.eventsActive = ArenaUtils.DictToOrderedDict({eventName: True for eventName, x in self.events.items(
                 ) if "phase" not in x.baseProps or thisPhase in x.baseProps["phase"]})
+                eventsOccurred = set()
                 while True:  # this just allows resetting the iteration
                     if PRINTHTML:
                         thisWriter = HTMLWriter(statuses)
@@ -622,6 +623,7 @@ class MegucaArena:
                             break
 
                         print(eventName)
+                        eventsOccurred.add(thisevent)
                         STATSDEBUG["allEvents"][eventName] += 1
                         if desc is not None:
                             if PRINTHTML:
@@ -656,6 +658,7 @@ class MegucaArena:
                             thisWriter = self.state['thisWriter']
                             Event.Event.stateStore[0] = self.state
                             ItemInstance.stateStore[0] = self.state
+                            eventsOccurred.clear()
                             restartTurn = True
                             break
 
@@ -673,14 +676,25 @@ class MegucaArena:
                         # conditions for ending the game
                         for callback in self.callbacks["endGameConditions"]:
                             if callback(liveContestants, self.state):
+                                winLine = list(liveContestants.values())[ 0].name + " survive(s) the game and win(s)"
+                                reasons = Event.Event.englishList([x.baseProps["winString"] for x in eventsOccurred if "winString" in x.baseProps], False)
+                                if reasons:
+                                    winLine += " " + reasons
+                                winLine += "!"
                                 if PRINTHTML:
-                                    thisWriter.addBigLine(list(liveContestants.values())[
-                                                          0].name + " survive(s) the game and win(s)!")
+                                    thisWriter.addBigLine(winLine)
+                                    for event in eventsOccurred:
+                                        possibleWinString = event.baseProps.get("additionalWinString")
+                                        if possibleWinString is not None:
+                                            thisWriter.addBigLine(possibleWinString)
                                     thisWriter.finalWrite(os.path.join("Assets", str(
                                         turnNumber[0]) + " Phase " + thisPhase + ".html"), self.state)
                                 else:
-                                    print(list(liveContestants.values())[
-                                          0].name + " survive(s) the game and win(s)!")
+                                    print(winLine)
+                                    for event in eventsOccurred:
+                                        possibleWinString = event.baseProps.get("additionalWinString")
+                                        if possibleWinString is not None:
+                                            print(possibleWinString)
 
                                 for callback in self.callbacks["postGameCallbacks"]:
                                     callback(self.state)
