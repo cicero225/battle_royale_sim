@@ -45,7 +45,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         fightDead = []  # dummy list.
         while (len(fightDead) != 1):
             fightDesc, fightList, fightDead, allKillers = Event.fight(
-                [mainActor, participants[0]], state['allRelationships'], state['settings'], forceRelationshipFight=True)
+                [mainActor, participants[0]], state['allRelationships'], state['settings'], deferActualKilling=True, forceRelationshipFight=True)
+        # We had to deny Event.fight actually killing anyone because of fact that it might be reset.
+        fightDeadList[0].kill()
         desc += "They did so, and " + fightDesc
         return (desc, [mainActor, participants[0]] + fightList, [str(x) for x in fightDead], allKillers)
     if chosen == 'attemptEscape':
