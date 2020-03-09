@@ -117,6 +117,13 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     desc += ' After a moment, ' + contestant.name + ' attacked. A fight started, '
     (fightDesc, fightDescList, fightDeadList, allKillers) = Event.fight(
         descList, state["allRelationships"], state["settings"], deferActualKilling=True)
+        
+    # We need to handle special cases because we want some chance of someone being injured and running away instead.
+    # If everyone dies
+    if len(fightDeadList) == 2:
+        fightDeadList[0].kill()
+        fightDeadList[1].kill()
+        
     # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot.
     if len(fightDeadList) == 1:
         if random.random() > 0.33:
