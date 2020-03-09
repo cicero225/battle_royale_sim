@@ -106,6 +106,11 @@ class Contestant(object):
         for callback in self.onDeathCallbacks:
             callback(self, self.stateStore[0])
     
+    # TODO: HUGE KLUDGE: The easiest way to deploy "escape" right now is just to secretly kill the contestant but not run any of the DeathCallbacks.
+    # This may need its own system eventually.
+    def escape(self):
+        self.alive = False
+        
     # Necessary to properly apply special modifiers to combat ability taking items into consideration. Only meant for 1v1 consideration.
     def getCombatAbility(self, otherContestant):
         base_ca = self.stats["combat ability"]

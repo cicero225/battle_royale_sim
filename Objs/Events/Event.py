@@ -13,6 +13,7 @@ from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict, Defaul
 from functools import partial
 from Objs.Items.Item import ItemInstance
 
+# TODO: Events should really output namedtuples...
 
 class Event(object):  # Python 2.x compatibility
 

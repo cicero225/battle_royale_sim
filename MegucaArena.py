@@ -384,7 +384,7 @@ class MegucaArena:
 
         # Conditions for ending the game. Expected args: liveContestants, state. Return: bool endGame. (True if you want game to end)
         endGameConditions = [
-            ArenaUtils.onlyOneLeft
+            ArenaUtils.oneOrFewerLeft
         ]
 
         preDayCallbacks = [  # Things that happen before each day. Args: state. Returns: None.
@@ -639,7 +639,7 @@ class MegucaArena:
                                 print(desc)
 
                         # Check if everyone is now dead...
-                        if all(not x.alive for x in liveContestants.values()):
+                        if all(not x.alive for x in liveContestants.values()) and (len(eventOutputs) < 6 or not eventOutputs[5]):
                             # This turn needs to be rerun
                             self.state.clear()
                             self.state.update(initialState.copy())
@@ -676,29 +676,40 @@ class MegucaArena:
                         # conditions for ending the game
                         for callback in self.callbacks["endGameConditions"]:
                             if callback(liveContestants, self.state):
-                                winLine = list(liveContestants.values())[ 0].name + " survive(s) the game and win(s)"
-                                reasons = Event.Event.englishList([x.baseProps["winString"] for x in eventsOccurred if "winString" in x.baseProps], False)
-                                if reasons:
-                                    winLine += " " + reasons
-                                winLine += "!"
-                                if PRINTHTML:
-                                    thisWriter.addBigLine(winLine)
-                                    for event in eventsOccurred:
-                                        possibleWinString = event.baseProps.get("additionalWinString")
-                                        if possibleWinString is not None:
-                                            thisWriter.addBigLine(possibleWinString)
-                                    thisWriter.finalWrite(os.path.join("Assets", str(
-                                        turnNumber[0]) + " Phase " + thisPhase + ".html"), self.state)
+                                if not liveContestants:
+                                    winLine = "No one wins..."
+                                    if PRINTHTML:
+                                        thisWriter.addBigLine(winLine)
+                                        thisWriter.finalWrite(os.path.join("Assets", str(
+                                            turnNumber[0]) + " Phase " + thisPhase + ".html"), self.state)
+                                    else:
+                                        print(winLine)
+                                    winner = None
                                 else:
-                                    print(winLine)
-                                    for event in eventsOccurred:
-                                        possibleWinString = event.baseProps.get("additionalWinString")
-                                        if possibleWinString is not None:
-                                            print(possibleWinString)
+                                    winLine = list(liveContestants.values())[ 0].name + " survive(s) the game and win(s)"
+                                    reasons = Event.Event.englishList([x.baseProps["winString"] for x in eventsOccurred if "winString" in x.baseProps], False)
+                                    if reasons:
+                                        winLine += " " + reasons
+                                    winLine += "!"
+                                    if PRINTHTML:
+                                        thisWriter.addBigLine(winLine)
+                                        for event in eventsOccurred:
+                                            possibleWinString = event.baseProps.get("additionalWinString")
+                                            if possibleWinString is not None:
+                                                thisWriter.addBigLine(possibleWinString)
+                                        thisWriter.finalWrite(os.path.join("Assets", str(
+                                            turnNumber[0]) + " Phase " + thisPhase + ".html"), self.state)
+                                    else:
+                                        print(winLine)
+                                        for event in eventsOccurred:
+                                            possibleWinString = event.baseProps.get("additionalWinString")
+                                            if possibleWinString is not None:
+                                                print(possibleWinString)
+                                    winner = list(liveContestants.values())[0].name
 
                                 for callback in self.callbacks["postGameCallbacks"]:
                                     callback(self.state)
-                                return list(liveContestants.values())[0].name, turnNumber[0]
+                                return winner, turnNumber[0]
                         if PRINTHTML:
                             if phaseNum == len(thisDay["phases"]) - 1:
                                 deadThisTurnNames = origLiveContestants - set(x for x in liveContestants)

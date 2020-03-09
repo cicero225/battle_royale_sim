@@ -607,10 +607,10 @@ def eventMayNotRepeat(actor, origProb, event, state):
                 return 0, False
     return origProb, True
 
-# Ends the game if only one contestant left
+# Ends the game if only zero or one contestant left
 
-def onlyOneLeft(liveContestants, _):
-    if len(liveContestants) == 1:
+def oneOrFewerLeft(liveContestants, _):
+    if len(liveContestants) <= 1:
         return True
     return False
 

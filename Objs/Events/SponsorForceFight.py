@@ -26,7 +26,6 @@ Event.registerInsertedCallback("modifyBaseWeights", allowForceFight)
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     desc = "Tired of waiting, the sponsors force two of the remaining contestants to fight. "
-
     # Build dict of weights for various possibilities
     optionDict = collections.OrderedDict()
     optionDict['fight'] = 1
@@ -51,6 +50,12 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += "They did so, and " + fightDesc
         return (desc, [mainActor, participants[0]] + fightList, [str(x) for x in fightDead], allKillers)
     if chosen == 'attemptEscape':
+        escape = bool(random.randint(0, 1))
+        if escape:
+            mainActor.escape()
+            participants[0].escape()
+            desc += 'Instead of fighting, the two contestants attempt to escape, and do so successfully!'
+            return(desc, [mainActor, participants[0]], [str(mainActor), str(participants[0])], {}, [mainActor, participants[0]], True)           
         dead = mainActor if random.randint(0, 1) else participants[0]
         desc += 'Instead of fighting, the two contestants attempt to escape, but ' + \
             dead.name + ' is caught and killed by the sponsors!'
