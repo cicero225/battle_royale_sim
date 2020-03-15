@@ -77,6 +77,8 @@ class Event(object):  # Python 2.x compatibility
             return "she"
         elif genString == "M":
             return "he"
+        elif genString == "N":
+            return "they"
         else:
             return "it"
 
@@ -87,6 +89,8 @@ class Event(object):  # Python 2.x compatibility
             return "her"
         elif genString == "M":
             return "him"
+        elif genString == "N":
+            return "them"
         else:
             return "it"
 
@@ -97,6 +101,8 @@ class Event(object):  # Python 2.x compatibility
             return "her"
         elif genString == "M":
             return "his"
+        elif genString == "N":
+            return "their"
         else:
             return "its"
 
@@ -107,6 +113,8 @@ class Event(object):  # Python 2.x compatibility
             return "herself"
         elif genString == "M":
             return "himself"
+        elif genString == "N":
+            return "itself"
         else:
             return "itself"
 
