@@ -114,7 +114,7 @@ class Event(object):  # Python 2.x compatibility
         elif genString == "M":
             return "himself"
         elif genString == "N":
-            return "itself"
+            return "themselves"
         else:
             return "itself"
 
