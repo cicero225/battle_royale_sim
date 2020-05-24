@@ -252,27 +252,24 @@ class Event(object):  # Python 2.x compatibility
                     person1.addStatus(
                         Event.stateStore[0]["statuses"]["Injury"])
         if not deadList:
-            desc = 'but no one was killed.'
+            desc = ' No one was killed.'
             if injuredList:
-                desc += ' (Injured: ' + Event.englishList(injuredList) + ')'
+                desc += '\n\nInjured: ' + Event.englishList(injuredList)
             return(desc, [], [], None)
-        desc = 'and '
+        desc = ''
         descList = []
         if len(deadList) < len(people):
             lootList = []
             for theDead in deadList:
                 lootList += Event.lootRandom(liveList, theDead)
-            if len(deadList) == 1:
-                desc += deadList[0].name + ' was killed!'
-            else:
-                desc += Event.englishList(deadList) + ' were killed!'
+            desc += '\n\nKilled: ' + Event.englishList(deadList)
             if lootList:
-                desc += ' ' + Event.englishList(lootList) + ' was looted.'
+                desc += '\n\nLooted: ' + Event.englishList(lootList)
             descList.extend(lootList)
         elif len(deadList) == len(people):
-            desc += 'everyone died in the fighting!'
+            desc += ' Everyone died in the fighting!' + '\n\nKilled: ' + Event.englishList(deadList)
         if injuredList:
-            desc += ' (Injured: ' + Event.englishList(injuredList) + ')'
+            desc += '\n\nInjured: ' + Event.englishList(injuredList)
         # decide a killer for anyone killed. This is unusual and needs to be handled here
         allKillers = defaultdict(str)
         for dead in deadList:
@@ -357,11 +354,11 @@ class Event(object):  # Python 2.x compatibility
                         Event.stateStore[0]["statuses"]["Injury"])
 
         if not faction1DeadList and not faction2DeadList:
-            desc = 'but no one was killed.'
+            desc = ' No one was killed.'
             if injuredList:
-                desc += ' (Injured: ' + Event.englishList(injuredList) + ')'
+                desc += '\n\nInjured: ' + Event.englishList(injuredList)
             return(desc, [], [], OrderedDict())
-        desc = 'and '
+        desc = ''
         descList = []
         deadList = faction1DeadList + faction2DeadList
         if len(deadList) < len(faction1) + len(faction2):
@@ -379,15 +376,12 @@ class Event(object):  # Python 2.x compatibility
                 else:
                     lootList2 += Event.lootRandom(faction1LiveList, theDead)
             lootList = lootList1 + lootList2
-            if len(deadList) == 1:
-                desc += deadList[0].name + ' was killed!'
-            else:
-                desc += Event.englishList(deadList) + ' were killed!'
+            desc += '\n\nKilled: ' + Event.englishList(deadList)
             if lootList:
-                desc += ' ' + Event.englishList(lootList) + ' was looted.'
+                desc += '\n\nLooted: ' + Event.englishList(lootList)
             descList.extend(lootList)
         elif not faction2LiveList and not faction1LiveList:
-            desc += 'everyone died in the fighting!'
+            desc += ' Everyone died in the fighting!' + '\n\nKilled: ' + Event.englishList(deadList)
         # decide a killer for anyone killed. This is unusual and needs to be handled here
         allKillers = DefaultOrderedDict(str)
         for dead in faction1DeadList:
@@ -399,7 +393,7 @@ class Event(object):  # Python 2.x compatibility
                 dead)] + 2 * relationships.loveships[str(x)][str(dead)]) for x in faction1})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         if injuredList:
-            desc += ' (Injured: ' + Event.englishList(injuredList) + ')'
+            desc += '\n\nInjured: ' + Event.englishList(injuredList)
         return(desc, descList, deadList, allKillers)
 
     @staticmethod

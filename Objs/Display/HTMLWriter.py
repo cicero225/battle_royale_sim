@@ -100,6 +100,8 @@ img {
     def addEvent(self, desc, descContestants, state=None, preEventInjuries=None, escape=True):
         if escape:
             desc = html.escape(desc)
+            # Convert \n to <br/>
+            desc = desc.replace("\n", "<br/>")
         tempStringList = []
         for contestant in descContestants:
             if state is not None:

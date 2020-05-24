@@ -25,7 +25,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                         eventPeople, relationships, state['settings'])
                     if fightDesc is None:
                         continue
-                    desc += ' Violence broke out due to frustration, '
+                    desc += ' Violence broke out due to frustration.'
                     desc += fightDesc
                     descList += fightList
         elif whatHappens == 1:
@@ -40,7 +40,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                         eventPeople, relationships, state['settings'])
                     if fightDesc is None:
                         continue    
-                    desc += ' A fight broke out over the loot, '
+                    desc += ' A fight broke out over the loot.'
                     desc += fightDesc
                     descList += fightList
         elif whatHappens == 2:
@@ -55,10 +55,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                 else:
                     desc += Event.parseGenderSubject(
                         eventPeople[0]) + ' escaped safely.'
-            elif len(fightDead) == 1:
-                desc += Event.englishList(fightDead) + ' was killed.'
             else:
-                desc += Event.englishList(fightDead) + ' were killed.'
+                desc += '\n\nKilled: ' + Event.englishList(fightDead)
             # This must be done separately because it assigns no killers
             # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
             return (desc, descList, [x.name for x in fightDead], collections.OrderedDict())

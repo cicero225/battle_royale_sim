@@ -413,7 +413,7 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
             state["allRelationships"].KillImpact(dead)
 
     # Modify description to reflect kills
-    killString = " [Kills: "
+    killString = "\n\n[Kills: "
     killList = []
     for key, value in trueKillDict.items():
         trueKillCounterDict[value] += 1

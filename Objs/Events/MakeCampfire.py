@@ -114,7 +114,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += ' After a moment, ' + contestant.name + ' left.'
         return (desc, descList, [], [], [mainActor])
 
-    desc += ' After a moment, ' + contestant.name + ' attacked. A fight started, '
+    desc += ' After a moment, ' + contestant.name + ' attacked. A fight started.'
     (fightDesc, fightDescList, fightDeadList, allKillers) = Event.fight(
         descList, state["allRelationships"], state["settings"], deferActualKilling=True)
         

@@ -4,7 +4,7 @@ from Objs.Events.Event import Event
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     desc = mainActor.name + ', ' + \
-        participants[0].name + ', and ' + participants[1].name + ' fought, '
+        participants[0].name + ', and ' + participants[1].name + ' fought.'
     descList = [mainActor, participants[0], participants[1]]
     fightDesc, fightList, fightDead, allKillers = Event.fight(
         descList, state['allRelationships'], state['settings'])

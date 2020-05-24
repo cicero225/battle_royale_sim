@@ -30,7 +30,6 @@ def spreadDisease(thisWriter, eventOutputs, thisEvent, state):
             # Chance procs for each person already sick
             for sickPerson in hasDisease:
                 if random.random() < chanceSpread:
-                    print("SPREEEEEEEEEAD")
                     contestant.addStatus(disease)
                     thisWriter.addEvent(str(contestant) + " caught " + state["statuses"][disease].friendly + " from " + str(
                         sickPerson), [contestant, state["statuses"][disease], sickPerson])

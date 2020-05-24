@@ -22,7 +22,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                 Event.parseGenderObject(victims[0]) + '.'
         lootList = Event.lootAll(mainActor, victims[0])
         if lootList:
-            desc += ' ' + str(mainActor) + ' looted ' + Event.englishList(lootList) + '.'
+            desc += '\n\nLooted: ' + Event.englishList(lootList) + '.'
             descList.extend(lootList)
         return (desc, descList, [victims[0].name])
     else:
