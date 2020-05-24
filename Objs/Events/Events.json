@@ -200,7 +200,7 @@
      },
  "SickWithFever":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0.75,
+     "mainWeight": 7.5,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
@@ -467,7 +467,7 @@
      },
      "SponsorCheatKill":
     {"phase": ["Night"],
-    "mainWeight": 0.15,
+    "mainWeight": 0.05,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -591,7 +591,7 @@
      },
      "GangUpFight":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0.1,
+     "mainWeight": 0.025,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0},
      "participantWeight": 1,
@@ -794,7 +794,7 @@
     },
     "SetExplosiveTrap":
     {"phase": ["Day"],
-     "mainWeight": 10,
+     "mainWeight": 100,
      "mainModifiers": {"cleverness": 0.3,
                        "stability": -0.2,
                        "meanness": 0.7,
@@ -816,7 +816,7 @@
     },
     "DiesFromExplosiveTrap":
     {"phase": ["Day", "Night"],
-     "mainWeight": 0.5,
+     "mainWeight": 10,
      "mainModifiers": {"cleverness": -0.2,
                        "survivalism": -0.2},
      "participantWeight": 0.3,
