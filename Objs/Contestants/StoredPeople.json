@@ -1,0 +1,171 @@
+"Lillian Ada":
+    {"imageFile": "LillianAda.png",
+    "gender": "F",
+    "stats":
+        {"gregariousness": 2,
+        "stability": 7,
+        "forgiveness": 8,
+        "loyalty": 8,
+        "meanness": 2,
+        "ruthlessness": 2,
+        "aggression": 5,
+        "endurance": 4,
+        "survivalism": 5,
+        "loneliness": 8,
+        "friendliness": 5,
+        "cleverness": 10,
+        "combat ability": 5
+         }
+    },
+     "diaeresis":
+    {"imageFile": "Diaeresis.jpg",
+    "gender": "M",
+    "stats":
+        {"gregariousness": 1,
+         "stability": 8,
+         "forgiveness": 4,
+         "loyalty": 5,
+         "meanness": 4,
+         "ruthlessness": 7,
+         "aggression": 4,
+         "endurance": 4,
+         "survivalism": 3,
+         "loneliness": 3,
+         "friendliness": 1,
+         "cleverness": 8,
+         "combat ability": 6
+         }
+    },
+       "Polos":
+    {"imageFile": "Polos.jpg",
+    "gender": "M",
+    "stats":
+        {"gregariousness": 5,
+         "stability": 7,
+         "forgiveness": 6,
+         "loyalty": 8,
+         "meanness": 4,
+         "ruthlessness": 2,
+         "aggression": 3,
+         "endurance": 8,
+         "survivalism": 7,
+         "loneliness": 7,
+         "friendliness": 8,
+         "cleverness": 9,
+         "combat ability": 7
+         }
+    },
+    "Natasha Daemondottr":
+    {"imageFile": "Natasha.png",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 0,
+         "stability": 7,
+         "forgiveness": 0,
+         "loyalty": 7,
+         "meanness": 10,
+         "ruthlessness": 10,
+         "aggression": 10,
+         "endurance": 7,
+         "survivalism": 7,
+         "loneliness": 1,
+         "friendliness": 1,
+         "cleverness": 5,
+         "combat ability": 10
+        }
+    },
+    "DIPLOMASTER":
+    {"imageFile": "DIPLOMASTER.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 10,
+         "stability": 1,
+         "forgiveness": 1,
+         "loyalty": 1,
+         "meanness": 10,
+         "ruthlessness": 10,
+         "aggression": 10,
+         "endurance": 10,
+         "survivalism": 1,
+         "loneliness": 1,
+         "friendliness": 10,
+         "cleverness": 10,
+         "combat ability": 10
+        }
+    },
+    "Elephant Parade":
+    {"imageFile": "ElephantParade.png",
+     "gender": "M",
+     "stats":
+        {"gregariousness": 5,
+         "stability": 2,
+         "forgiveness": 7,
+         "loyalty": 9,
+         "meanness": 3,
+         "ruthlessness": 4,
+         "aggression": 2,
+         "endurance": 3,
+         "survivalism": 2,
+         "loneliness": 9,
+         "friendliness": 3,
+         "cleverness": 8,
+         "combat ability": 7
+        }
+    },
+    "Celestial Teapot":
+    {"imageFile": "Teapot.jpg",
+     "gender": "N",
+     "stats":
+        {"gregariousness": 6,
+         "stability": 8,
+         "forgiveness": 7,
+         "loyalty": 5,
+         "meanness": 4,
+         "ruthlessness": 7,
+         "aggression": 6,
+         "endurance": 10,
+         "survivalism": 9,
+         "loneliness": 9,
+         "friendliness": 4,
+         "cleverness": 0,
+         "combat ability": 10
+         }
+    },
+    "Princess Meimei":
+    {"imageFile": "Meimei.jpg",
+     "gender": "F",
+     "stats":
+        {"gregariousness": 1,
+         "stability": 1,
+         "forgiveness": 7,
+         "loyalty": 5,
+         "meanness": 3,
+         "ruthlessness": 1,
+         "aggression": 1,
+         "endurance": 1,
+         "survivalism": 1,
+         "loneliness": 1,
+         "friendliness": 1,
+         "cleverness": 10,
+         "combat ability": 1
+        }
+    },
+    "Potato Walrus":
+    {"imageFile": "Potato Walrus.jpg",
+     "gender": "N",
+     "stats":
+        {"gregariousness": 10,
+         "stability": 0,
+         "forgiveness": 10,
+         "loyalty": 0,
+         "meanness": 10,
+         "ruthlessness": 0,
+         "aggression": 10,
+         "endurance": 10,
+         "survivalism": 10,
+         "loneliness": 0,
+         "friendliness": 10,
+         "cleverness": 0,
+         "combat ability": 10
+         }
+    },

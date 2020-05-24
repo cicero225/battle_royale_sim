@@ -142,7 +142,7 @@
     "ammouse": [2, 5] 
     },
     "Dossier":
-    {"imageFile": "Dossier.jpg",
+    {"imageFile": "dossier.png",
     "friendly": "a Dossier",
     "statChanges": 
         {

@@ -76,5 +76,44 @@
          "friendliness": 4,
          "meanness": 4
          }
+    },
+"Lain, God of the Wired":
+    {"imageFile": "Lain.gif",
+    "gender": "F",
+    "trait": "Trickster",
+    "stats": 
+        {"gregariousness": 2,
+         "forgiveness": 4,
+         "loyalty": 10,
+         "loneliness": 7,
+         "friendliness": 4,
+         "meanness": 4
+         }
+    },
+"Lc0":
+    {"imageFile": "Lc0.png",
+    "gender": "F",
+    "trait": "Gladiatorial",
+    "stats": 
+        {"gregariousness": 3,
+         "forgiveness": 2,
+         "loyalty": 5,
+         "loneliness": 4,
+         "friendliness": 4,
+         "meanness": 6
+         }
+    },
+"Stockfish":
+    {"imageFile": "Stockfish.jpg",
+    "gender": "M",
+    "trait": "Gladiatorial",
+    "stats": 
+        {"gregariousness": 1,
+         "forgiveness": 0,
+         "loyalty": 0,
+         "loneliness": 0,
+         "friendliness": 0,
+         "meanness": 10
+         }
     }
 }
