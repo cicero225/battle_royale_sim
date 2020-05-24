@@ -3,17 +3,17 @@ from Objs.Events.Event import Event
 import collections
 import random
 
-# The numbers here are the chance the disease spreads per interaction per person.
-DISEASE_ITEMS = collections.OrderedDict()
-DISEASE_ITEMS["Fever"] = (0.5, True)  # chance, requires contact.
-
 
 def spreadDisease(thisWriter, eventOutputs, thisEvent, state):
     # This happens fairly often, so might as well shortcut this
     if len(eventOutputs[1]) < 2:
         return
-    for disease in DISEASE_ITEMS:
-        chanceSpread, requiresContact = DISEASE_ITEMS[disease]
+    for disease, disease_item in state["statuses"].items():
+        disease_stats = disease_item.rawData.get("contagious")
+        if disease_stats is None:
+            continue
+        chanceSpread = disease_stats["ChanceSpread"]
+        requiresContact = disease_stats["RequiresContact"]
         if requiresContact and not thisEvent.baseProps.get("contact", False):
             continue
         # descContestants, a more reliable guide to who was involved than eventOutputs[4], even if it exists, because we care about everyone involved
@@ -30,6 +30,7 @@ def spreadDisease(thisWriter, eventOutputs, thisEvent, state):
             # Chance procs for each person already sick
             for sickPerson in hasDisease:
                 if random.random() < chanceSpread:
+                    print("SPREEEEEEEEEAD")
                     contestant.addStatus(disease)
                     thisWriter.addEvent(str(contestant) + " caught " + state["statuses"][disease].friendly + " from " + str(
                         sickPerson), [contestant, state["statuses"][disease], sickPerson])

@@ -2,10 +2,7 @@ import collections
 import copy
 from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS, ITEM_ON_ACQUISITION, ITEM_ON_REMOVAL
 
-# I wonder if this needs to import Contestant...
-
 # stats stack, other things don't, at the moment
-
 
 class InstanceInsteadOfMainThing(Exception):
     pass

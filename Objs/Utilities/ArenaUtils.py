@@ -583,8 +583,11 @@ def starterItemAllocation(state):
             for newItemName in contestant.starterItems:
                 contestant.addItem(newItemName, isNew=True, resetItemAllowed=True)
     if state["settings"]["randomStarterItems"] > 0:
+        diseases = [x for x, y in state["statuses"].items() if "contagious" in y.rawData]
         allItemStrings = set(str(x) for x in state["items"].values())
         for contestant in state["contestants"].values():
+            if random.random() < state["settings"]["InitialDiseaseChance"]:
+                contestant.addStatus(random.choice(diseases))
             options = sorted(allItemStrings - set(str(x) for x in contestant.inventory if not x.stackable), key=lambda x: str(x))
             for _ in range(max(state["settings"]["randomStarterItems"] - len(contestant.inventory), 0)):
                 if not options:

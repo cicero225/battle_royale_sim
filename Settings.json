@@ -20,5 +20,6 @@
  "fullRandomStats": true,
  "meanNumInitialRelationships": 0.3,
  "presetStarterItems": true,
- "randomStarterItems": 2
+ "randomStarterItems": 2,
+ "InitialDiseaseChance": 0.05
 }

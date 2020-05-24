@@ -47,7 +47,11 @@
     "eventsDisabled": {
         "SickWithFever": {"main": true}
         },
-    "stackable": false
+    "stackable": false,
+    "contagious": {
+        "ChanceSpread": 0.5,
+        "RequiresContact": true
+        }
     },
     "Love":
     {"imageFile": "Love.png",
