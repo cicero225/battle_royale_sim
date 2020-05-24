@@ -30,10 +30,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                     descList += fightList
         elif whatHappens == 1:
             numItems = random.randint(1, 2)
-            itemsFound = random.sample(list(state['items'].values()), 2)
+            itemsFound = Event.lootRandom(eventPeople, random.sample(list(state['items'].values()), 2))
             desc += ' and found ' + Event.englishList(itemsFound) + '.'
             descList += itemsFound
-            Event.lootRandom(eventPeople, itemsFound)
             if len(eventPeople) > 1:
                 probViolence = 0.5 - relationships.groupCohesion(eventPeople) / 100
                 if random.random() < probViolence:
