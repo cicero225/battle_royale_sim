@@ -1,5 +1,5 @@
 
-from Objs.Events.Event import Event
+from Objs.Events.Event import Event, EventOutput
 import random
 
 
@@ -24,13 +24,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             desc += " " + mainActor.name + " laughed at " + \
                 Event.parseGenderPossessive(victims[0]) + " pain."
         mainActor.removeItem(state["items"]["MolotovCocktail"])
-        lootList = Event.lootAll(mainActor, victims[0])
-        if lootList:
-            desc += ' ' + mainActor.name + ' looted the body for ' + \
-                Event.englishList(lootList) + '.'
-            tempList.extend(lootList)
+        lootDict = Event.lootAll(mainActor, victims[0])
         # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-        return (desc, tempList, [victims[0].name])
+        return EventOutput(desc, tempList, [victims[0].name], loot_table=lootDict)
 
 
 Event.registerEvent("KillWithMolotovCocktail", func)

@@ -1,5 +1,5 @@
 
-from Objs.Events.Event import Event
+from Objs.Events.Event import Event, EventOutput
 import random
 
 
@@ -27,11 +27,12 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     detection = (victims[0].stats["cleverness"] +
                  victims[0].stats["survivalism"]) / 30
 
+    injuries = None
     if random.random() < detection:
         # Participant realizes what's going on
         desc += str(victims[0]) + " caught " + \
             Event.parseGenderObject(mainActor) + " in the act and attacked!"
-        (fightDesc, fightDescList, fightDeadList, allKillers) = Event.fight(
+        (fightDesc, fightDeadList, allKillers, lootDict, injuries) = Event.fight(
             descList, state["allRelationships"], state["settings"])
         # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot. If they are already injured they just die (skip this segment).
         if len(fightDeadList) == 1 and random.random() < 0.33 and not fightDeadList[0].hasThing("Injury"):
@@ -40,36 +41,25 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             fightDeadList[0].addStatus(state["statuses"]["Injury"])
             if fightDeadList[0] == mainActor:
                 desc += ' In the end, ' + mainActor.name + ' was injured and forced to flee.'
-                if fightDescList:
-                    desc += ' ' + Event.parseGenderSubject(mainActor).capitalize(
-                    ) + ' left behind ' + Event.englishList(fightDescList) + '.'
             else:
                 desc += ' In the end, however, ' + \
                     victims[0].name + ' was injured and forced to flee.'
-                if fightDescList:
-                    desc += ' ' + Event.parseGenderSubject(victims[0]).capitalize(
-                    ) + ' left behind ' + Event.englishList(fightDescList) + '.'
-            descList.extend(fightDescList)
-            return (desc, descList, [])
+            return EventOutput(desc, descList, [], loot_table=lootDict, injuries=injuries)
 
         if not fightDeadList:
             desc += ' The fight was a draw, and the two sides departed, friends no more.'
             return (desc, descList, [])
-        desc += " " + fightDesc[4].capitalize() + fightDesc[5:]
-        descList += fightDescList
+        desc += " " + fightDesc.capitalize()
         return (desc, descList, [x.name for x in fightDeadList], allKillers)
 
     else:
         desc += str(victims[0]) + \
             " ate the meal, blissfully unaware, before falling over dead."
         victims[0].kill()
-        lootList = Event.lootAll(mainActor, victims[0])
-        if lootList:
-            desc += ' ' + str(mainActor) + ' looted ' + Event.englishList(lootList) + '.'
-            descList.extend(lootList)
+        lootDict = Event.lootAll(mainActor, victims[0])
 
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-    return (desc, descList, [str(victims[0])])
+    return EventOutput(desc, descList, [str(victims[0])], loot_table=lootDict, injuries=injuries)
 
 
 Event.registerEvent("ACooksForBButPoison", func)

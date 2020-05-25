@@ -19,7 +19,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     # This is a dummy event, representing the character not participating. For display purposes, these are only displayed at the end of the turn.
     listNothing = self.eventStore.setdefault("CornucopiaDoNothing", [])
     listNothing.append(mainActor)
-    print(mainActor.name)
     return (None, [mainActor], [])
 
 Event.registerEvent("DoNothing", func)

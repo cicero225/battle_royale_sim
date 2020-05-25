@@ -373,6 +373,7 @@ class MegucaArena:
 
         # Things that happen after event processing (usually logging or emergency reset. Note that resetting callbacks need to happen before logging.
         # Expected args: proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere
+        # returns a tuple or list or Event.EventOutput  (which will be converted immediately into EventOutput)
         postEventCallbacks = [
             ArenaUtils.logEventsByContestant,
             ArenaUtils.logKills
@@ -613,7 +614,6 @@ class MegucaArena:
                                     # Apparently this event is not valid for this contestant (participants etc. should not be considered)
                                     selectionState.indivProb[eventName] = 0
                                     continue
-                                eventOutputs = list(eventOutputs)
                                 self.allRelationships.processTraitEffect(
                                     thisevent, self.contestants[contestantKey], participants + victims)
                             for postEvent in self.callbacks["postEventCallbacks"]:
@@ -627,14 +627,14 @@ class MegucaArena:
                         STATSDEBUG["allEvents"][eventName] += 1
                         if desc is not None:
                             if PRINTHTML:
-                                thisWriter.addEvent(
-                                    desc, descContestants, self.state, preEventInjuries)
+                                thisWriter.addStructuredEvent(eventOutputs, self.state, preEventInjuries)
                                 # Consume the announcement queue.
                                 for announcement in self.state["announcementQueue"]:
                                     thisWriter.addEvent(*announcement)
                                 self.state["announcementQueue"].clear()
                                 for callback in self.callbacks["postEventWriterCallbacks"]:
                                     callback(thisWriter, eventOutputs, thisevent, self.state)
+                                thisWriter.addEmptyLines(3)
                             else:
                                 print(desc)
 
@@ -686,7 +686,7 @@ class MegucaArena:
                                         print(winLine)
                                     winner = None
                                 else:
-                                    winLine = list(liveContestants.values())[ 0].name + " survive(s) the game and win(s)"
+                                    winLine = list(liveContestants.values())[0].name + " survive(s) the game and win(s)"
                                     reasons = Event.Event.englishList([x.baseProps["winString"] for x in eventsOccurred if "winString" in x.baseProps], False)
                                     if reasons:
                                         winLine += " " + reasons

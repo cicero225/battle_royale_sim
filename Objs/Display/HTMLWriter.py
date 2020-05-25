@@ -97,30 +97,62 @@ img {
             desc = self.massInsertTag(desc, x.friendly, "status")
         return desc
 
-    def addEvent(self, desc, descContestants, state=None, preEventInjuries=None, escape=True):
+    # Adds a basic event with some formatting. Use addStructuredEvent for canonical EventOutput outputs.
+    def addEvent(self, desc, descContestants, state=None, preEventInjuries=None, escape=True, output_string=False):
         if escape:
             desc = html.escape(desc)
             # Convert \n to <br/>
             desc = desc.replace("\n", "<br/>")
         tempStringList = []
-        for contestant in descContestants:
-            if state is not None:
-                extensionString = ""
-                if hasattr(contestant, "statuses") and preEventInjuries.get(str(contestant), False) and contestant.hasThing("Injury"):
-                    extensionString += ' (Injured)'
-                if hasattr(contestant, "statuses") and contestant.hasThing("Hypothermia"):
-                    extensionString += ' (Hypothermic)'
-                if extensionString:
-                    # We could use setdefault but that would defeat the purpose of not compiling the regex.
-                    potentialRegex = self.contestant_regexes.get(str(contestant))
-                    if potentialRegex is None:
-                        potentialRegex = re.compile(r"(?<![\w\<])(" + re.escape(html.escape(str(contestant))) + r")(?![\w\>])")
-                        self.contestant_regexes[str(contestant)] = potentialRegex
-                    desc = potentialRegex.sub(html.escape(str(contestant)) + extensionString, desc)
-            tempStringList.append("<img src='" + html.escape(contestant.imageFile) + "'>")
-        tempStringList.append("<br>")
+        if descContestants:
+            for contestant in descContestants:
+                if state is not None:
+                    extensionString = ""
+                    if hasattr(contestant, "statuses") and preEventInjuries.get(str(contestant), False) and contestant.hasThing("Injury"):
+                        extensionString += ' (Injured)'
+                    if hasattr(contestant, "statuses") and contestant.hasThing("Hypothermia"):
+                        extensionString += ' (Hypothermic)'
+                    if extensionString:
+                        # We could use setdefault but that would defeat the purpose of not compiling the regex.
+                        potentialRegex = self.contestant_regexes.get(str(contestant))
+                        if potentialRegex is None:
+                            potentialRegex = re.compile(r"(?<![\w\<])(" + re.escape(html.escape(str(contestant))) + r")(?![\w\>])")
+                            self.contestant_regexes[str(contestant)] = potentialRegex
+                        desc = potentialRegex.sub(html.escape(str(contestant)) + extensionString, desc)
+                tempStringList.append("<img src='" + html.escape(contestant.imageFile) + "'>")
+            tempStringList.append("<br>")
         tempStringList.append(HTMLWriter.wrap(desc, "eventnormal"))
-        self.bodylist.append(HTMLWriter.wrap('\n'.join(tempStringList), "p"))
+        outputString = '\n'.join(tempStringList)
+        if output_string:
+            return outputString
+        self.bodylist.append(HTMLWriter.wrap(outputString, "p"))
+    
+    # If we were enforcing typing, event_output is Event.EventOutput
+    # This is canoncical output for events.
+    def addStructuredEvent(self, event_output, state, preEventInjuries):
+        from ..Events.Event import Event  # This utility function should really be made more general...
+        output_pieces = []
+        desc = event_output.description
+        if event_output.dead or event_output.injuries:
+            desc += "\n"
+        if event_output.dead:
+            is_str = isinstance(event_output.dead[0], str)
+            desc += '\nKilled: ' + Event.englishList(event_output.dead, not is_str)
+        if event_output.injuries:
+            desc += '\nInjured: ' + Event.englishList(event_output.injuries)
+        output_pieces.append(self.addEvent(desc, event_output.display_items, state, preEventInjuries, output_string=True))
+        if event_output.loot_table:
+            # This will likely need some work.
+            lootedList = []
+            desc = ""
+            for name, items in event_output.loot_table.items():
+                lootedList.extend(items)
+                desc += name + " looted " + Event.englishList(items) + "\n"
+            output_pieces.append(self.addEvent(desc, lootedList, state, preEventInjuries, output_string=True))
+        self.bodylist.append(HTMLWriter.wrap('<br/>'.join(output_pieces), "p"))
+        
+    def addEmptyLines(self, num_lines):
+        self.bodylist.append(''.join('<br/'*num_lines))
 
     def finalWrite(self, filepath, state):
         with open(filepath, 'w') as target:

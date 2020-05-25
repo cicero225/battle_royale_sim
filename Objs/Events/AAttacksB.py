@@ -1,5 +1,5 @@
 
-from Objs.Events.Event import Event
+from Objs.Events.Event import Event, EventOutput
 import random
 
 
@@ -13,18 +13,15 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     if random.random() < probKill:
         victims[0].kill()
         if mainActor.stats['ruthlessness'] > 6:
-            desc = mainActor.name + ' assaulted ' + \
+            desc = mainActor.name + ' snuck up on ' + \
                 victims[0].name + ', killing ' + \
                 Event.parseGenderObject(victims[0]) + ' brutally.'
         else:
             desc = mainActor.name + ' attacked ' + \
                 victims[0].name + ', killing ' + \
-                Event.parseGenderObject(victims[0]) + '.'
-        lootList = Event.lootAll(mainActor, victims[0])
-        if lootList:
-            desc += '\n\nLooted: ' + Event.englishList(lootList) + '.'
-            descList.extend(lootList)
-        return (desc, descList, [victims[0].name])
+                Event.parseGenderObject(victims[0]) + ' efficiently.'
+        lootDict = Event.lootAll(mainActor, victims[0])
+        return EventOutput(desc, descList, [victims[0].name], loot_table=lootDict)
     else:
         desc = mainActor.name + ' tried to attack ' + \
             victims[0].name + ', but ' + \

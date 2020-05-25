@@ -1,6 +1,6 @@
 from __future__ import division
 
-from Objs.Events.Event import Event
+from Objs.Events.Event import Event, EventOutput
 from Objs.Items.Status import StatusInstance
 import random
 from collections import defaultdict
@@ -114,8 +114,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += ' After a moment, ' + contestant.name + ' left.'
         return (desc, descList, [], [], [mainActor])
 
-    desc += ' After a moment, ' + contestant.name + ' attacked. A fight started.'
-    (fightDesc, fightDescList, fightDeadList, allKillers) = Event.fight(
+    desc += ' After a moment, ' + contestant.name + ' attacked.'
+    (fightDesc, fightDeadList, allKillers, lootDict, injuries) = Event.fight(
         descList, state["allRelationships"], state["settings"], deferActualKilling=True)
         
     # We need to handle special cases because we want some chance of someone being injured and running away instead.
@@ -138,32 +138,26 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                 mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(
                     data={"day": state["turnNumber"][0]}))
                 contestant.removeStatus("Hypothermia")
-                if fightDescList:
-                    desc += ' ' + Event.parseGenderSubject(mainActor).capitalize(
-                    ) + ' left behind ' + Event.englishList(fightDescList) + '.'
             else:
                 desc += ' but ' + contestant.name + ' was injured and forced to flee.'
                 contestant.addStatus(state["statuses"]["Hypothermia"].makeInstance(
                     data={"day": state["turnNumber"][0]}))
-                if fightDescList:
-                    desc += ' ' + Event.parseGenderSubject(contestant).capitalize(
-                    ) + ' left behind ' + Event.englishList(fightDescList) + '.'
-            descList.extend(fightDescList)
-            return (desc, descList, [])
+            if fightDeadList[0] not in injuries:
+                injuries.append(fightDeadList[0])
+            return EventOutput(desc, descList, [], loot_table=lootDict, injuries=injuries)
 
     # If nobody was hurt, they just give up and use the fire together.
     if not fightDeadList:
         self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
         contestant.removeStatus("Hypothermia")
-        desc += ' but in the end both sides got tired and gave up, agreeing to use the fire together for one night. Neither side slept well.'
-        return (desc, descList, [])
+        desc += '\nIn the end both sides got tired and gave up, agreeing to use the fire together for one night. Neither side slept well.'
+        return EventOutput(desc, descList, [], injuries=injuries)
 
     # need to ban contestant from turning up again in fire events if they won the fight.
     if contestant.name not in fightDeadList:
         self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
     desc += fightDesc
-    descList += fightDescList
-    return (desc, descList, [x.name for x in fightDeadList], allKillers)
+    return EventOutput(desc, descList, [x.name for x in fightDeadList], allKillers, loot_table=lootDict, injuries=injuries)
 
 
 Event.registerEvent("MakeCampfire", func)

@@ -370,9 +370,11 @@ def logEventsByContestant(proceedAsUsual, eventOutputs, thisevent, mainActor, st
     else:
         state["callbackStore"]["eventLog"][state["turnNumber"][0]
                                            ][state["curPhase"]][mainActor.name] = "overridden"
+    return eventOutputs
 
 
 def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, participants, victims, sponsorsHere):
+    eventOutputs = list(eventOutputs)
     if not eventOutputs[2] or (len(eventOutputs) <= 3 and ("murder" not in thisevent.baseProps or not thisevent.baseProps["murder"])):
         return
     if (len(eventOutputs) > 3 and isinstance(eventOutputs[3], dict)):
@@ -421,6 +423,7 @@ def logKills(proceedAsUsual, eventOutputs, thisevent, mainActor, state, particip
             value + " (" + str(trueKillCounterDict[value]) + ")" + " kills " + key)
     killString += ", ".join(killList) + "]"
     eventOutputs[0] += killString
+    return eventOutputs
 
 
 def logContestants(liveContestants, baseEventActorWeights, baseEventParticipantWeights, baseEventVictimWeights, baseEventSponsorWeights, turnNumber, state):

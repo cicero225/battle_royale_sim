@@ -1,4 +1,4 @@
-from Objs.Events.Event import Event
+from Objs.Events.Event import Event, EventOutput
 from ..Utilities.ArenaUtils import weightedDictRandom
 import collections
 import random
@@ -43,18 +43,19 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         # Keep running until only neither 0 nor all contestants are dead.
         fightDead = []  # dummy list.
         while (len(fightDead) != 1):
-            fightDesc, fightList, fightDead, allKillers = Event.fight(
+            fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
                 [mainActor, participants[0]], state['allRelationships'], state['settings'], deferActualKilling=True, forceRelationshipFight=True)
         # We had to deny Event.fight actually killing anyone because of fact that it might be reset.
         fightDead[0].kill()
         desc += "They did so." + fightDesc
-        return (desc, [mainActor, participants[0]] + fightList, [str(x) for x in fightDead], allKillers)
+        return EventOutput(desc, [mainActor, participants[0]], [str(x) for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries)
     if chosen == 'attemptEscape':
         escape = bool(random.randint(0, 1))
         if escape:
             mainActor.escape()
             participants[0].escape()
             desc += 'Instead of fighting, the two contestants attempt to escape, and do so successfully!'
+            # This is a hack, declaring both of them "Dead" but ending the game immediately with overriding text that suggests they survived.
             return(desc, [mainActor, participants[0]], [str(mainActor), str(participants[0])], {}, [mainActor, participants[0]], True)           
         dead = mainActor if random.randint(0, 1) else participants[0]
         desc += 'Instead of fighting, the two contestants attempt to escape, but ' + \

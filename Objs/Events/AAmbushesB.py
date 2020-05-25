@@ -1,5 +1,5 @@
 
-from Objs.Events.Event import Event
+from Objs.Events.Event import Event, EventOutput
 import random
 
 
@@ -20,11 +20,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             desc = mainActor.name + ' lay in wait for ' + \
                 victims[0].name + ', surprising and killing ' + \
                 Event.parseGenderObject(victims[0]) + '.'
-        lootList = Event.lootAll(mainActor, victims[0])
-        if lootList:
-            desc += ' ' + str(mainActor) + ' looted ' + Event.englishList(lootList) + '.'
-            descList.extend(lootList)
-        return (desc, descList, [victims[0].name])
+        lootDict = Event.lootAll(mainActor, victims[0])
+        return EventOutput(desc, descList, [victims[0].name], loot_table=lootDict)
     else:
         desc = mainActor.name + ' lay in wait for ' + \
             victims[0].name + ', but ' + \

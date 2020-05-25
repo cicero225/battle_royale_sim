@@ -8,12 +8,16 @@
 from __future__ import division
 
 import random
-from collections import defaultdict, OrderedDict
+from collections import defaultdict, namedtuple, OrderedDict
 from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict, DefaultOrderedDict
 from functools import partial
 from Objs.Items.Item import ItemInstance
 
-# TODO: Events should really output namedtuples...
+# TODO: Refactor the overall program to always return this named tuple? For now though, this is the preferred event output and standard tuples are deprecated.
+# This should probably really be typed.
+EventOutput = namedtuple("EventOutput", ["description", "display_items", "dead", "killer_dict", "consumed_by_event_override", "end_game_immediately", "loot_table", "injuries"],
+                         defaults=(None, None, False, None, None))
+    
 
 class Event(object):  # Python 2.x compatibility
 
@@ -57,9 +61,20 @@ class Event(object):  # Python 2.x compatibility
         cls.inserted_callbacks.setdefault(
             callbackLocation, []).append(callback)
 
+    @staticmethod
+    def getNamedCallback(callback):
+        def namedCallback(*args, **kwargs):
+            output = callback(*args, **kwargs)
+            if output is None:
+                return None
+            output = list(output)
+            return EventOutput(*output)
+        return namedCallback
+
     @classmethod
     def registerEvent(cls, eventName, callback):
-        cls.event_callbacks[eventName] = callback
+        # Really, events should return EventOutput directly, but for backwards compatibility we convert it here.
+        cls.event_callbacks[eventName] = cls.getNamedCallback(callback)
 
     def doEvent(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
         desc = mainActor.name + ' did absolutely nothing.'
@@ -152,7 +167,7 @@ class Event(object):  # Python 2.x compatibility
                     looted.addItem(loot, loot.count, isNew=False)
                 else:
                     lootList.append(lootref)
-        return lootList
+        return {str(looter): lootList}
 
     @staticmethod
     def lootRandom(looters, looted):
@@ -160,7 +175,7 @@ class Event(object):  # Python 2.x compatibility
             itemList = [x for x in looted.inventory if x.lootable]
         else:
             itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted if x.lootable]
-        lootList = []
+        lootDict = {}
         for loot in itemList:
             if hasattr(looted, 'inventory'):
                 looted.removeItem(loot, loot.count)
@@ -174,9 +189,8 @@ class Event(object):  # Python 2.x compatibility
                     if lootref is None:
                         # We actually have to return it to keep the object from disappearing, and retrying this random.choice loop is risky
                         looted.addItem(lootref, isNew=False)
-                    if not lootList or lootList[-1].name != loot.name:
-                        lootList.append(loot)
-        return lootList
+                    lootDict.setdefault(str(trueLooter), []).append(loot)
+        return lootDict
 
     @staticmethod
     # Attacker, victim
@@ -253,23 +267,14 @@ class Event(object):  # Python 2.x compatibility
                         Event.stateStore[0]["statuses"]["Injury"])
         if not deadList:
             desc = ' No one was killed.'
-            if injuredList:
-                desc += '\n\nInjured: ' + Event.englishList(injuredList)
-            return(desc, [], [], None)
+            return desc, [], None, None, injuredList
         desc = ''
-        descList = []
+        lootDict = None
         if len(deadList) < len(people):
-            lootList = []
             for theDead in deadList:
-                lootList += Event.lootRandom(liveList, theDead)
-            desc += '\n\nKilled: ' + Event.englishList(deadList)
-            if lootList:
-                desc += '\n\nLooted: ' + Event.englishList(lootList)
-            descList.extend(lootList)
+                lootDict = Event.lootRandom(liveList, theDead)
         elif len(deadList) == len(people):
-            desc += ' Everyone died in the fighting!' + '\n\nKilled: ' + Event.englishList(deadList)
-        if injuredList:
-            desc += '\n\nInjured: ' + Event.englishList(injuredList)
+            desc += ' Everyone died in the fighting!'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
         allKillers = defaultdict(str)
         for dead in deadList:
@@ -279,12 +284,12 @@ class Event(object):  # Python 2.x compatibility
                 forceRelationshipFight or not possible_love or (str(possible_love[0].target) != str(x)))})
             if not killDict:
                 # This event is impossible as rng'd. The cleanest solution is to just bail.
-                return None, None, None, None
+                return None, None, None, None, None
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         for dead in deadList:
             if not deferActualKilling:
                 dead.kill()
-        return(desc, descList, deadList, allKillers)
+        return desc, deadList, allKillers, lootDict, injuredList
 
     @staticmethod
     def factionFight(faction1, faction2, relationships, settings):
@@ -355,33 +360,27 @@ class Event(object):  # Python 2.x compatibility
 
         if not faction1DeadList and not faction2DeadList:
             desc = ' No one was killed.'
-            if injuredList:
-                desc += '\n\nInjured: ' + Event.englishList(injuredList)
-            return(desc, [], [], OrderedDict())
+            return desc, [], OrderedDict(), None, injuredList
         desc = ''
-        descList = []
         deadList = faction1DeadList + faction2DeadList
+        lootDict = None
         if len(deadList) < len(faction1) + len(faction2):
             # We have to do the looting carefully
-            lootList1 = []
+            lootDict1 = {}
             for theDead in faction1DeadList:
                 if not faction2LiveList:  # If the entire other faction is dead, this faction gets their own dead teammate's stuff
-                    lootList1 += Event.lootRandom(faction1LiveList, theDead)
+                    lootDict1 = Event.lootRandom(faction1LiveList, theDead)
                 else:
-                    lootList1 += Event.lootRandom(faction2LiveList, theDead)
-            lootList2 = []
+                    lootDict1 = Event.lootRandom(faction2LiveList, theDead)
+            lootDict2 = {}
             for theDead in faction2DeadList:
                 if not faction1LiveList:
-                    lootList2 += Event.lootRandom(faction2LiveList, theDead)
+                    lootDict2 = Event.lootRandom(faction2LiveList, theDead)
                 else:
-                    lootList2 += Event.lootRandom(faction1LiveList, theDead)
-            lootList = lootList1 + lootList2
-            desc += '\n\nKilled: ' + Event.englishList(deadList)
-            if lootList:
-                desc += '\n\nLooted: ' + Event.englishList(lootList)
-            descList.extend(lootList)
+                    lootDict2 = Event.lootRandom(faction1LiveList, theDead)
+            lootDict = {**lootDict1, **lootDict2}
         elif not faction2LiveList and not faction1LiveList:
-            desc += ' Everyone died in the fighting!' + '\n\nKilled: ' + Event.englishList(deadList)
+            desc += ' Everyone died in the fighting!'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
         allKillers = DefaultOrderedDict(str)
         for dead in faction1DeadList:
@@ -392,9 +391,7 @@ class Event(object):  # Python 2.x compatibility
             killDict = DictToOrderedDict({x: 1.1**(relationships.friendships[str(x)][str(
                 dead)] + 2 * relationships.loveships[str(x)][str(dead)]) for x in faction1})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
-        if injuredList:
-            desc += '\n\nInjured: ' + Event.englishList(injuredList)
-        return(desc, descList, deadList, allKillers)
+        return (desc, deadList, allKillers, lootDict, injuredList)
 
     @staticmethod
     def getFriendlyIfPossible(namedObject):
