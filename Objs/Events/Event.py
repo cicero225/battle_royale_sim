@@ -8,6 +8,7 @@
 from __future__ import division
 
 import random
+import warnings
 from collections import defaultdict, namedtuple, OrderedDict
 from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict, DefaultOrderedDict
 from functools import partial
@@ -158,15 +159,16 @@ class Event(object):  # Python 2.x compatibility
         lootList = []
         for loot in itemList:
             if hasattr(looted, 'inventory'):
-                looted.removeItem(loot, loot.count)
-            # If we wanted to make non-stackable loot acquirable in mass quantity, we'd remove the first check...but what do you even do with two spears?...and it would cause double stats, etc.
-            if not looter.hasThing(loot) or loot.stackable:
-                lootref = looter.addItem(loot, loot.count, isNew=False)
-                if lootref is None:
-                    # We actually have to return it to keep the object from disappearing
-                    looted.addItem(loot, loot.count, isNew=False)
-                else:
-                    lootList.append(lootref)
+                loot = looted.removeAndGet(loot, loot.count)
+            lootref = looter.addItem(loot, loot.count, isNew=False)
+            if lootref is None:
+                # We actually have to return it to keep the object from disappearing
+                looted.addItem(loot, loot.count, isNew=False)
+            else:
+                # Note that we append the original item, which keeps it in memory solely for the loot table.
+                lootList.append(loot)
+        if not lootList:
+            return {}
         return {str(looter): lootList}
 
     @staticmethod
@@ -178,18 +180,39 @@ class Event(object):  # Python 2.x compatibility
         lootDict = {}
         for loot in itemList:
             if hasattr(looted, 'inventory'):
-                looted.removeItem(loot, loot.count)
-            maybeLooters = [looter for looter in looters if not looter.hasThing(
-                loot) or loot.stackable]
-            if maybeLooters:
+                loot = looted.removeAndGet(loot, loot.count)
+            if loot.stackable:
                 for _ in range(loot.count):
+                    trueLooter = random.choice(looters)
+                    lootref = trueLooter.addItem(loot, count=1, isNew=False)
+                    if lootref is None:
+                        # We actually have to return it to keep the object from disappearing, and retrying this random.choice loop is risky.
+                        # Note that here we are accepting that some of the loot returns to the body, but this should not actually be possible (hence the warning)
+                        warnings.warn("Unable to allocate stackable loot:" + str(loot) + " to " + str(trueLooter))
+                        looted.addItem(loot, count=1, isNew=False)
+                    else:
+                        # Note that we append the original item, which keeps it in memory solely for the loot table.
+                        lootdict_ref = lootDict.setdefault(str(trueLooter), [])
+                        for item in lootdict_ref:
+                            if str(item) == str(loot):
+                                item.count += 1
+                                break
+                        else:
+                            lootdict_ref.append(loot) 
+            else:
+                maybeLooters = [looter for looter in looters if not looter.hasThing(loot)]
+                if maybeLooters:
                     # TODO : We do not yet properly handle loot with potential different properties (i.e. two different non-stackable spears). That means the name output here is incorrect.
                     trueLooter = random.choice(maybeLooters)
                     lootref = trueLooter.addItem(loot, isNew=False)
                     if lootref is None:
-                        # We actually have to return it to keep the object from disappearing, and retrying this random.choice loop is risky
-                        looted.addItem(lootref, isNew=False)
-                    lootDict.setdefault(str(trueLooter), []).append(loot)
+                        # We actually have to return it to keep the object from disappearing, and retrying this random.choice loop is risky.
+                        # Note that here we are accepting that some of the loot returns to the body, but this should not actually be possible (hence the warning)
+                        warnings.warn("Unable to allocate nonstackable loot:" + str(loot) + " to " + str(trueLooter))
+                        looted.addItem(loot, isNew=False)
+                    else:
+                        # Note that we append the original item, which keeps it in memory solely for the loot table.
+                        lootDict.setdefault(str(trueLooter), []).append(loot)
         return lootDict
 
     @staticmethod
@@ -271,8 +294,22 @@ class Event(object):  # Python 2.x compatibility
         desc = ''
         lootDict = None
         if len(deadList) < len(people):
+            lootDict = {}
+            # Holy mother of for loops. At least these are small...
             for theDead in deadList:
-                lootDict = Event.lootRandom(liveList, theDead)
+                partialLootDict = Event.lootRandom(liveList, theDead)
+                for name, items in partialLootDict.items():
+                    lootdict_ref = lootDict.setdefault(name, [])
+                    for new_item in items:
+                        for item in lootdict_ref:
+                            if str(item) == str(new_item):
+                                if item.stackable:
+                                    item.count += new_item.count
+                                else:
+                                    warnings.warn("Impossible outcome: non-stackable item looted more than once")
+                                break
+                        else:
+                            lootdict_ref.append(new_item)
         elif len(deadList) == len(people):
             desc += ' Everyone died in the fighting!'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
@@ -378,6 +415,7 @@ class Event(object):  # Python 2.x compatibility
                     lootDict2 = Event.lootRandom(faction2LiveList, theDead)
                 else:
                     lootDict2 = Event.lootRandom(faction1LiveList, theDead)
+            # Note that this lazy approach to merging loot dicts only works because we know they cannot share keys.
             lootDict = {**lootDict1, **lootDict2}
         elif not faction2LiveList and not faction1LiveList:
             desc += ' Everyone died in the fighting!'

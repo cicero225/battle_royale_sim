@@ -10,10 +10,6 @@ import random
 import collections
 
 
-class CannotTakeInstanceOfStackableThing(Exception):
-    pass
-
-
 def contestantIndivActorCallback(actor, baseEventActorWeight, event):
     try:  # Pythonic, etc. Really, it's preferred this way...
         if actor.eventDisabled[event.name]["main"]:
@@ -229,8 +225,11 @@ class Contestant(object):
                      self.statuses if str(x) == str(item)]
         return item_list
 
-    # Returns a reference to the instance of the item itself, which is useful occasionally (but otherwise lets it go out of scope)
-    # Returns None if item invalid.
+    # Returns a reference to the instance of the item in the inventory.
+    # This effectively spawns new item instances if the return value is not None. If it is undesired that new items be created, it
+    # is the responsibility of the caller to ensure the input item and count properly go out of scope/are removed. However, this
+    # function assures that it is not being kept alive otherwise.
+    # Returns None if item invalid (and nothing was transferred).
     def addItem(self, item, count=1, isNew=True, resetItemAllowed=False, extraArguments=None, target=None):
         if isinstance(item, str):
             item = self.stateStore[0]["items"][item]
@@ -250,10 +249,11 @@ class Contestant(object):
             return None
         else:
             possibleItem[0].count += count
-            newItem = item
+            newItem = possibleItem[0]
         self.refreshEventState()
         return newItem
 
+    # Note that if the caller wants the iteminstance itself, removeAndGet is more appropriate.
     def removeItem(self, item, count=1):
         possibleItem = self.hasThing(item)
         if not possibleItem:
@@ -262,22 +262,27 @@ class Contestant(object):
             self.inventory.remove(possibleItem[0])
             possibleItem[0].onRemoval(self)
         elif possibleItem[0].count < count:
-            self.inventory.remove(possibleItem[0])
-            possibleItem[0].onRemoval(self)
             return False
         else:
             possibleItem[0].count -= count
         self.refreshEventState()
         return True
 
-    def removeAndGet(self, item):
-        if item.stackable and not item.distinct:
-            raise CannotTakeInstanceOfStackableThing
+    def removeAndGet(self, item, count=1):
         possibleItem = self.hasThing(item)
         if not possibleItem:
-            return False
-        self.inventory.remove(possibleItem[0])
-        return possibleItem[0]
+            return None
+        if not item.stackable or item.distinct or possibleItem[0].count == count:
+            self.inventory.remove(possibleItem[0])
+            possibleItem[0].onRemoval(self)
+            self.refreshEventState()
+            return possibleItem[0]
+        if possibleItem[0].count < count:
+            return None
+        possibleItem[0].count -= count
+        self.refreshEventState()
+        # We're making a new copy with the right count to pass up.
+        return Item.takeOrMakeInstance(str(item), count=count)
 
     def addStatus(self, status, count=1, target=None):
         possibleStatus = self.hasThing(status)
