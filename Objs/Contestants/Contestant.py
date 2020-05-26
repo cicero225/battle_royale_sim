@@ -239,7 +239,7 @@ class Contestant(object):
                 if target == already_targeted.target:
                     return None
                     # TODO: Distinct items might want to impose other rules restructing duplication.
-            newItem = ItemInstance.takeOrMakeInstance(item, count=count, target=target)
+            newItem = ItemInstance.takeOrMakeInstance(item, count=count, target=target, split_stackable=True)
             if not newItem.checkItemValidity(self, isNew, resetItemAllowed):
                 return None
             if extraArguments is not None:
@@ -265,6 +265,8 @@ class Contestant(object):
             return False
         else:
             possibleItem[0].count -= count
+            if possibleItem[0].count == 0:
+                self.inventory.remove(possibleItem[0])
         self.refreshEventState()
         return True
 
@@ -280,9 +282,11 @@ class Contestant(object):
         if possibleItem[0].count < count:
             return None
         possibleItem[0].count -= count
+        if possibleItem[0].count == 0:
+            self.inventory.remove(possibleItem[0])
         self.refreshEventState()
         # We're making a new copy with the right count to pass up.
-        return Item.takeOrMakeInstance(str(item), count=count)
+        return item.copyOrMakeInstance(str(item), count=count)
 
     def addStatus(self, status, count=1, target=None):
         possibleStatus = self.hasThing(status)

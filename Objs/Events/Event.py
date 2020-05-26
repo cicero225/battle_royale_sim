@@ -198,7 +198,7 @@ class Event(object):  # Python 2.x compatibility
                                 item.count += 1
                                 break
                         else:
-                            lootdict_ref.append(loot) 
+                            lootdict_ref.append(loot.takeOrMakeInstance(loot, count=1, split_stackable=True)) 
             else:
                 maybeLooters = [looter for looter in looters if not looter.hasThing(loot)]
                 if maybeLooters:

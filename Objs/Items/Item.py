@@ -39,6 +39,8 @@ class ItemInstance(object):
     @classmethod
     def copyOrMakeInstance(cls, item, count=1, target=None):
         if hasattr(item, "item"):
+            if count != item.count:
+                raise Exception("Attempt to take stackable item with incorrect count")
             newItem = copy.copy(item)
             newItem.data = copy.deepcopy(item.data)
             newItem.eventHandlers = copy.deepcopy(item.eventHandlers)
@@ -47,9 +49,16 @@ class ItemInstance(object):
         return newItem
 
     @classmethod
-    def takeOrMakeInstance(cls, item, count=1, target=None):
+    def takeOrMakeInstance(cls, item, count=1, target=None, split_stackable=False):
         if hasattr(item, "item"):
-            newItem = item
+            if count == item.count:
+                newItem = item
+            else:
+                if not split_stackable:
+                    raise Exception("Attempt to take stackable item with incorrect count")
+                else:
+                    item.count -= count
+                    return cls(item.item, count=count, target=target)
         else:
             newItem = cls(item, count=count, target=target)
         return newItem
