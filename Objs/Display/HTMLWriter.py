@@ -139,7 +139,8 @@ img {
             is_str = isinstance(event_output.dead[0], str)
             desc += '\nKilled: ' + Event.englishList(event_output.dead, not is_str)
         if event_output.injuries:
-            desc += '\nInjured: ' + Event.englishList(event_output.injuries)
+            is_str = isinstance(event_output.injuries[0], str)
+            desc += '\nInjured: ' + Event.englishList(event_output.injuries, not is_str)
         output_pieces.append(self.addEvent(desc, event_output.display_items, state, preEventInjuries, output_string=True))
         if event_output.loot_table:
             # This will likely need some work.

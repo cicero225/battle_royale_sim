@@ -15,7 +15,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += ' but hurt ' + \
             Event.parseGenderReflexive(mainActor) + ' doing so.'
         mainActor.addStatus(state["statuses"]["Injury"])
-        injuries.append(str(mainActor))
+        injuries = [str(mainActor)]
     else:
         desc += ' and was successfully able to improve ' + \
             Event.parseGenderPossessive(mainActor) + ' skills'
