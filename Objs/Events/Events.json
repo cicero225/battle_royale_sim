@@ -346,7 +346,7 @@
      },
    "FindDeadBody":
      {"phase": ["Day"],
-     "mainWeight": 0.5,
+     "mainWeight": 2,
      "mainModifiers": {"survivalism": 1.0,
                        "cleverness": 1.0},
      "unique": false,
