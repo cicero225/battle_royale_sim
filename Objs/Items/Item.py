@@ -30,6 +30,15 @@ class ItemInstance(object):
                 return
             ITEM_INITIALIZERS[self.item.name](self)
     
+    # Note that this is not same in the sense of being the same item, having the same handlers, etc., which could be done with id(item).
+    # This is just a rough check that it is the "same" item in a gameplay sense.
+    def is_same_item(self, other, ignore_count=True):
+        if isinstance(other, str) or isinstance(other, Item):
+            if self.target is not None or (not ignore_count and (self.count != 1)):
+                return False
+            return self.name == str(other)
+        return (self.name == other.name) and (self.target == other.target) and (ignore_count or (self.count == other.count))        
+    
     # Processes if the combat ability needs to change for this _particular_ combat (rather than in general)
     def RealTimeCombatAbilityChange(self, value, thisContestant, otherContestant):
         if self.item.name not in ITEM_COMBAT_ABILITY_CHANGES:

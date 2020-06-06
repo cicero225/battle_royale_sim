@@ -222,7 +222,7 @@ class Contestant(object):
 
     def hasThing(self, item):
         item_list = [x for x in self.inventory +
-                     self.statuses if str(x) == str(item)]
+                     self.statuses if x.is_same_item(item)]
         return item_list
 
     # Returns a reference to the instance of the item in the inventory.
@@ -234,7 +234,7 @@ class Contestant(object):
         if isinstance(item, str):
             item = self.stateStore[0]["items"][item]
         possibleItem = self.hasThing(item)
-        if not possibleItem or item.distinct:
+        if not possibleItem:
             for already_targeted in possibleItem:
                 if target == already_targeted.target:
                     return None
@@ -267,6 +267,7 @@ class Contestant(object):
             possibleItem[0].count -= count
             if possibleItem[0].count == 0:
                 self.inventory.remove(possibleItem[0])
+                possibleItem[0].onRemoval(self)
         self.refreshEventState()
         return True
 
@@ -274,7 +275,7 @@ class Contestant(object):
         possibleItem = self.hasThing(item)
         if not possibleItem:
             return None
-        if not item.stackable or item.distinct or possibleItem[0].count == count:
+        if not item.stackable or possibleItem[0].count == count:
             self.inventory.remove(possibleItem[0])
             possibleItem[0].onRemoval(self)
             self.refreshEventState()
@@ -282,8 +283,6 @@ class Contestant(object):
         if possibleItem[0].count < count:
             return None
         possibleItem[0].count -= count
-        if possibleItem[0].count == 0:
-            self.inventory.remove(possibleItem[0])
         self.refreshEventState()
         # We're making a new copy with the right count to pass up.
         return item.copyOrMakeInstance(str(item), count=count)
@@ -292,7 +291,7 @@ class Contestant(object):
         possibleStatus = self.hasThing(status)
         if isinstance(status, str):
             status = self.stateStore[0]["statuses"][status]
-        if not possibleStatus or status.distinct:
+        if not possibleStatus:
             self.statuses.append(StatusInstance.takeOrMakeInstance(status, count=count, target=target))
         elif not status.stackable:
             return False
