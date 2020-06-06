@@ -135,9 +135,18 @@ img {
         desc = event_output.description
         if event_output.dead or event_output.injuries:
             desc += "\n"
-        if event_output.dead:
-            is_str = isinstance(event_output.dead[0], str)
-            desc += '\nKilled: ' + Event.englishList(event_output.dead, not is_str)
+        if event_output.dead:           
+            if event_output.list_killers:
+                # Unfortunately, this dict is the exact reverse of the order we want this.
+                reverse_kill_dict = {}
+                for killed, killer in event_output.killer_dict.items():
+                    reverse_kill_dict.setdefault(killer, []).append(killed)
+                for killer, killed in reverse_kill_dict.items():
+                    is_str = isinstance(killed[0], str)
+                    desc += '\n' + killer +  ' kills ' + Event.englishList(killed, not is_str)
+            else:
+                is_str = isinstance(event_output.dead[0], str)
+                desc += '\nKilled: ' + Event.englishList(event_output.dead, not is_str)          
         if event_output.injuries:
             is_str = isinstance(event_output.injuries[0], str)
             desc += '\nInjured: ' + Event.englishList(event_output.injuries, not is_str)

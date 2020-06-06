@@ -21,7 +21,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         return None
     desc = Event.englishList(eventPeople) + " stumbled across " + Event.englishList(itemsFound) + " at the same time. A fight broke out. " + fightDesc
     
-    return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries)
+    return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True)
 
 
 Event.registerEvent("FightOverItems", func)

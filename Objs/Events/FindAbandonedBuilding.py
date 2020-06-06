@@ -64,7 +64,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             return (desc, descList, [x.name for x in fightDead], collections.OrderedDict())
 
         # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-        return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries)
+        return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True)
 
 
 Event.registerEvent("FindAbandonedBuilding", func)

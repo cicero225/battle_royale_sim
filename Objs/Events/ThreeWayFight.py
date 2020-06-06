@@ -9,7 +9,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
         descList, state['allRelationships'], state['settings'])
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-    return EventOutput(desc + fightDesc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries)
+    return EventOutput(desc + fightDesc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True)
 
 
 Event.registerEvent("ThreeWayFight", func)

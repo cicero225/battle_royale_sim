@@ -16,8 +16,8 @@ from Objs.Items.Item import ItemInstance
 
 # TODO: Refactor the overall program to always return this named tuple? For now though, this is the preferred event output and standard tuples are deprecated.
 # This should probably really be typed.
-EventOutput = namedtuple("EventOutput", ["description", "display_items", "dead", "killer_dict", "consumed_by_event_override", "end_game_immediately", "loot_table", "injuries"],
-                         defaults=(None, None, False, None, None))
+EventOutput = namedtuple("EventOutput", ["description", "display_items", "dead", "killer_dict", "consumed_by_event_override", "end_game_immediately", "loot_table", "injuries", "list_killers"],
+                         defaults=(None, None, False, None, None, False))
     
 
 class Event(object):  # Python 2.x compatibility
