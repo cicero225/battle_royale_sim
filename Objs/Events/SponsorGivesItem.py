@@ -28,6 +28,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     while itemInstance is None:
         gift = random.choice(options)
         itemInstance = mainActor.addItem(gift, isNew=True, resetItemAllowed=True)
+    assert(itemInstance.target != mainActor)  # Sentinal for a bug we were having for a long while. If this doesn't trigger for a long while, this can be deleted.
     # To get the actual item name, we need to get the name of the item INSTANCE
     friendlyName = itemInstance.friendly
     state["allRelationships"].IncreaseFriendLevel(

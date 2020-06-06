@@ -26,9 +26,9 @@ PRE_GAME_ITEM_RULES = [LoveGlobalDeathRule]
 # (e.g. it needs to be factored into the Item or ItemInstance constructor). Try not to use this for behavior that could
 # be incorporated in some other way.
 
-def DossierInitialization(itemInstance, remake=False):
-    if itemInstance.target is None:
-        lookupList = [v for k, v in itemInstance.stateStore[0]["contestants"].items() if v.alive and (itemInstance.target is None or itemInstance.target.name != k)]
+def DossierInitialization(itemInstance, remake=False, forbidden_target=None):
+    if remake or itemInstance.target is None:
+        lookupList = [v for k, v in itemInstance.stateStore[0]["contestants"].items() if v.alive and (forbidden_target is None or forbidden_target.name != k)]
         if not lookupList:  # edge case, only one person is still alive.
             return False
         itemInstance.target = random.choice(lookupList) 
@@ -63,7 +63,7 @@ def DossierRestrictions(itemInstance, contestant, isNew, resetItemAllowed):
     if isNew and itemInstance.target == contestant and not resetItemAllowed:
         return False
     if itemInstance.target == contestant and resetItemAllowed:
-        return DossierInitialization(itemInstance, remake=True)
+        return DossierInitialization(itemInstance, remake=True, forbidden_target=itemInstance.target)
     return True
 
 ITEM_RESTRICTIONS = collections.OrderedDict({
