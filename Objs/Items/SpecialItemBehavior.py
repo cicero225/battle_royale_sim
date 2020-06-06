@@ -117,6 +117,26 @@ ITEM_ON_REMOVAL = collections.OrderedDict({
 "Love": LoveOnRemoval
 })
 
+# For these display rules, returning None implies standard processing. Returning "" implies nothing.
+def DossierDisplayRule(itemInstance, contestant, state):
+    # Don't display dossiers for dead people (though we keep them around in case of resurrection.)
+    if itemInstance.target is None or itemInstance.target.alive:
+        return None
+    return ""
+
+ITEM_DISPLAY_OVERRIDE = collections.OrderedDict({
+"Dossier": DossierDisplayRule
+})
+
+def DossierImageDisplayRule(itemInstance, contestant, state):
+    # Don't display dossiers for dead people (though we keep them around in case of resurrection.)
+    if itemInstance.target is None or itemInstance.target.alive:
+        return None
+    return ""
+
+ITEM_IMAGE_DISPLAY_OVERRIDE = collections.OrderedDict({
+"Dossier": DossierImageDisplayRule
+})
 
 # This section allows items to accept extra arguments (as a dict) at creation time. Note that this must be explicitly provided in the
 # code - if an item may be made arbitrarily, it cannot strictly depend on this being called to function.

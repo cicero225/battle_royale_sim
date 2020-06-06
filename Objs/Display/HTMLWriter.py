@@ -119,7 +119,8 @@ img {
                             potentialRegex = re.compile(r"(?<![\w\<])(" + re.escape(html.escape(str(contestant))) + r")(?![\w\>])")
                             self.contestant_regexes[str(contestant)] = potentialRegex
                         desc = potentialRegex.sub(html.escape(str(contestant)) + extensionString, desc)
-                tempStringList.append("<img src='" + html.escape(contestant.imageFile) + "'>")
+                if contestant.imageFile is not None:
+                    tempStringList.append("<img src='" + html.escape(contestant.imageFile) + "'>")
             tempStringList.append("<br>")
         tempStringList.append(HTMLWriter.wrap(desc, "eventnormal"))
         outputString = '\n'.join(tempStringList)
@@ -157,7 +158,10 @@ img {
             desc = ""
             for name, items in event_output.loot_table.items():
                 lootedList.extend(items)
-                desc += name + " looted " + Event.englishList(items) + "\n"
+                # Because some items may choose not to display (e.g. Dossiers for dead people), we need to check if the resulting string is even popualted.
+                maybe_string = Event.englishList(items)
+                if maybe_string:
+                    desc += name + " looted " + maybe_string + "\n"
             output_pieces.append(self.addEvent(desc, lootedList, state, preEventInjuries, output_string=True))
         self.bodylist.append(HTMLWriter.wrap('<br/>'.join(output_pieces), "p"))
         

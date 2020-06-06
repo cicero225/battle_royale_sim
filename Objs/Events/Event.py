@@ -439,6 +439,9 @@ class Event(object):  # Python 2.x compatibility
         except TypeError:
             countModifier = ""
         try:
+            potential_friendly = namedObject.friendly
+            if not potential_friendly:
+                return None
             return namedObject.friendly + countModifier
         except AttributeError:
             return namedObject.name + countModifier
@@ -454,13 +457,16 @@ class Event(object):  # Python 2.x compatibility
                 def stringGetter(x): return x
         if not thingList:
             return ''
-        thingList = list(thingList)
+        thingList = [stringGetter(x) for x in thingList]
+        thingList = [x for x in thingList if x is not None]
+        if not thingList:
+            return ""
         if len(thingList) == 1:
-            return stringGetter(thingList[0])
+            return thingList[0]
         elif len(thingList) == 2:
-            return stringGetter(thingList[0]) + ' and ' + stringGetter(thingList[1])
+            return thingList[0] + ' and ' + thingList[1]
         else:
-            return ', '.join(stringGetter(x) for x in thingList[:-1]) + ' and ' + stringGetter(thingList[-1])
+            return ', '.join(thingList[:-1]) + ' and ' + thingList[-1]
 
     # Puts a message in the display queue that will be consumed after the current event runs. No order guarantee is provided.
     # The entries are identical to the arguments for HTMLWriter.addEvent. Provide state if you want (injured) annotations.

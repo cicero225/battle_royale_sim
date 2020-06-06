@@ -1,6 +1,6 @@
 import collections
 import copy
-from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS, ITEM_ON_ACQUISITION, ITEM_ON_REMOVAL
+from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS, ITEM_ON_ACQUISITION, ITEM_ON_REMOVAL, ITEM_DISPLAY_OVERRIDE, ITEM_IMAGE_DISPLAY_OVERRIDE
 
 # stats stack, other things don't, at the moment
 
@@ -87,7 +87,28 @@ class ItemInstance(object):
         newInstance.eventHandlers = copy.deepcopy(self.eventHandlers, memo)
         return newInstance
 
+    # TODO: maybe just rename things so it has a proper internal and external friendly?
+    def friendly_processor(self):
+        special_display = ITEM_DISPLAY_OVERRIDE.get(self.item.name)
+        if special_display is None:
+            return None
+        return special_display(self, self.owner, self.stateStore[0])
+        
+    def image_file_processor(self):
+        special_display = ITEM_IMAGE_DISPLAY_OVERRIDE.get(self.item.name)
+        if special_display is None:
+            return None
+        return special_display(self, self.owner, self.stateStore[0])
+
     def __getattribute__(self, attr):
+        if attr == "friendly":
+            try_special = self.friendly_processor()
+            if try_special is not None:
+                return try_special
+        elif attr == "imageFile":
+            try_special = self.image_file_processor()
+            if try_special is not None:
+                return try_special
         try:
             return object.__getattribute__(self, attr)
         except AttributeError:
