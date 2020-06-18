@@ -191,10 +191,10 @@ class Event(object):  # Python 2.x compatibility
                         warnings.warn("Unable to allocate stackable loot:" + str(loot) + " to " + str(trueLooter))
                         looted.addItem(loot, count=1, isNew=False)
                     else:
-                        # Note that we append the original item, which keeps it in memory solely for the loot table.
+                        # Note that we make a new item just for loot tracking, but this is distinct from what's in the memory of the game.
                         lootdict_ref = lootDict.setdefault(str(trueLooter), [])
                         for item in lootdict_ref:
-                            if str(item) == str(loot):
+                            if item.is_same_item(str(loot)):
                                 item.count += 1
                                 break
                         else:

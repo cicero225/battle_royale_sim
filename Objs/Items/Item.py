@@ -32,9 +32,14 @@ class ItemInstance(object):
     
     # Note that this is not same in the sense of being the same item, having the same handlers, etc., which could be done with id(item).
     # This is just a rough check that it is the "same" item in a gameplay sense.
-    def is_same_item(self, other, ignore_count=True):
-        if isinstance(other, str) or isinstance(other, Item):
-            if self.target is not None or (not ignore_count and (self.count != 1)):
+    def is_same_item(self, other, ignore_count=True, strict=False):
+        if strict and not isinstance(other, ItemInstance):
+            raise "Illegal strict ItemInstance comparison."
+        # We allow "other" to be a string for convenience. In that case the only possible meaning is a simple name check.
+        if isinstance(other, str):
+            return self.name == other         
+        if isinstance(other, Item):
+            if not ignore_count and (self.count != 1):
                 return False
             return self.name == str(other)
         return (self.name == other.name) and (self.target == other.target) and (ignore_count or (self.count == other.count))        
@@ -46,9 +51,9 @@ class ItemInstance(object):
         return ITEM_COMBAT_ABILITY_CHANGES[self.item.name](self, value, thisContestant, otherContestant)
 
     @classmethod
-    def copyOrMakeInstance(cls, item, count=1, target=None):
-        if hasattr(item, "item"):
-            if count != item.count:
+    def copyOrMakeInstance(cls, item, count=None, target=None):
+        if isinstance(item, ItemInstance):
+            if count is not None and count != item.count:
                 raise Exception("Attempt to take stackable item with incorrect count")
             newItem = copy.copy(item)
             newItem.data = copy.deepcopy(item.data)
@@ -57,17 +62,23 @@ class ItemInstance(object):
             newItem = cls(item, count=count, target=target)
         return newItem
 
+    # Note: if split_stackable is true the item is _never_ taken by reference, since the behavior
+    # would otherwise be inconsistent depending on if we're taking the whole stack or not. This
+    # leaves a residual item with count=0, which it is the caller's responsibility to destroy.
     @classmethod
     def takeOrMakeInstance(cls, item, count=1, target=None, split_stackable=False):
-        if hasattr(item, "item"):
+        if isinstance(item, ItemInstance):
             if count == item.count:
+                if split_stackable:
+                    item.count -= count
+                    return cls(item.item, count=count, target=item.target)
                 newItem = item
             else:
                 if not split_stackable:
                     raise Exception("Attempt to take stackable item with incorrect count")
                 else:
                     item.count -= count
-                    return cls(item.item, count=count, target=target)
+                    return cls(item.item, count=count, target=item.target)
         else:
             newItem = cls(item, count=count, target=target)
         return newItem

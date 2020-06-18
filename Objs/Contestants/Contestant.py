@@ -231,14 +231,18 @@ class Contestant(object):
     # function assures that it is not being kept alive otherwise.
     # Returns None if item invalid (and nothing was transferred).
     def addItem(self, item, count=1, isNew=True, resetItemAllowed=False, extraArguments=None, target=None):
+        possibleItem = self.hasThing(item)
         if isinstance(item, str):
             item = self.stateStore[0]["items"][item]
-        possibleItem = self.hasThing(item)
-        if not possibleItem:
-            for already_targeted in possibleItem:
-                if target == already_targeted.target:
-                    return None
-                    # TODO: Distinct items might want to impose other rules restructing duplication.
+        if item.distinct or not possibleItem:
+            for already_targeted in possibleItem:  # Note that if anything is in here this implies item.distinct = True
+                if target is not None and target == already_targeted.target:
+                    if item.stackable:
+                        possibleItem[0].count += count
+                        newItem = possibleItem[0]
+                        return newItem
+                    else:
+                        return None
             newItem = ItemInstance.takeOrMakeInstance(item, count=count, target=target, split_stackable=True)
             if not newItem.checkItemValidity(self, isNew, resetItemAllowed):
                 return None
@@ -282,10 +286,8 @@ class Contestant(object):
             return possibleItem[0]
         if possibleItem[0].count < count:
             return None
-        possibleItem[0].count -= count
         self.refreshEventState()
-        # We're making a new copy with the right count to pass up.
-        return item.copyOrMakeInstance(str(item), count=count)
+        return item.takeOrMakeInstance(str(item), count=count, target=target, split_stackable=True)
 
     def addStatus(self, status, count=1, target=None):
         possibleStatus = self.hasThing(status)
