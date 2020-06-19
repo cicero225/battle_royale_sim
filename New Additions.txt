@@ -1,6 +1,35 @@
-Figure out html tables
-Change NeededFriendLevel/NeededLoveLevel to permit an "or" condition, then modify events accordingly.
+"AmineHsu, Miyako, Skarmory and Sakura Kyouko found an abandoned building, and found Medicine and Dossier."
 
+Certain group events only can force lover kills if the lovers are the only people involved.
 
+Fix logging events for people who are already dead.
 
+It is possible to get multiple dossiers for the same person. Is this okay?
 
+Add more evening events
+
+Molotov cocktail should destroy loot.
+
+Stealing items event
+
+Dorryza (Hypothermic) managed to successfully sneak in and grab a Dossier for Dorryza (Hypothermic)
+
+Primary Trait: Gladiatorial
+Secondary Trait: Gladiatorial
+
+Cleverness (chance to bail from fights)
+
+No sponsor cheat on last day
+
+Output one giant html file
+
+Misc:
+Move Lc0/SF to contestants
+
+ people in relationships heal each other with the medkit
+
+no one on the audience really noticed
+on my end it feels like dossiers are far too present for how good they actually are
+maybe make them so they have a bonus to doing events kind of like positive/negative relationship?
+
+give kyouko a bespoke apple event lol
