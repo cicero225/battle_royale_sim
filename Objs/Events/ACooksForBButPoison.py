@@ -49,7 +49,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         if not fightDeadList:
             desc += ' The fight was a draw, and the two sides departed, friends no more.'
             return (desc, descList, [])
-        desc += " " + fightDesc.capitalize()
+        desc += fightDesc
         return (desc, descList, [x.name for x in fightDeadList], allKillers)
 
     else:

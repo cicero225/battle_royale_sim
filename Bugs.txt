@@ -1,4 +1,9 @@
-"AmineHsu, Miyako, Skarmory and Sakura Kyouko found an abandoned building, and found Medicine and Dossier."
+(Some) Outstanding bugs:
+------------------------
+
+In a fight, if there was preexisting loot, it may not get distributed after the fight - see Event.fight, near the bottom
+
+If everyone dies in a fight, we still get messages about the participants hating each other/being dire enemies
 
 Certain group events only can force lover kills if the lovers are the only people involved.
 
@@ -6,7 +11,8 @@ Fix logging events for people who are already dead.
 
 It is possible to get multiple dossiers for the same person. Is this okay?
 
-Add more evening events
+Add more evening events 
+    - marshmallows with campfires? increase happiness or somesuch stats maybe
 
 Molotov cocktail should destroy loot.
 

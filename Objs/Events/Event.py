@@ -228,7 +228,7 @@ class Event(object):  # Python 2.x compatibility
     # If it is possible for people in relationships (or other murder banning conditions) to trigger this method, you must handle
     # the edge case where this fails to find a working result and returns None, None, None, None
     @staticmethod  
-    def fight(people, relationships, settings, deferActualKilling=False, forceRelationshipFight=False):
+    def fight(people, relationships, settings, deferActualKilling=False, forceRelationshipFight=False, preexistingLoot=None):
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
         alreadyInjured = sorted(
             list(set(str(person) for person in people if person.hasThing("Injury"))))
@@ -289,8 +289,17 @@ class Event(object):  # Python 2.x compatibility
                     person1.addStatus(
                         Event.stateStore[0]["statuses"]["Injury"])
         if not deadList:
-            desc = ' No one was killed.'
-            return desc, [], None, None, injuredList
+            # if there was already some loot, decide if it was destroyed in the fighting or not
+            if preexistingLoot:
+                if random.randint(0, 1):
+                    desc = ' The loot was destroyed in the fighting, but no one was killed.'
+                    return desc, [], None, None, injuredList
+                else:
+                    desc = ' No one was killed, and the loot was eventually distributed.'
+                    return desc, [], None, preexistingLoot, injuredList
+            else:
+                desc = ' No one was killed.'
+                return desc, [], None, None, injuredList
         desc = ''
         lootDict = None
         if len(deadList) < len(people):
@@ -308,7 +317,7 @@ class Event(object):  # Python 2.x compatibility
                                 else:
                                     warnings.warn("Impossible outcome: non-stackable item looted more than once")
                                 break
-                        else:
+                        else: # uh, was this supposed to be shifted over? pretty sure this never executes
                             lootdict_ref.append(new_item)
         elif len(deadList) == len(people):
             desc += ' Everyone died in the fighting!'
@@ -326,6 +335,8 @@ class Event(object):  # Python 2.x compatibility
         for dead in deadList:
             if not deferActualKilling:
                 dead.kill()
+        #todo: we need to combine loot from dead people with preexistingLoot
+        #      pretty sure we should extract some of the logic we have above for creating the loot from dead people, as it seems similar?
         return desc, deadList, allKillers, lootDict, injuredList
 
     @staticmethod

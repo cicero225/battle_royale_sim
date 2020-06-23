@@ -109,7 +109,7 @@ def DossierOnAcquisition(itemInstance, contestant, state):
     if itemInstance.target == contestant:
         from Objs.Events.Event import Event  # Again, this should really be in Arenautils...
         # Destroy self-dossiers.
-        state["announcementQueue"].append((contestant.name + " destroyed a dossier about " + Event.parseGenderReflexive(contestant) + ".",
+        state["announcementQueue"].append((contestant.name + " destroyed a Dossier about " + Event.parseGenderReflexive(contestant) + ".",
                                           [contestant, itemInstance], state, {}))
         contestant.removeItem(itemInstance, itemInstance.count)
 

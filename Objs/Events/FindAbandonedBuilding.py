@@ -30,19 +30,15 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                     desc += ' Violence broke out due to frustration.'
                     desc += fightDesc
         elif whatHappens == 1:
-            numItems = random.randint(1, 2)
-            lootDict = Event.lootRandom(eventPeople, random.sample(list(state['items'].values()), 2))
-            lootList = set()
-            for x in lootDict.values():
-                for item in x:
-                    if str(item) not in lootList:
-                        lootList.add(str(item))
-            desc += ' and found ' + Event.englishList(lootList, False) + '.'
+            # get one or two random pieces of loot
+            lootDict = Event.lootRandom(eventPeople, random.sample(list(state['items'].values()), random.randint(1, 2)))
+            desc += ' and found sweet loot!' # let the loot be described separately
             if len(eventPeople) > 1:
                 probViolence = 0.5 - relationships.groupCohesion(eventPeople) / 100
                 if random.random() < probViolence:
+                    preexistingLoot = lootDict
                     fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
-                        eventPeople, relationships, state['settings'])
+                        eventPeople, relationships, state['settings'], False, False, preexistingLoot)
                     if fightDesc is None:
                         continue    
                     desc += ' A fight broke out over the loot.'
@@ -57,8 +53,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                 if len(eventPeople) > 1:
                     desc += 'Everyone escaped safely.'
                 else:
-                    desc += Event.parseGenderSubject(
-                        eventPeople[0]) + ' escaped safely.'
+                    desc += Event.parseGenderSubject(eventPeople[0]).capitalize() + ' escaped safely.'
+                     
             # This must be done separately because it assigns no killers
             # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
             return (desc, descList, [x.name for x in fightDead], collections.OrderedDict())

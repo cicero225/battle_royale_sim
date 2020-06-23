@@ -461,7 +461,7 @@ class MegucaArena:
                 thisDay = self.phases[str(turnNumber[0])]
             else:
                 # process random
-                # Default phases have a fixed overall rate of occurence
+                # Default phases have a fixed overall rate of occurrence
                 roll = random.random()
                 if roll < self.phases["default"]["prob"]:
                     thisDay = self.phases["default"]
