@@ -53,7 +53,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
 
     # If character has ever killed anyone, initial 1/3 chance this becomes a haunting event. (affected by stability)
     # logistic
-    hauntprob = 1/(1 + exp(3 - len(state["callbackStore"]["killCounter"][str(mainActor)]) + (mainActor.stats["stability"] - 5) * self.settings['statInfluence'] * 0.4))
+    hauntprob = 1
+    # hauntprob = 1/(1 + exp(3 - len(state["callbackStore"]["killCounter"][str(mainActor)]) + (mainActor.stats["stability"] - 5) * self.settings['statInfluence'] * 0.4))
     if state["callbackStore"]["killCounter"][str(mainActor)] and random.random() < hauntprob:
         haunter = state["contestants"][str(random.choice(state["callbackStore"]["killCounter"][str(mainActor)]))]
         desc = str(mainActor) + " was haunted by the ghost of " + str(haunter) + " and unable to sleep or make a fire."
@@ -61,7 +62,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(
                 data={"day": state["turnNumber"][0]}))
         mainActor.permStatChange({"stability": random.randint(-2,0)})
-        return (desc, descList, [])
+        return EventOutput(desc, descList, [], no_contact=[haunter])
     
     # Unless character already has clean water, 50% chance (potentially of the remaining 2/3) this becomes a clean water event
     if not mainActor.hasThing("Clean Water"):

@@ -8,6 +8,7 @@ def spreadDisease(thisWriter, eventOutputs, thisEvent, state):
     # This happens fairly often, so might as well shortcut this
     if len(eventOutputs[1]) < 2:
         return
+    no_contact = [] if eventOutputs.no_contact is None else [str(x) for x in eventOutputs.no_contact]
     for disease, disease_item in state["statuses"].items():
         disease_stats = disease_item.rawData.get("contagious")
         if disease_stats is None:
@@ -18,7 +19,7 @@ def spreadDisease(thisWriter, eventOutputs, thisEvent, state):
             continue
         # descContestants, a more reliable guide to who was involved than eventOutputs[4], even if it exists, because we care about everyone involved
         potentialContestants = [
-            x for x in eventOutputs[1] if str(x) in state["contestants"]]
+            x for x in eventOutputs[1] if str(x) in state["contestants"] and str(x) not in no_contact]
         # note some people here will be dead, but are still valid disease vectors (but shouldn't _catch_ a disease)
         hasDisease = [x for x in potentialContestants if x.hasThing(disease)]
         if not hasDisease:

@@ -1,6 +1,8 @@
 (Some) Outstanding bugs:
 ------------------------
 
+Make a fun ectoplasm disease from haunting?
+
 In a fight, if there was preexisting loot, it may not get distributed after the fight - see Event.fight, near the bottom
 
 If everyone dies in a fight, we still get messages about the participants hating each other/being dire enemies
