@@ -32,6 +32,10 @@ def spreadDisease(thisWriter, eventOutputs, thisEvent, state):
             for sickPerson in hasDisease:
                 if random.random() < chanceSpread:
                     contestant.addStatus(disease)
+                    output_str = str(contestant) + " caught " + state["statuses"][disease].friendly + " from " + str(sickPerson)
+                    if thisWriter is None:
+                        print(output_str)
+                        break
                     thisWriter.addEvent(str(contestant) + " caught " + state["statuses"][disease].friendly + " from " + str(
                         sickPerson), [contestant, state["statuses"][disease], sickPerson])
                     break

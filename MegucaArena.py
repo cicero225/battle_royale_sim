@@ -637,6 +637,8 @@ class MegucaArena:
                                 thisWriter.addEmptyLines(3)
                             else:
                                 print(desc)
+                                for callback in self.callbacks["postEventWriterCallbacks"]:
+                                    callback(None, eventOutputs, thisevent, self.state)
 
                         # Check if everyone is now dead...
                         if all(not x.alive for x in liveContestants.values()) and (len(eventOutputs) < 6 or not eventOutputs[5]):

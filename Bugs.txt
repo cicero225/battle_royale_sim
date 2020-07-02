@@ -41,3 +41,10 @@ on my end it feels like dossiers are far too present for how good they actually 
 maybe make them so they have a bonus to doing events kind of like positive/negative relationship?
 
 give kyouko a bespoke apple event lol
+
+
+Refactoring:
+
+The Fever spreading callback seems a bit legacy -- it should really run in PostEventCallbacks and push an announcement to the announcement queue, not run in postEventWriterCallbacks.
+
+It would be more principled if the non-html output method (just print text out) had its own interface analogous to the HTMLWriter
