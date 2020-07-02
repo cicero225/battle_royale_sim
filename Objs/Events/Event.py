@@ -61,6 +61,10 @@ class Event(object):  # Python 2.x compatibility
     def registerInsertedCallback(cls, callbackLocation, callback):
         cls.inserted_callbacks.setdefault(
             callbackLocation, []).append(callback)
+            
+    @classmethod
+    def registerDebug(cls, callback):
+        cls.registerInsertedCallback("eventDebug", callback)
 
     @staticmethod
     def getNamedCallback(callback):

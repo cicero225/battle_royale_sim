@@ -312,6 +312,10 @@ class MegucaArena:
             "phasesRun": {},
             "announcementQueue": []
         }))  # Allows for convenient passing of the entire game state to anything that needs it (usually events)
+        self.event_debug_info = ArenaUtils.DictToOrderedDict({
+        "pre_state": {},
+        "event_data": {}
+        })
         # An unfortunate bit of split processing
         for sponsor in self.sponsors.values():
             sponsor.initializeTraits(self.state)
@@ -379,6 +383,7 @@ class MegucaArena:
             ArenaUtils.logKills
         ]
 
+        # This has to be capable of accepting a None thisWriter, for stat-collection mode.
         postEventWriterCallbacks = [  # For piggy-backing after events if you need to write to the main HTML. Args: thisWriter, eventOutputs, thisEvent, state. Returns: None.
             ArenaUtils.relationshipUpdate
         ]
@@ -397,6 +402,10 @@ class MegucaArena:
         
         postDayCallbacks = [  # Things that happen after each day. Args: state. Returns: None.
             self.allRelationships.decay
+        ]
+        
+        eventDebug = [  # Functions that can be used to check the inputs and outputs of events. Args: self.event_debug_info, self.state, EventOutput  Returns: bool, message.
+        # Do not _ever_ modify state in here. Return True if passes, False and a message if fails.
         ]
 
         if PRINTHTML:
@@ -424,6 +433,7 @@ class MegucaArena:
                                                        "postPhaseCallbacks": postPhaseCallbacks,
                                                        "postDayCallbacks": postDayCallbacks,
                                                        "postGameCallbacks": postGameCallbacks,
+                                                       "eventDebug": eventDebug
                                                        })
 
         # loophole that allows event-defining and item/status-defining files to slip callbacks in
@@ -608,6 +618,15 @@ class MegucaArena:
                             if resetEvent:
                                 continue
                             if proceedAsUsual:
+                                if debug:
+                                    self.event_debug_info["pre_state"] = copy.deepcopy(self.state)
+                                    self.event_debug_info["event_data"] = {  # Note that we do not store objects directly, because that would require more deep-copying and we already have it.
+                                        "eventName": eventName,
+                                        "mainActor": contestantKey,
+                                        "participants": [str(x) for x in participants],
+                                        "victims": [str(x) for x in victims],
+                                        "sponsorsHere": [str(x) for x in sponsorsHere]
+                                    }
                                 eventOutputs = thisevent.doEvent(
                                     self.contestants[contestantKey], self.state, participants, victims, sponsorsHere)
                                 if not eventOutputs:
@@ -639,6 +658,14 @@ class MegucaArena:
                                 print(desc)
                                 for callback in self.callbacks["postEventWriterCallbacks"]:
                                     callback(None, eventOutputs, thisevent, self.state)
+                        if debug:
+                            for callback in self.callbacks["eventDebug"]:
+                                result, message = callback(self.event_debug_info, self.state, eventOutputs)
+                                if not result:
+                                    if debug == 1:
+                                        print(message)
+                                    else:
+                                        raise AssertionError(message)
 
                         # Check if everyone is now dead...
                         if all(not x.alive for x in liveContestants.values()) and (len(eventOutputs) < 6 or not eventOutputs[5]):
