@@ -161,3 +161,29 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
 
 
 Event.registerEvent("MakeCampfire", func)
+
+
+# Debug functions for this event.
+
+# Check that the haunting event never spreads Fever from the ghost. We detect Haunting here by checking for Contestants in the DescList that were dead at the _beginning_ of the event.
+def CheckHauntNoFever(event_info, state, event_outputs):
+    if event_info["event_data"]["eventName"] != "MakeCampfire":
+        return True, None
+    mainActor = event_info["event_data"]["mainActor"]
+    # Check if the current mainActor has no fever. If so, return.
+    if not state["contestants"][mainActor].hasThing("Fever"):
+        return True, None
+    # Check if the pre-event mainActor had fever. If so, return.
+    if event_info["pre_state"]["contestants"][mainActor].hasThing("Fever"):
+        return True, None
+    # mainActor caught Fever somehow. Is this a haunting event?
+    from Objs.Contestants.Contestant import Contestant
+    # Find contestants listed in the event_outputs that aren't the mainActor.
+    for item in event_outputs.display_items:
+        if isinstance(item, Contestant) and str(item) != event_info["event_data"]["mainActor"]:
+            if not event_info["pre_state"]["contestants"][str(item)].alive:
+                # This is a haunting event, but mainActor caught Fever. This is an error.
+                return False, "CheckHauntNoFever failed"
+    return True, None
+
+Event.registerDebug(CheckHauntNoFever)
