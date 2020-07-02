@@ -4,6 +4,7 @@
 # In case of Python 2+. The Python 3 implementation is way less dumb.
 from __future__ import division
 
+import argparse
 import sys
 import copy
 import os
@@ -30,7 +31,6 @@ from Objs.Items import ItemCallbacks
 from Objs.Display.HTMLWriter import HTMLWriter
 
 PRINTHTML = True
-DEBUG = True
 STATSDEBUG = collections.OrderedDict()
 CONFIG_FILE_PATHS = {"settings": "Settings.json",
                      "phases": "Phases.json",
@@ -261,7 +261,7 @@ class MegucaArena:
             sponsor.contestantStatFill(statTemplate)
             sponsor.InitializeEventModifiers(self.events) 
         
-    def main(self):
+    def main(self, debug=0):
         """The main for the battle royale sim"""
 
         # List of settings as I come up with them. It can stay as a dict. THIS IS OUT OF DATE.
@@ -586,7 +586,7 @@ class MegucaArena:
                                 if len(possibleParticipantEventWeights[eventName]) - list(possibleParticipantEventWeights[eventName].values()).count(0) < selectionState.trueNumRoles["participant"][eventName]:
                                     # abort event
                                     continue
-                            if DEBUG:
+                            if debug:
                                 STATSDEBUG["state"] = self.state
                                 STATSDEBUG["indivProb"] = selectionState.indivProb
                                 STATSDEBUG["eventParticipantWeights"] = selectionState.eventWeights["participant"][eventName]
@@ -729,29 +729,29 @@ class MegucaArena:
 class TooManyDays(Exception):
     pass
 
-def postmortem():
-    if not DEBUG:
+def postmortem(debug=0):
+    if not debug:
         return
     import pdb
     _, _, tb = sys.exc_info()
     traceback.print_exc()
     pdb.post_mortem(tb)
 
-def statCollection():  # expand to count number of days, and fun stuff like epiphany targets?
+def statCollection(num, debug=0):  # expand to count number of days, and fun stuff like epiphany targets?
     statDict = ArenaUtils.DefaultOrderedDict(int)
     numErrors = 0
     days = []
     global PRINTHTML
     PRINTHTML = False
-    for _ in range(0, 100):
+    for _ in range(0, num):
         try:
-            winner, day = MegucaArena(CONFIG_FILE_PATHS).main()
+            winner, day = MegucaArena(CONFIG_FILE_PATHS).main(debug=debug)
             statDict[winner] += 1
             days.append(day)
         except TooManyDays:
             pass
         except Exception:
-            postmortem()
+            postmortem(debug=debug)
             numErrors += 1
 
     print(statDict)
@@ -762,22 +762,28 @@ def statCollection():  # expand to count number of days, and fun stuff like epip
     print({x: round(y / totEvents, 3)
            for x, y in STATSDEBUG["allEvents"].items()})
 
+parser = argparse.ArgumentParser(description='Run the battle royale sim!')
+parser.add_argument('--stats', type=int, default=0, help='Run function in stat collection mode. Provide the number of games to run.')
+parser.add_argument('--debug', type=int, default=0, help='Run debug code? (expensive). Set to 1 to print out failed assertions, 2 to raise Exceptions instead.')
+parser.add_argument('--loadseed', action='store_true', help='Load in random seed from RSEED_BACKUP?')
+args = parser.parse_args()
+
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == '--stats':
-        statCollection()
+    if args.stats:
+        statCollection(num=args.stats, debug=args.debug)
     else:
         # this is deliberately mutually exclusive with "--stats"
-        if len(sys.argv) > 1 and sys.argv[1] == '--loadseed':
+        if args.loadseed:
             with open("RSEED_BACKUP", "rb") as f:
                 lograndstate = pickle.load(f)
-            random.setstate(lograndstate)
+            random.setstate(lograndstate) 
         else:
             lograndstate = random.getstate()
             with open("RSEED_BACKUP", "wb") as f:
                 pickle.dump(lograndstate, f)
         try:
-            MegucaArena(CONFIG_FILE_PATHS).main()
+            MegucaArena(CONFIG_FILE_PATHS).main(debug=args.debug)
         except Exception as e:
-            postmortem()
+            postmortem(debug=args.debug)
             raise e
 
