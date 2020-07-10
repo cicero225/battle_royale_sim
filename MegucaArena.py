@@ -24,6 +24,7 @@ from Objs.Items.Status import Status
 from Objs.Sponsors.Sponsor import Sponsor, contestantIndivActorWithSponsorsCallback
 from Objs.World.World import World
 from Objs.Relationships.Relationship import Relationship
+from Objs.Utilities.ArenaEnums import DebugMode
 import Objs.Utilities.ArenaUtils as ArenaUtils
 from Objs.Events import *
 # If we get more stuff here, we're going to have to do something better
@@ -261,7 +262,7 @@ class MegucaArena:
             sponsor.contestantStatFill(statTemplate)
             sponsor.InitializeEventModifiers(self.events) 
         
-    def main(self, debug=0):
+    def main(self, debug=DebugMode.OFF):
         """The main for the battle royale sim"""
 
         # List of settings as I come up with them. It can stay as a dict. THIS IS OUT OF DATE.
@@ -596,7 +597,7 @@ class MegucaArena:
                                 if len(possibleParticipantEventWeights[eventName]) - list(possibleParticipantEventWeights[eventName].values()).count(0) < selectionState.trueNumRoles["participant"][eventName]:
                                     # abort event
                                     continue
-                            if debug:
+                            if debug != DebugMode.OFF:
                                 STATSDEBUG["state"] = self.state
                                 STATSDEBUG["indivProb"] = selectionState.indivProb
                                 STATSDEBUG["eventParticipantWeights"] = selectionState.eventWeights["participant"][eventName]
@@ -618,7 +619,7 @@ class MegucaArena:
                             if resetEvent:
                                 continue
                             if proceedAsUsual:
-                                if debug:
+                                if debug != DebugMode.OFF:
                                     self.event_debug_info["pre_state"] = copy.deepcopy(self.state)
                                     self.event_debug_info["event_data"] = {  # Note that we do not store objects directly, because that would require more deep-copying and we already have it.
                                         "eventName": eventName,
@@ -658,13 +659,13 @@ class MegucaArena:
                                 print(desc)
                                 for callback in self.callbacks["postEventWriterCallbacks"]:
                                     callback(None, eventOutputs, thisevent, self.state)
-                        if debug:
+                        if debug != DebugMode.OFF:
                             for callback in self.callbacks["eventDebug"]:
                                 result, message = callback(self.event_debug_info, self.state, eventOutputs)
                                 if not result:
-                                    if debug == 1:
+                                    if debug == DebugMode.LOG:
                                         print(message)
-                                    else:
+                                    elif debug == DebugMode.EXCEPT:
                                         raise AssertionError(message)
 
                         # Check if everyone is now dead...
@@ -758,15 +759,15 @@ class MegucaArena:
 class TooManyDays(Exception):
     pass
 
-def postmortem(debug=0):
-    if not debug:
+def postmortem(debug=DebugMode.OFF):
+    if debug != DebugMode.OFF:
         return
     import pdb
     _, _, tb = sys.exc_info()
     traceback.print_exc()
     pdb.post_mortem(tb)
 
-def statCollection(num, debug=0):  # expand to count number of days, and fun stuff like epiphany targets?
+def statCollection(num, debug=DebugMode.OFF):  # expand to count number of days, and fun stuff like epiphany targets?
     statDict = ArenaUtils.DefaultOrderedDict(int)
     numErrors = 0
     days = []
@@ -798,8 +799,11 @@ parser.add_argument('--loadseed', action='store_true', help='Load in random seed
 args = parser.parse_args()
 
 if __name__ == '__main__':
+    #convert debug parameter to enum
+    debug = DebugMode(args.debug)
+
     if args.stats:
-        statCollection(num=args.stats, debug=args.debug)
+        statCollection(num=args.stats, debug=debug)
     else:
         # this is deliberately mutually exclusive with "--stats"
         if args.loadseed:
@@ -811,8 +815,8 @@ if __name__ == '__main__':
             with open("RSEED_BACKUP", "wb") as f:
                 pickle.dump(lograndstate, f)
         try:
-            MegucaArena(CONFIG_FILE_PATHS).main(debug=args.debug)
+            MegucaArena(CONFIG_FILE_PATHS).main(debug=debug)
         except Exception as e:
-            postmortem(debug=args.debug)
+            postmortem(debug=debug)
             raise e
 

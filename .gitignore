@@ -8,3 +8,4 @@ assets/.picasa.ini
 *.gif
 *.png
 RSEED_BACKUP
+.vscode/launch.json
