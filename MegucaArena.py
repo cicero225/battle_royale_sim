@@ -799,8 +799,11 @@ parser.add_argument('--loadseed', action='store_true', help='Load in random seed
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    #convert debug parameter to enum
-    debug = DebugMode(args.debug)
+    #convert debug parameter to enum (safely)
+    try:
+        debug = DebugMode(args.debug)
+    except:
+        debug = DebugMode.OFF
 
     if args.stats:
         statCollection(num=args.stats, debug=debug)
