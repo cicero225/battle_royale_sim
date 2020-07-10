@@ -794,19 +794,13 @@ def statCollection(num, debug=DebugMode.OFF):  # expand to count number of days,
 
 parser = argparse.ArgumentParser(description='Run the battle royale sim!')
 parser.add_argument('--stats', type=int, default=0, help='Run function in stat collection mode. Provide the number of games to run.')
-parser.add_argument('--debug', type=int, default=0, help='Run debug code? (expensive). Set to 1 to print out failed assertions, 2 to raise Exceptions instead.')
+parser.add_argument('--debug', type=lambda x: DebugMode(int(x)), default=DebugMode.OFF, help='Run debug code? (expensive). Set to 1 to print out failed assertions, 2 to raise Exceptions instead.')
 parser.add_argument('--loadseed', action='store_true', help='Load in random seed from RSEED_BACKUP?')
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    #convert debug parameter to enum (safely)
-    try:
-        debug = DebugMode(args.debug)
-    except:
-        debug = DebugMode.OFF
-
     if args.stats:
-        statCollection(num=args.stats, debug=debug)
+        statCollection(num=args.stats, debug=args.debug)
     else:
         # this is deliberately mutually exclusive with "--stats"
         if args.loadseed:
@@ -818,8 +812,8 @@ if __name__ == '__main__':
             with open("RSEED_BACKUP", "wb") as f:
                 pickle.dump(lograndstate, f)
         try:
-            MegucaArena(CONFIG_FILE_PATHS).main(debug=debug)
+            MegucaArena(CONFIG_FILE_PATHS).main(debug=args.debug)
         except Exception as e:
-            postmortem(debug=debug)
+            postmortem(debug=args.debug)
             raise e
 
