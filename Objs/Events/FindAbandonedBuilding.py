@@ -29,20 +29,23 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                         continue
                     desc += ' Violence broke out due to frustration.'
                     desc += fightDesc
+            break
         elif whatHappens == 1:
             # get one or two random pieces of loot
-            lootDict = Event.lootRandom(eventPeople, random.sample(list(state['items'].values()), random.randint(1, 2)))
+            new_loot = random.sample(list(state['items'].values()), random.randint(1, 2))
             desc += ' and found sweet loot!' # let the loot be described separately
             if len(eventPeople) > 1:
                 probViolence = 0.5 - relationships.groupCohesion(eventPeople) / 100
                 if random.random() < probViolence:
-                    preexistingLoot = lootDict
                     fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
-                        eventPeople, relationships, state['settings'], False, False, preexistingLoot)
+                        eventPeople, relationships, state['settings'], False, False, preexistingLoot=new_loot)
                     if fightDesc is None:
                         continue    
                     desc += ' A fight broke out over the loot.'
                     desc += fightDesc
+                    break  # This has separate logic than what happens if there is no fight.
+            lootDict = Event.lootRandom(eventPeople, new_loot)
+            break            
         elif whatHappens == 2:
             desc += ' but the building was booby-trapped! '
             for person in eventPeople:
@@ -59,8 +62,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
             return (desc, descList, [x.name for x in fightDead], collections.OrderedDict())
 
-        # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-        return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True)
+    # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
+    return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True)
 
 
 Event.registerEvent("FindAbandonedBuilding", func)

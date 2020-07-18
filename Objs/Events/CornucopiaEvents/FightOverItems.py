@@ -13,11 +13,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     numItems = random.randint(1, 2)
     itemsFound = [ItemInstance.takeOrMakeInstance(v) for v in random.sample(list(state['items'].values()), 2)]
     descList = eventPeople + itemsFound
-    # We deliberately don't record the output here, because we're about to redestribute the loot again.
-    # todo: this doesn't work properly, because if no one dies, we never get a message about who got the original loot
-    Event.lootRandom(eventPeople, itemsFound)
     fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
-        eventPeople, state["allRelationships"], state['settings'])
+        eventPeople, state["allRelationships"], state['settings'], preexistingLoot=itemsFound)
     if fightDesc is None:
         return None
     desc = Event.englishList(eventPeople) + " stumbled across " + Event.englishList(itemsFound) + " at the same time. A fight broke out. " + fightDesc

@@ -220,6 +220,21 @@ class Event(object):  # Python 2.x compatibility
         return lootDict
 
     @staticmethod
+    def MergeLootDicts(final_dict, to_merge_in):
+        for name, items in to_merge_in.items():
+            lootdict_ref = final_dict.setdefault(name, [])
+            for new_item in items:
+                for item in lootdict_ref:
+                    if str(item) == str(new_item):
+                        if item.stackable:
+                            item.count += new_item.count
+                        else:
+                            warnings.warn("Impossible outcome: non-stackable item looted more than once")
+                        break
+                else:
+                    lootdict_ref.append(new_item)
+
+    @staticmethod
     # Attacker, victim
     def DieOrEscapeProb1v1(person1, person2, settings, attackStat=None, defenseStat=None):
         if attackStat is None:
@@ -295,12 +310,9 @@ class Event(object):  # Python 2.x compatibility
         if not deadList:
             # if there was already some loot, decide if it was destroyed in the fighting or not
             if preexistingLoot:
-                if random.randint(0, 1):
-                    desc = ' The loot was destroyed in the fighting, but no one was killed.'
-                    return desc, [], None, None, injuredList
-                else:
-                    desc = ' No one was killed, and the loot was eventually distributed.'
-                    return desc, [], None, preexistingLoot, injuredList
+                desc = ' No one was killed, and the loot was eventually distributed.'
+                lootDict = Event.lootRandom(liveList, preexistingLoot)
+                return desc, [], None, lootDict, injuredList
             else:
                 desc = ' No one was killed.'
                 return desc, [], None, None, injuredList
@@ -308,21 +320,13 @@ class Event(object):  # Python 2.x compatibility
         lootDict = None
         if len(deadList) < len(people):
             lootDict = {}
-            # Holy mother of for loops. At least these are small...
             for theDead in deadList:
                 partialLootDict = Event.lootRandom(liveList, theDead)
-                for name, items in partialLootDict.items():
-                    lootdict_ref = lootDict.setdefault(name, [])
-                    for new_item in items:
-                        for item in lootdict_ref:
-                            if str(item) == str(new_item):
-                                if item.stackable:
-                                    item.count += new_item.count
-                                else:
-                                    warnings.warn("Impossible outcome: non-stackable item looted more than once")
-                                break
-                        else: # uh, was this supposed to be shifted over? pretty sure this never executes
-                            lootdict_ref.append(new_item)
+                Event.MergeLootDicts(lootDict, partialLootDict)
+            # Handle preexistingLoot
+            if preexistingLoot:
+                partialLootDict = Event.lootRandom(liveList, preexistingLoot)
+                Event.MergeLootDicts(lootDict, partialLootDict)            
         elif len(deadList) == len(people):
             desc += ' Everyone died in the fighting!'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
