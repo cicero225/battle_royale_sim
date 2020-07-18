@@ -32,7 +32,7 @@ class ItemInstance(object):
     
     # Note that this is not same in the sense of being the same item, having the same handlers, etc., which could be done with id(item).
     # This is just a rough check that it is the "same" item in a gameplay sense.
-    def is_same_item(self, other, ignore_count=True, strict=False):
+    def is_same_item(self, other, strict=False, ignore_count=True, ):
         if strict and not isinstance(other, ItemInstance):
             raise "Illegal strict ItemInstance comparison."
         # We allow "other" to be a string for convenience. In that case the only possible meaning is a simple name check.
@@ -240,3 +240,13 @@ class Item(object):
         thisInstance = ItemInstance(self, count)
         thisInstance.data = data
         return thisInstance
+    
+    # Note that this is not same in the sense of being the same item, having the same handlers, etc., which could be done with id(item).
+    # This is just a rough check that it is the "same" item in a gameplay sense.
+    # ignore_count is provided to match the 
+    def is_same_item(self, other, strict=False):
+        if strict and not isinstance(other, Item):
+            raise "Illegal strict Item comparison."
+        # We allow "other" to be a string for convenience. In that case the only possible meaning is a simple name check.   
+        return self.name == str(other)
+            
