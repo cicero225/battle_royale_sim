@@ -154,29 +154,41 @@ class Event(object):  # Python 2.x compatibility
         # If you ever intend to remove this callback, it's a good idea to keep track of this.
         return anonfunc
 
+    # Gives loot to a single looter
+    # looter - contestant retrieving loot
+    # looted - some source of lootable items, generally a dead contestant
+    # percentDestroyed - optional, should be between 0 and 100
     @staticmethod
-    def lootAll(looter, looted):
+    def lootForOne(looter, looted, percentDestroyed=0):
         if hasattr(looted, 'inventory'):
             itemList = [x for x in looted.inventory if x.lootable]
         else:
             itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted if x.lootable]
         lootList = []
         for loot in itemList:
+            # If the loot is in the inventory of a dead contestant, we remove it from there
             if hasattr(looted, 'inventory'):
                 loot = looted.removeAndGet(loot, loot.count)
+
+            # Add the loot to the inventory of the contestant retrieving loot
             lootref = looter.addItem(loot, loot.count, isNew=False)
+
+            # If lootref is None, then the item could not be transferred to the looter
+            # To prevent the item from just disappearing, we will give it back to the loot source
             if lootref is None:
-                # We actually have to return it to keep the object from disappearing
                 looted.addItem(loot, loot.count, isNew=False)
+            
+            # Otherwise, we add the original item to a list to be used for the loot table
             else:
-                # Note that we append the original item, which keeps it in memory solely for the loot table.
                 lootList.append(loot)
         if not lootList:
             return {}
         return {str(looter): lootList}
 
+    # distributes all loot randomly between multiple looters
+    # percentDestroyed is optional, should be between 0 and 100
     @staticmethod
-    def lootRandom(looters, looted):
+    def lootForMany(looters, looted, percentDestroyed=0):
         if hasattr(looted, 'inventory'):
             itemList = [x for x in looted.inventory if x.lootable]
         else:
@@ -311,7 +323,7 @@ class Event(object):  # Python 2.x compatibility
             # if there was already some loot, decide if it was destroyed in the fighting or not
             if preexistingLoot:
                 desc = ' No one was killed, and the loot was eventually distributed.'
-                lootDict = Event.lootRandom(liveList, preexistingLoot)
+                lootDict = Event.lootForMany(liveList, preexistingLoot)
                 return desc, [], None, lootDict, injuredList
             else:
                 desc = ' No one was killed.'
@@ -321,11 +333,11 @@ class Event(object):  # Python 2.x compatibility
         if len(deadList) < len(people):
             lootDict = {}
             for theDead in deadList:
-                partialLootDict = Event.lootRandom(liveList, theDead)
+                partialLootDict = Event.lootForMany(liveList, theDead)
                 Event.MergeLootDicts(lootDict, partialLootDict)
             # Handle preexistingLoot
             if preexistingLoot:
-                partialLootDict = Event.lootRandom(liveList, preexistingLoot)
+                partialLootDict = Event.lootForMany(liveList, preexistingLoot)
                 Event.MergeLootDicts(lootDict, partialLootDict)            
         elif len(deadList) == len(people):
             desc += ' Everyone died in the fighting!'
@@ -425,15 +437,15 @@ class Event(object):  # Python 2.x compatibility
             lootDict1 = {}
             for theDead in faction1DeadList:
                 if not faction2LiveList:  # If the entire other faction is dead, this faction gets their own dead teammate's stuff
-                    lootDict1 = Event.lootRandom(faction1LiveList, theDead)
+                    lootDict1 = Event.lootForMany(faction1LiveList, theDead)
                 else:
-                    lootDict1 = Event.lootRandom(faction2LiveList, theDead)
+                    lootDict1 = Event.lootForMany(faction2LiveList, theDead)
             lootDict2 = {}
             for theDead in faction2DeadList:
                 if not faction1LiveList:
-                    lootDict2 = Event.lootRandom(faction2LiveList, theDead)
+                    lootDict2 = Event.lootForMany(faction2LiveList, theDead)
                 else:
-                    lootDict2 = Event.lootRandom(faction1LiveList, theDead)
+                    lootDict2 = Event.lootForMany(faction1LiveList, theDead)
             # Note that this lazy approach to merging loot dicts only works because we know they cannot share keys.
             lootDict = {**lootDict1, **lootDict2}
         elif not faction2LiveList and not faction1LiveList:

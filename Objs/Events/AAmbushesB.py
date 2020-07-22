@@ -20,7 +20,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             desc = mainActor.name + ' lay in wait for ' + \
                 victims[0].name + ', surprising and killing ' + \
                 Event.parseGenderObject(victims[0]) + '.'
-        lootDict = Event.lootAll(mainActor, victims[0])
+        lootDict = Event.lootForOne(mainActor, victims[0])
         return EventOutput(desc, descList, [victims[0].name], loot_table=lootDict)
     else:
         desc = mainActor.name + ' lay in wait for ' + \

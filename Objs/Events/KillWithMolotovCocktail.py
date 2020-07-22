@@ -22,9 +22,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         mainActor.permStatChange({'stability': -2})
         if mainActor.stats["stability"] < 3:
             desc += " " + mainActor.name + " laughed at " + \
-                Event.parseGenderPossessive(victims[0]) + " pain."
+                Event.parseGenderPossessive(victims[0]) + " agony."
         mainActor.removeItem(state["items"]["MolotovCocktail"])
-        lootDict = Event.lootAll(mainActor, victims[0])
+        lootDict = Event.lootForOne(mainActor, victims[0])
         # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
         return EventOutput(desc, tempList, [victims[0].name], loot_table=lootDict)
 

@@ -25,7 +25,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
 
     # generate appropriate message
     if body.inventory:
-        lootDict = Event.lootAll(mainActor, body)
+        lootDict = Event.lootForOne(mainActor, body)
         if lootDict:
             # if there's any loot, a separate message will be generated for it, so we don't need to describe it here
             desc = descBeginning 

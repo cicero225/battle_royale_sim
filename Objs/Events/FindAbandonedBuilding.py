@@ -44,7 +44,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                     desc += ' A fight broke out over the loot.'
                     desc += fightDesc
                     break  # This has separate logic than what happens if there is no fight.
-            lootDict = Event.lootRandom(eventPeople, new_loot)
+            lootDict = Event.lootForMany(eventPeople, new_loot)
             break            
         elif whatHappens == 2:
             desc += ' but the building was booby-trapped! '

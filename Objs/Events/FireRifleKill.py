@@ -21,7 +21,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc = mainActor.name + ' fired at ' + \
             victims[0].name + " from long range and killed " + \
             Event.parseGenderObject(victims[0]) + "."
-        lootDict = Event.lootAll(mainActor, victims[0])
+        lootDict = Event.lootForOne(mainActor, victims[0])
     else:
         deadList = []
         desc = mainActor.name + ' fired at ' + \

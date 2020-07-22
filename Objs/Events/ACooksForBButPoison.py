@@ -56,7 +56,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += str(victims[0]) + \
             " ate the meal, blissfully unaware, before falling over dead."
         victims[0].kill()
-        lootDict = Event.lootAll(mainActor, victims[0])
+        lootDict = Event.lootForOne(mainActor, victims[0])
 
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
     return EventOutput(desc, descList, [str(victims[0])], loot_table=lootDict, injuries=injuries)
