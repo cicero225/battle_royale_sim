@@ -156,14 +156,14 @@ class Event(object):  # Python 2.x compatibility
 
     # Gives loot to a single looter
     # looter - contestant retrieving loot
-    # looted - some source of lootable items, generally a dead contestant
-    # percentDestroyed - optional, should be between 0 and 100
+    # looted - some source of lootable items, either an iterable of items or an object with an inventory attribute (Almost always Contestant)
+    # ratioDestroyed - optional, between 0 and 1
     @staticmethod
-    def lootForOne(looter, looted, percentDestroyed=0):
+    def lootForOne(looter, looted, ratioDestroyed=0):
         if hasattr(looted, 'inventory'):
             itemList = [x for x in looted.inventory if x.lootable]
         else:
-            itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted if x.lootable]
+            itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted if x.lootable]  # takeOrMakeInstance enforces that Item objects are instantiated into ItemInstances.
         lootList = []
         for loot in itemList:
             # If the loot is in the inventory of a dead contestant, we remove it from there
@@ -174,7 +174,8 @@ class Event(object):  # Python 2.x compatibility
             lootref = looter.addItem(loot, loot.count, isNew=False)
 
             # If lootref is None, then the item could not be transferred to the looter
-            # To prevent the item from just disappearing, we will give it back to the loot source
+            # To prevent the item from just disappearing, we will give it back to the loot source.
+            # This is important for events where people loot dead bodies, come back to life, etc.
             if lootref is None:
                 looted.addItem(loot, loot.count, isNew=False)
             
@@ -186,9 +187,9 @@ class Event(object):  # Python 2.x compatibility
         return {str(looter): lootList}
 
     # distributes all loot randomly between multiple looters
-    # percentDestroyed is optional, should be between 0 and 100
+    # ratioDestroyed is optional, should be between 0 and 100
     @staticmethod
-    def lootForMany(looters, looted, percentDestroyed=0):
+    def lootForMany(looters, looted, ratioDestroyed=0):
         if hasattr(looted, 'inventory'):
             itemList = [x for x in looted.inventory if x.lootable]
         else:
