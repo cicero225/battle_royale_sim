@@ -12,8 +12,10 @@ def CheckPreexistingLootAcquired(event_info, state, event_outputs):
     mainActor = event_info["event_data"]["mainActor"]
     if state["contestants"][mainActor].alive:
         living_pre_contestants.append(event_info["pre_state"]["contestants"][mainActor])
+    if not living_pre_contestants:  # Everyone died in this event, so loot not distributed.
+        return True, None
     for potential_item in event_outputs.display_items:
-        if not isinstance(potential_item, ItemInstance) and not isinstance(potential_item, Item):
+        if (not isinstance(potential_item, ItemInstance) and not isinstance(potential_item, Item)) or not potential_item.lootable:
             continue
         for _, item_list in event_outputs.loot_table.items():
             for item in item_list:

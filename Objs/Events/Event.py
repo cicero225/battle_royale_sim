@@ -255,6 +255,7 @@ class Event(object):  # Python 2.x compatibility
 
     # If it is possible for people in relationships (or other murder banning conditions) to trigger this method, you must handle
     # the edge case where this fails to find a working result and returns None, None, None, None
+    # NOTE: If everyone dies in this fight, the preexistingLoot is _not_ distributed (and will be missing from the invesntories of the dead). Distribute it yourself beforehand if this is non-desirable behavior.
     @staticmethod  
     def fight(people, relationships, settings, deferActualKilling=False, forceRelationshipFight=False, preexistingLoot=None):
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
