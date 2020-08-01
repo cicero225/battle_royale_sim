@@ -7,16 +7,14 @@ Add a chance for loot to get destroyed during fighting.
 
 Oversight for looting items--certain items should provide value even when looted and nonstackable. That is, looting a rifle when already holding a rifle should loot _ammo_. This is not something that the current system takes into account at all (and ammo is a special snowflake implementation by the rifle item)
 
-If everyone dies in a fight, we still get messages about the participants hating each other/being dire enemies
-
 Certain group events only can force lover kills if the lovers are the only people involved.
-
-Fix logging events for people who are already dead.
 
 It is possible to get multiple dossiers for the same person. Is this okay?
 
 Add more evening events 
     - marshmallows with campfires? increase happiness or somesuch stats maybe
+
+Observed very rare bug where the sponsors force 2 contestants to fight when there is only one contestant alive. Unclear how this was possible, but I didn't manage to capture the state.
 
 Molotov cocktail should destroy loot.
 
