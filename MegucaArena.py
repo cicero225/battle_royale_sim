@@ -24,7 +24,7 @@ from Objs.Items.Status import Status
 from Objs.Sponsors.Sponsor import Sponsor, contestantIndivActorWithSponsorsCallback
 from Objs.World.World import World
 from Objs.Relationships.Relationship import Relationship
-from Objs.Utilities.ArenaEnums import DebugMode
+from Objs.Utilities.ArenaEnumsAndNamedTuples import DebugMode, EventOutput
 import Objs.Utilities.ArenaUtils as ArenaUtils
 from Objs.Events import *
 # If we get more stuff here, we're going to have to do something better
@@ -378,7 +378,7 @@ class MegucaArena:
 
         # Things that happen after event processing (usually logging or emergency reset. Note that resetting callbacks need to happen before logging.
         # Expected args: proceedAsUsual, eventOutputs, thisevent, contestants[contestantKey], state, participants, victims, sponsorsHere
-        # returns a tuple or list or Event.EventOutput  (which will be converted immediately into EventOutput)
+        # returns a tuple or list or ArenaEnumsAndNamedTuples.EventOutput  (which will be converted immediately into EventOutput)
         postEventCallbacks = [
             ArenaUtils.logEventsByContestant,
             ArenaUtils.logKills
@@ -695,8 +695,8 @@ class MegucaArena:
                         # Remove the dead contestants from the live list. Add the contestants involved to alreadyUsed.
                         for dead in theDead:
                             del liveContestants[dead]
-                        if len(eventOutputs) > 4 and eventOutputs[4]:
-                            alreadyUsed.update([x.name for x in eventOutputs[4]])
+                        if eventOutputs.consumed_by_event_override:
+                            alreadyUsed.update([x.name for x in eventOutputs.consumed_by_event_override])
                         else:
                             alreadyUsed.update([x.name for x in descContestants if isinstance(x, Contestant)])
                     

@@ -128,7 +128,7 @@ img {
             return outputString
         self.bodylist.append(HTMLWriter.wrap(outputString, "p"))
     
-    # If we were enforcing typing, event_output is Event.EventOutput
+    # If we were enforcing typing, event_output is ArenaEnumsAndNamedTuples.EventOutput
     # This is canoncical output for events.
     def addStructuredEvent(self, event_output, state, preEventInjuries):
         from ..Events.Event import Event  # This utility function should really be made more general...

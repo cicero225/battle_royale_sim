@@ -1,5 +1,6 @@
 
-from Objs.Events.Event import Event, EventOutput
+from Objs.Utilities.ArenaEnumsAndNamedTuples import EventOutput
+from Objs.Events.Event import Event
 
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):

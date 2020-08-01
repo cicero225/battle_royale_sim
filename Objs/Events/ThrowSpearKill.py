@@ -1,3 +1,4 @@
+from Objs.Utilities.ArenaEnumsAndNamedTuples import EventOutput
 from Objs.Events.Event import Event, EventOutput
 import random
 

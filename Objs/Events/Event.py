@@ -9,15 +9,11 @@ from __future__ import division
 
 import random
 import warnings
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import defaultdict, OrderedDict
+from ..Utilities.ArenaEnumsAndNamedTuples import EventOutput
 from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict, DefaultOrderedDict
 from functools import partial
 from Objs.Items.Item import ItemInstance
-
-# TODO: Refactor the overall program to always return this named tuple? For now though, this is the preferred event output and standard tuples are deprecated.
-# This should probably really be typed.
-EventOutput = namedtuple("EventOutput", ["description", "display_items", "dead", "killer_dict", "consumed_by_event_override", "end_game_immediately", "loot_table", "injuries", "list_killers", "no_contact"],
-                         defaults=(None, None, False, None, None, False, None, None, None, None))
     
 
 class Event(object):  # Python 2.x compatibility

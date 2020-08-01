@@ -1,4 +1,6 @@
-from Objs.Events.Event import Event, EventOutput
+
+from Objs.Utilities.ArenaEnumsAndNamedTuples import EventOutput
+from Objs.Events.Event import Event
 from ..Utilities.ArenaUtils import weightedDictRandom
 import collections
 import random

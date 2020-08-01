@@ -1,6 +1,7 @@
 from __future__ import division
 
-from Objs.Events.Event import Event, EventOutput
+from Objs.Utilities.ArenaEnumsAndNamedTuples import EventOutput
+from Objs.Events.Event import Event
 from Objs.Items.Status import StatusInstance
 import random
 from collections import defaultdict
