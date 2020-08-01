@@ -775,12 +775,15 @@ def statCollection(num, debug=DebugMode.OFF):  # expand to count number of days,
     PRINTHTML = False
     for _ in range(0, num):
         try:
+            lograndstate = random.getstate()
             winner, day = MegucaArena(CONFIG_FILE_PATHS).main(debug=debug)
             statDict[winner] += 1
             days.append(day)
         except TooManyDays:
             pass
         except Exception:
+            with open("RSEED_BACKUP", "wb") as f:
+                pickle.dump(lograndstate, f)
             postmortem(debug=debug)
             numErrors += 1
 
