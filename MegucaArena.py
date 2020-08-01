@@ -648,12 +648,20 @@ class MegucaArena:
                         if desc is not None:
                             if PRINTHTML:
                                 thisWriter.addStructuredEvent(eventOutputs, self.state, preEventInjuries)
-                                # Consume the announcement queue.
-                                for announcement in self.state["announcementQueue"]:
-                                    thisWriter.addEvent(*announcement)
-                                self.state["announcementQueue"].clear()
                                 for callback in self.callbacks["postEventWriterCallbacks"]:
                                     callback(thisWriter, eventOutputs, thisevent, self.state)
+                                # Consume the announcement queue.
+                                for announcement in self.state["announcementQueue"]:
+                                    if announcement.block_if_any_contestant_dead:
+                                        for entry in announcement.display_items:
+                                            if announcement.dead_here is not None and str(entry) in announcement.dead_here:
+                                                continue
+                                            if isinstance(entry, Contestant) and not entry.alive:
+                                                break
+                                        else:
+                                            # No one is dead.     
+                                            thisWriter.addEvent(*announcement[:4])
+                                self.state["announcementQueue"].clear()
                                 thisWriter.addEmptyLines(3)
                             else:
                                 print(desc)

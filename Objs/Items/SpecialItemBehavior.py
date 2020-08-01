@@ -1,5 +1,6 @@
 import collections
 import random
+from ..Utilities.ArenaUtils import announce
 
 # This will be placed into game startup and enables arbitrary item-related modifications.
 def LoveGlobalDeathRule(state):
@@ -14,9 +15,9 @@ def LoveGlobalDeathRule(state):
             return
         new_lover = state["allRelationships"].SetNewRomance(lover)
         if new_lover is None:
-            Event.announce(str(lover) + " was heartbroken by the death of " + str(contestant), [lover, state["statuses"]["LoveBroken"]])
+            announce(str(lover) + " was heartbroken by the death of " + str(contestant), [lover, state["statuses"]["LoveBroken"]], state, deadHere=[str(contestant)])
         else:
-            Event.announce("Because of " + str(contestant) + "'s death, " + str(lover) + " is now in a romance with " + str(new_lover), [lover, state["statuses"]["Love"], new_lover])       
+            announce("Because of " + str(contestant) + "'s death, " + str(lover) + " is now in a romance with " + str(new_lover), [lover, state["statuses"]["Love"], new_lover], state, deadHere=[str(contestant)])       
     from Objs.Contestants.Contestant import Contestant
     Contestant.onDeathCallbacks.append(BreakHeartForDead)
 
@@ -109,8 +110,8 @@ def DossierOnAcquisition(itemInstance, contestant, state):
     if itemInstance.target == contestant:
         from Objs.Events.Event import Event  # Again, this should really be in Arenautils...
         # Destroy self-dossiers.
-        state["announcementQueue"].append((contestant.name + " destroyed a Dossier about " + Event.parseGenderReflexive(contestant) + ".",
-                                          [contestant, itemInstance], state, {}))
+        announce(contestant.name + " destroyed a Dossier about " + Event.parseGenderReflexive(contestant) + ".",
+                                          [contestant, itemInstance], state)
         contestant.removeItem(itemInstance, itemInstance.count)
 
 ITEM_ON_ACQUISITION = collections.OrderedDict({

@@ -2,6 +2,7 @@
 from __future__ import division
 from Objs.Display.HTMLWriter import HTMLWriter
 from functools import partial
+from ..Utilities.ArenaEnumsAndNamedTuples import EventAnnouncement
 
 import json
 import html
@@ -353,6 +354,11 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
 
 # Callbacks for specific arena features
 
+# Puts a message in the display queue that will be consumed after the current event runs. No order guarantee is provided.
+# The entries are identical to the arguments for HTMLWriter.addEvent, except deadHere, which describes which characters in this event are known to be dead.
+# Otherwise, events that involve dead characters will be screened out.
+def announce(desc, descContestants, state, preEventInjuries=None, deadHere=None):  # TODO: If preEventInjuries is not submitted, injured tags will be missing. This is fine for now, but I'm not really sure how correct this is.
+    state["announcementQueue"].append(EventAnnouncement(desc, descContestants, state, preEventInjuries, True, deadHere))
 
 def loggingStartup(state):
     state["callbackStore"]["eventLog"] = DefaultOrderedDict(partial(
@@ -466,12 +472,6 @@ def initializeRomances(state):
         if not contestant.hasThing("Love"):
             relationships.SetNewRomance(contestant, initial=True)
 
-def addThisWriterEventOrPrint(thisWriter, text, items):
-    if thisWriter is None:
-        print(text)
-        return
-    thisWriter.addEvent(text, items)
-
 # Adds a Shipping Update immediately after a relevant event.
 def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
     new_loves, lost_loves, new_hates, lost_hates = state["allRelationships"].reportChanges(
@@ -493,9 +493,9 @@ def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
             lover2.removeStatus("LoveBroken")
             lover1.addStatus("Love", target=lover2)
             lover2.addStatus("Love", target=lover1)
-            addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " and " + contestant_tuple[1] + " are now in a romance.", [lover1, heart, lover2])
+            announce(contestant_tuple[0] + " and " + contestant_tuple[1] + " are now in a romance.", [lover1, heart, lover2], state)
             continue
-        addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " now has a crush on " + contestant_tuple[1], [lover1, heart, arrow, lover2])
+        announce(contestant_tuple[0] + " now has a crush on " + contestant_tuple[1], [lover1, heart, arrow, lover2], state)
     
     skiptuples = set()
     for contestant_tuple, old_backwards_exists in lost_loves.items():
@@ -508,16 +508,16 @@ def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
         if potential_love:
             potential_love = potential_love[0]
         if old_backwards_exists and not potential_love:
-            addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " no longer has a crush on " + contestant_tuple[1], [lover1, heartbroken, arrow, lover2])
+            announce(contestant_tuple[0] + " no longer has a crush on " + contestant_tuple[1], [lover1, heartbroken, arrow, lover2], state)
         elif not old_backwards_exists and potential_love and potential_love.target == contestant_tuple[1]:
-            addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " and " + contestant_tuple[1] + " are no longer in a romance.", [lover1, heartbroken, lover2])
+            announce(contestant_tuple[0] + " and " + contestant_tuple[1] + " are no longer in a romance.", [lover1, heartbroken, lover2], state)
             skiptuples.add(reverse_tuple)
             new_lover = state["allRelationships"].SetNewRomance(contestant_tuple[0])
             if new_lover:
-                addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " is now in a romance with " + str(new_lover), [lover1, heart, new_lover])
+                announce(contestant_tuple[0] + " is now in a romance with " + str(new_lover), [lover1, heart, new_lover], state)
             new_lover = state["allRelationships"].SetNewRomance(contestant_tuple[1])
             if new_lover:
-                addThisWriterEventOrPrint(thisWriter, contestant_tuple[1] + " is now in a romance with " + str(new_lover), [lover2, heart, new_lover])
+                announce(contestant_tuple[1] + " is now in a romance with " + str(new_lover), [lover2, heart, new_lover], state)
             continue
 
     swords = state["statuses"]["Swords"]
@@ -529,28 +529,28 @@ def relationshipUpdate(thisWriter, eventOutputs, thisEvent, state):
         reverse_tuple = (contestant_tuple[1], contestant_tuple[0])
         if old_backwards_exists:
             if reverse_tuple not in lost_hates:
-                addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " and " + contestant_tuple[1] + " are now dire enemies.", [contestants[contestant_tuple[0]], swords, contestants[contestant_tuple[1]]])
+                announce(contestant_tuple[0] + " and " + contestant_tuple[1] + " are now dire enemies.", [contestants[contestant_tuple[0]], swords, contestants[contestant_tuple[1]]], state)
                 continue
-            addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " now hates " + contestant_tuple[1], [contestants[contestant_tuple[0]], swords, arrow, contestants[contestant_tuple[1]]])
+            announce(contestant_tuple[0] + " now hates " + contestant_tuple[1], [contestants[contestant_tuple[0]], swords, arrow, contestants[contestant_tuple[1]]], state)
         else:
             if reverse_tuple in new_hates:
-                addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " and " + contestant_tuple[1] + " are now dire enemies.", [contestants[contestant_tuple[0]], swords, contestants[contestant_tuple[1]]])
+                announce(contestant_tuple[0] + " and " + contestant_tuple[1] + " are now dire enemies.", [contestants[contestant_tuple[0]], swords, contestants[contestant_tuple[1]]], state)
                 skiptuples.add(reverse_tuple)
                 continue
-            addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " now hates " + contestant_tuple[1], [contestants[contestant_tuple[0]], swords, arrow, contestants[contestant_tuple[1]]])
+            announce(contestant_tuple[0] + " now hates " + contestant_tuple[1], [contestants[contestant_tuple[0]], swords, arrow, contestants[contestant_tuple[1]]], state)
     skiptuples = set()
     for contestant_tuple, old_backwards_exists in lost_hates.items():
         if contestant_tuple in skiptuples:
             continue
         reverse_tuple = (contestant_tuple[1], contestant_tuple[0])
         if old_backwards_exists:
-            addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " no longer hates " + contestant_tuple[1], [contestants[contestant_tuple[0]], swordsbroken, arrow, contestants[contestant_tuple[1]]])
+            announce(contestant_tuple[0] + " no longer hates " + contestant_tuple[1], [contestants[contestant_tuple[0]], swordsbroken, arrow, contestants[contestant_tuple[1]]], state)
         else:
             if reverse_tuple in lost_hates:
-                addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " and " + contestant_tuple[1] + " are no longer dire enemies.", [contestants[contestant_tuple[0]], swordsbroken, contestants[contestant_tuple[1]]])
+                announce(contestant_tuple[0] + " and " + contestant_tuple[1] + " are no longer dire enemies.", [contestants[contestant_tuple[0]], swordsbroken, contestants[contestant_tuple[1]]], state)
                 skiptuples.add(reverse_tuple)
                 continue
-            addThisWriterEventOrPrint(thisWriter, contestant_tuple[0] + " no longer hates " + contestant_tuple[1], [contestants[contestant_tuple[0]], swordsbroken, arrow, contestants[contestant_tuple[1]]])
+            announce(contestant_tuple[0] + " no longer hates " + contestant_tuple[1], [contestants[contestant_tuple[0]], swordsbroken, arrow, contestants[contestant_tuple[1]]], state)
 
 def ContestantStatWrite(state):
     from Objs.Events.Event import Event

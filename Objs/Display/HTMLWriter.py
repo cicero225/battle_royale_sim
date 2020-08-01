@@ -1,5 +1,6 @@
 """A dumb very specific html writer, because I don't want to figure out the various library options."""
 
+from Objs.Utilities.ArenaEnumsAndNamedTuples import EventOutput
 import html
 import re
 
@@ -108,7 +109,7 @@ img {
             for contestant in descContestants:
                 if state is not None:
                     extensionString = ""
-                    if hasattr(contestant, "statuses") and preEventInjuries.get(str(contestant), False) and contestant.hasThing("Injury"):
+                    if hasattr(contestant, "statuses") and preEventInjuries is not None and preEventInjuries.get(str(contestant), False) and contestant.hasThing("Injury"):
                         extensionString += ' (Injured)'
                     if hasattr(contestant, "statuses") and contestant.hasThing("Hypothermia"):
                         extensionString += ' (Hypothermic)'
@@ -128,9 +129,8 @@ img {
             return outputString
         self.bodylist.append(HTMLWriter.wrap(outputString, "p"))
     
-    # If we were enforcing typing, event_output is ArenaEnumsAndNamedTuples.EventOutput
     # This is canoncical output for events.
-    def addStructuredEvent(self, event_output, state, preEventInjuries):
+    def addStructuredEvent(self, event_output: EventOutput, state, preEventInjuries):
         from ..Events.Event import Event  # This utility function should really be made more general...
         output_pieces = []
         desc = event_output.description
