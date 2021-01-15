@@ -11,19 +11,20 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     state["allRelationships"].IncreaseFriendLevel(victims[0], mainActor, -2)
     state["allRelationships"].IncreaseLoveLevel(victims[0], mainActor, -3)
     lootDict = None
+    destroyedList = None
     if random.random() < probKill:
         victims[0].kill()
         deadList = [victims[0].name]
         desc = mainActor.name + ' shot an arrow at ' + \
             victims[0].name + " and killed " + \
             Event.parseGenderObject(victims[0]) + "."
-        lootDict = Event.lootForOne(mainActor, victims[0])
+        lootDict, destroyedList = self.lootForOne(mainActor, victims[0])
     else:
         deadList = []
         desc = mainActor.name + ' shot an arrow at ' + \
             victims[0].name + ", but missed."
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-    return EventOutput(desc, tempList, deadList, loot_table=lootDict)
+    return EventOutput(desc, tempList, deadList, loot_table=lootDict, destroyed_loot_table=destroyedList)
 
 
 Event.registerEvent("FireArrowKill", func)

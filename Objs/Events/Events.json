@@ -279,7 +279,8 @@
                           "Bloodthirsty": {"value": 1.0, "all": false},
                           "Gladiatorial": {"value": 1.0},
                           "Senate": {"value": 0.5},
-                          "Pacifist": {"value": -1.0, "all": false}}
+                          "Pacifist": {"value": -1.0, "all": false}},
+     "itemDestructionModifier": 0.3
      },
    "CraftBowAndArrow":
     {"phase": ["Day", "Night"],
@@ -317,7 +318,8 @@
                           "Bloodthirsty": {"value": 1.0, "all": false},
                           "Gladiatorial": {"value": 1.0},
                           "Senate": {"value": 0.5},
-                          "Pacifist": {"value": -1.0, "all": false}} 
+                          "Pacifist": {"value": -1.0, "all": false}},
+    "itemDestructionModifier": 0.3
      },
    "FireRifleKill":
      {"phase": ["Day", "Night"],
@@ -342,7 +344,8 @@
                           "Bloodthirsty": {"value": 1.0, "all": false},
                           "Gladiatorial": {"value": 1.0},
                           "Senate": {"value": 0.5},
-                          "Pacifist": {"value": -1.0, "all": false}} 
+                          "Pacifist": {"value": -1.0, "all": false}},
+    "itemDestructionModifier": 0.3 
      },
    "FindDeadBody":
      {"phase": ["Day"],
@@ -463,7 +466,8 @@
      "sponsorInfluence": {"Senate": {"value": 1.0, "all": false},
                           "Bloodthirsty": {"value": 1.0, "all": false},
                           "Pacifist": {"value": -1.0, "all": false},
-                          "Greater Good": {"value": -1.0, "all": false}}
+                          "Greater Good": {"value": -1.0, "all": false}},
+    "itemDestructionModifier": -1
      },
      "SponsorCheatKill":
     {"phase": ["Night"],
@@ -693,8 +697,6 @@
      "ACooksForB":
     {"phase": ["Day","Night"],
      "mainWeight": 0.7,
-     "mainModifiers": {"gregariousness": 1.0,
-                       "survivalism": 1.0},
      "participantWeight": 0.7,
      "numParticipants": 1,
      "mainModifiers": {"gregariousness": 1.0,
@@ -723,9 +725,6 @@
                        "loyalty": -1.0},
      "victimWeight": 0.4,
      "numVictims": 1,
-     "mainModifiers": {"gregariousness": 1.0,
-                       "loneliness": 0.5,
-                       "friendliness": 0.5},
      "unique": false,
      "itemRequired": false,
      "friendEffectVictim": -0.5,

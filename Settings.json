@@ -21,5 +21,6 @@
  "meanNumInitialRelationships": 0.3,
  "presetStarterItems": true,
  "randomStarterItems": 2,
- "InitialDiseaseChance": 0.05
+ "InitialDiseaseChance": 0.05,
+ "DefaultItemDestructionChance": 0.3
 }

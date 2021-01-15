@@ -45,12 +45,12 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         # Keep running until only neither 0 nor all contestants are dead.
         fightDead = []  # dummy list.
         while (len(fightDead) != 1):
-            fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
-                [mainActor, participants[0]], state['allRelationships'], state['settings'], deferActualKilling=True, forceRelationshipFight=True)
+            fightDesc, fightDead, allKillers, lootDict, injuries, destroyedList = self.fight(
+                [mainActor, participants[0]], state['allRelationships'], deferActualKilling=True, forceRelationshipFight=True)
         # We had to deny Event.fight actually killing anyone because of fact that it might be reset.
         fightDead[0].kill()
         desc += "They did so." + fightDesc
-        return EventOutput(desc, [mainActor, participants[0]], [str(x) for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries)
+        return EventOutput(desc, [mainActor, participants[0]], [str(x) for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, destroyed_loot_table=destroyedList)
     if chosen == 'attemptEscape':
         escape = bool(random.randint(0, 1))
         if escape:

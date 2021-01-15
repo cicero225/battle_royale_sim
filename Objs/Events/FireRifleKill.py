@@ -16,13 +16,14 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     ammoUsed = min(random.randint(actualItem.rawData["ammouse"][0], actualItem.rawData["ammouse"][1]), currentAmmo)
     currentAmmo -= ammoUsed
     lootDict = None
+    destroyedList = None
     if random.random() < probKill:
         victims[0].kill()
         deadList = [victims[0].name]
         desc = mainActor.name + ' fired at ' + \
             victims[0].name + " from long range and killed " + \
             Event.parseGenderObject(victims[0]) + "."
-        lootDict = Event.lootForOne(mainActor, victims[0])
+        lootDict, destroyedList = self.lootForOne(mainActor, victims[0])
     else:
         deadList = []
         desc = mainActor.name + ' fired at ' + \
@@ -34,7 +35,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += "\nThe Rifle belonging to " + mainActor.name + " exhausted its ammo."
         mainActor.removeItem("Rifle")
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-    return EventOutput(desc, tempList, deadList, loot_table=lootDict)
+    return EventOutput(desc, tempList, deadList, loot_table=lootDict, destroyed_loot_table=destroyedList)
 
 
 Event.registerEvent("FireRifleKill", func)

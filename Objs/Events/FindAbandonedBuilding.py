@@ -17,6 +17,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         fightDead = []
         allKillers = None
         lootDict = None
+        destroyedList = None
         injuries = None
         if whatHappens == 0:
             desc += 'but it turned out to have nothing of value.'
@@ -24,8 +25,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                 probViolence = 0.25 - \
                     relationships.groupCohesion(eventPeople) / 200
                 if random.random() < probViolence:
-                    fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
-                        eventPeople, relationships, state['settings'])
+                    fightDesc, fightDead, allKillers, lootDict, injuries, destroyedList = self.fight(
+                        eventPeople, relationships)
                     if fightDesc is None:
                         continue
                     desc += ' Violence broke out due to frustration.'
@@ -35,17 +36,24 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             # get one or two random pieces of loot
             new_loot = random.sample(list(state['items'].values()), random.randint(1, 2))
             desc += ' and found sweet loot!' # let the loot be described separately
+            lootDict = {}
+            destroyedList = []
+             # If there is no fight, there's no reason loot would be destroyed.
+            overrideLootDestructionChance = 0
             if len(eventPeople) > 1:
                 probViolence = 0.5 - relationships.groupCohesion(eventPeople) / 100
                 if random.random() < probViolence:
-                    fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
-                        eventPeople, relationships, state['settings'], False, False, preexistingLoot=new_loot)
+                    overrideLootDestructionChange = None
+                    fightDesc, fightDead, allKillers, lootDict, injuries, destroyedList = self.fight(
+                        eventPeople, relationships, False, False, preexistingLoot=new_loot)
                     if fightDesc is None:
                         continue    
                     desc += ' A fight broke out over the loot.'
                     desc += fightDesc
                     break  # This has separate logic than what happens if there is no fight.
-            lootDict = Event.lootForMany(eventPeople, new_loot)
+            partialLoot, partialDestroyed = self.lootForMany(eventPeople, new_loot, chanceDestroyedOverride=overrideLootDestructionChance)
+            Event.MergeLootDicts(lootDict, partialLoot)
+            Event.MergeDestroyedLists(destroyedList, partialDestroyed)
             break            
         elif whatHappens == 2:
             desc += ' but the building was booby-trapped! '
@@ -64,7 +72,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             return (desc, descList, [x.name for x in fightDead], collections.OrderedDict())
 
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-    return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True)
+    return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True, destroyed_loot_table=destroyedList)
 
 
 Event.registerEvent("FindAbandonedBuilding", func)

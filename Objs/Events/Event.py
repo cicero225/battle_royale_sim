@@ -10,18 +10,19 @@ from __future__ import division
 import random
 import warnings
 from collections import defaultdict, OrderedDict
-from ..Utilities.ArenaEnumsAndNamedTuples import EventOutput
+from ..Utilities.ArenaEnumsAndNamedTuples import EventOutput, FightOutput
 from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict, DefaultOrderedDict
 from functools import partial
 from Objs.Items.Item import ItemInstance
+from typing import Any, List, Callable, Dict, Optional, Iterable, Type
     
 
 class Event(object):  # Python 2.x compatibility
 
     # It is important that this is a class attribute, which can be modified in Python
-    event_callbacks = OrderedDict()
+    event_callbacks: Dict[str, Callable] = OrderedDict()
     # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
-    inserted_callbacks = OrderedDict()
+    inserted_callbacks: Dict[str, Callable] = OrderedDict()
     # This allows import time access to a pointer to state, which is needed occasionally by doEvent functors. It must be supplied by main during initialization.
     stateStore = [None]
 
@@ -77,10 +78,10 @@ class Event(object):  # Python 2.x compatibility
         # Really, events should return EventOutput directly, but for backwards compatibility we convert it here.
         cls.event_callbacks[eventName] = cls.getNamedCallback(callback)
 
-    def doEvent(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
+    """def doEvent(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
         desc = mainActor.name + ' did absolutely nothing.'
         # Second entry is the contestants named in desc, in order. Third is anyone who died.
-        return (desc, [mainActor], [])
+        return (desc, [mainActor], [])"""
 
     def eventRandomize(self, propName):
         self.baseProps[propName] = (self.baseProps[propName]
@@ -154,17 +155,32 @@ class Event(object):  # Python 2.x compatibility
     # looter - contestant retrieving loot
     # looted - some source of lootable items, either an iterable of items or an object with an inventory attribute (Almost always Contestant)
     # ratioDestroyed - optional, between 0 and 1
-    @staticmethod
-    def lootForOne(looter, looted, ratioDestroyed=0):
+    def lootForOne(self, looter, looted, chanceDestroyedOverride=None):
+        if chanceDestroyedOverride is not None:
+            chanceDestroyed = chanceDestroyedOverride
+        else:
+            potentialitemDestructionModifier = self.baseProps.get("itemDestructionModifier")
+            potentialitemDestructionModifier = 1 if potentialitemDestructionModifier is None else potentialitemDestructionModifier
+            if potentialitemDestructionModifier < 0:
+                chanceDestroyed = 1
+            else:
+                chanceDestroyed = self.settings["DefaultItemDestructionChance"] * potentialitemDestructionModifier
         if hasattr(looted, 'inventory'):
             itemList = [x for x in looted.inventory if x.lootable]
         else:
             itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted if x.lootable]  # takeOrMakeInstance enforces that Item objects are instantiated into ItemInstances.
         lootList = []
+        destroyedList = []
         for loot in itemList:
             # If the loot is in the inventory of a dead contestant, we remove it from there
             if hasattr(looted, 'inventory'):
                 loot = looted.removeAndGet(loot, loot.count)
+            
+            # If loot is randomly destroyed, continue, letting the reference
+            # implicitly expire.
+            if random.random() < chanceDestroyed:
+                destroyedList.append(loot)
+                continue
 
             # Add the loot to the inventory of the contestant retrieving loot
             lootref = looter.addItem(loot, loot.count, isNew=False)
@@ -179,24 +195,43 @@ class Event(object):  # Python 2.x compatibility
             else:
                 lootList.append(loot)
         if not lootList:
-            return {}
-        return {str(looter): lootList}
+            return {}, destroyedList
+        return {str(looter): lootList}, destroyedList
 
     # distributes all loot randomly between multiple looters
     # ratioDestroyed is optional, should be between 0 and 100
-    @staticmethod
-    def lootForMany(looters, looted, ratioDestroyed=0):
+    def lootForMany(self, looters, looted, chanceDestroyedOverride=None):
+        if chanceDestroyedOverride is not None:
+            chanceDestroyed = chanceDestroyedOverride
+        else:
+            potentialitemDestructionModifier = self.baseProps.get("itemDestructionModifier")
+            potentialitemDestructionModifier = 1 if potentialitemDestructionModifier is None else potentialitemDestructionModifier
+            if potentialitemDestructionModifier < 0:
+                chanceDestroyed = 1
+            else:
+                chanceDestroyed = self.settings["DefaultItemDestructionChance"] * potentialitemDestructionModifier
         if hasattr(looted, 'inventory'):
             itemList = [x for x in looted.inventory if x.lootable]
         else:
             itemList = [ItemInstance.takeOrMakeInstance(x) for x in looted if x.lootable]
         lootDict = {}
+        destroyedList = []
         for loot in itemList:
             if hasattr(looted, 'inventory'):
                 loot = looted.removeAndGet(loot, loot.count)
             if loot.stackable:
                 for _ in range(loot.count):
                     trueLooter = random.choice(looters)
+                    # If loot is randomly destroyed, continue, letting the reference
+                    # implicitly expire.
+                    if random.random() < chanceDestroyed:
+                        for item in destroyedList:
+                            if item.is_same_item(loot):
+                                item.count +=1
+                                break
+                        else:
+                            destroyedList.append(loot)
+                        continue
                     lootref = trueLooter.addItem(loot, count=1, isNew=False)
                     if lootref is None:
                         # We actually have to return it to keep the object from disappearing, and retrying this random.choice loop is risky.
@@ -217,6 +252,11 @@ class Event(object):  # Python 2.x compatibility
                 if maybeLooters:
                     # TODO : We do not yet properly handle loot with potential different properties (i.e. two different non-stackable spears). That means the name output here is incorrect.
                     trueLooter = random.choice(maybeLooters)
+                    # If loot is randomly destroyed, continue, letting the reference
+                    # implicitly expire.
+                    if random.random() < chanceDestroyed:
+                        destroyedList.append(loot)
+                        continue
                     lootref = trueLooter.addItem(loot, isNew=False)
                     if lootref is None:
                         # We actually have to return it to keep the object from disappearing, and retrying this random.choice loop is risky.
@@ -226,7 +266,7 @@ class Event(object):  # Python 2.x compatibility
                     else:
                         # Note that we append the original item, which keeps it in memory solely for the loot table.
                         lootDict.setdefault(str(trueLooter), []).append(loot)
-        return lootDict
+        return lootDict, destroyedList
 
     @staticmethod
     def MergeLootDicts(final_dict, to_merge_in):
@@ -243,6 +283,22 @@ class Event(object):  # Python 2.x compatibility
                 else:
                     lootdict_ref.append(new_item)
 
+    # Figuring out how to typehint Item without including it is tricky...
+    @staticmethod
+    def MergeDestroyedLists(original_list: List[Type[Any]],
+                            to_merge_in: Iterable[Type[Any]]) -> None:
+        new_items = []
+        for new_item in to_merge_in:
+            if not new_item.stackable:
+                continue
+            for item in original_list:
+                if item.is_same_item(new_item):
+                    item.count +=1
+                    break
+            else:
+                new_items.append(new_item)
+        original_list.extend(new_items)
+
     @staticmethod
     # Attacker, victim
     def DieOrEscapeProb1v1(person1, person2, settings, attackStat=None, defenseStat=None):
@@ -256,8 +312,7 @@ class Event(object):  # Python 2.x compatibility
     # If it is possible for people in relationships (or other murder banning conditions) to trigger this method, you must handle
     # the edge case where this fails to find a working result and returns None, None, None, None
     # NOTE: If everyone dies in this fight, the preexistingLoot is _not_ distributed (and will be missing from the invesntories of the dead). Distribute it yourself beforehand if this is non-desirable behavior.
-    @staticmethod  
-    def fight(people, relationships, settings, deferActualKilling=False, forceRelationshipFight=False, preexistingLoot=None):
+    def fight(self, people, relationships, deferActualKilling=False, forceRelationshipFight=False, preexistingLoot=None)->EventOutput:
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
         alreadyInjured = sorted(
             list(set(str(person) for person in people if person.hasThing("Injury"))))
@@ -288,12 +343,11 @@ class Event(object):  # Python 2.x compatibility
                     continue
                 person2Ability = person2.stats['combat ability'] * (1 + (
                     (person2.stats['aggression'] * 2 + person2.stats['ruthlessness']) / 15 - 1) * 0.3)
-                baseCombatAbility += settings['friendCombatEffect'] * relationships.friendships[str(person2)][str(
+                baseCombatAbility += self.settings['friendCombatEffect'] * relationships.friendships[str(person2)][str(
                     person1)] / 5 * person2Ability if relationships.friendships[str(person2)][str(person1)] > 0 else 0
-                baseCombatAbility += settings['friendCombatEffect'] * relationships.loveships[str(person2)][str(
+                baseCombatAbility += self.settings['friendCombatEffect'] * relationships.loveships[str(person2)][str(
                     person1)] / 5 * person2Ability if relationships.loveships[str(person2)][str(person1)] > 0 else 0
             fightDict[i] = baseCombatAbility
-        probDict = OrderedDict()
         deadList = []
         liveList = []
         injuredList = []
@@ -304,10 +358,10 @@ class Event(object):  # Python 2.x compatibility
                     continue
                 meanAbilityTot += fightDict[ii]
             # Sigmoid probability! woo...
-            probDeath = 1 / (1 + (1 + settings['combatAbilityEffect'])**(
+            probDeath = 1 / (1 + (1 + self.settings['combatAbilityEffect'])**(
                 fightDict[i] - meanAbilityTot / (len(people) - 1)))
             # Yes the exact same formula... because it makes sense.
-            probInjury = 1 / (1 + (1 + settings['combatAbilityEffect'])**(
+            probInjury = 1 / (1 + (1 + self.settings['combatAbilityEffect'])**(
                 fightDict[i] - meanAbilityTot / (len(people) - 1)))
             if random.random() < probDeath:
                 deadList.append(person1)
@@ -321,21 +375,25 @@ class Event(object):  # Python 2.x compatibility
             # if there was already some loot, decide if it was destroyed in the fighting or not
             if preexistingLoot:
                 desc = ' No one was killed, and the loot was eventually distributed.'
-                lootDict = Event.lootForMany(liveList, preexistingLoot)
-                return desc, [], None, lootDict, injuredList
+                lootDict, destroyedList = self.lootForMany(liveList, preexistingLoot)
+                return FightOutput(desc, [], None, lootDict, injuredList, destroyedList)
             else:
                 desc = ' No one was killed.'
-                return desc, [], None, None, injuredList
+                return FightOutput(desc, [], None, None, injuredList, None)
         desc = ''
         lootDict = None
+        destroyedList = None
         if len(deadList) < len(people):
             lootDict = {}
+            destroyedList = []
             for theDead in deadList:
-                partialLootDict = Event.lootForMany(liveList, theDead)
+                partialLootDict, partialDestroyedList = self.lootForMany(liveList, theDead)
+                Event.MergeDestroyedLists(destroyedList, partialDestroyedList)
                 Event.MergeLootDicts(lootDict, partialLootDict)
             # Handle preexistingLoot
             if preexistingLoot:
-                partialLootDict = Event.lootForMany(liveList, preexistingLoot)
+                partialLootDict, partialDestroyedList = self.lootForMany(liveList, preexistingLoot)
+                Event.MergeDestroyedLists(destroyedList, partialDestroyedList)
                 Event.MergeLootDicts(lootDict, partialLootDict)            
         elif len(deadList) == len(people):
             desc += ' Everyone died in the fighting!'
@@ -348,17 +406,16 @@ class Event(object):  # Python 2.x compatibility
                 forceRelationshipFight or not possible_love or (str(possible_love[0].target) != str(x)))})
             if not killDict:
                 # This event is impossible as rng'd. The cleanest solution is to just bail.
-                return None, None, None, None, None
+                return None, None, None, None, None, None
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
         for dead in deadList:
             if not deferActualKilling:
                 dead.kill()
         #todo: we need to combine loot from dead people with preexistingLoot
         #      pretty sure we should extract some of the logic we have above for creating the loot from dead people, as it seems similar?
-        return desc, deadList, allKillers, lootDict, injuredList
+        return FightOutput(desc, deadList, allKillers, lootDict, injuredList, destroyedList)
 
-    @staticmethod
-    def factionFight(faction1, faction2, relationships, settings):
+    def factionFight(self, faction1, faction2, relationships)->FightOutput:
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
         alreadyInjured = sorted(list(
             set(str(person) for person in faction1 + faction2 if person.hasThing("Injury"))))
@@ -386,16 +443,16 @@ class Event(object):  # Python 2.x compatibility
                 (person2.stats['aggression'] * 2 + person2.stats['ruthlessness']) / 15 - 1) * 0.3)
 
         faction1ProbDeath = 1 / \
-            (1 + (1 + settings['combatAbilityEffect'])
+            (1 + (1 + self.settings['combatAbilityEffect'])
              ** (faction1Power - faction2Power))
         faction1ProbInjury = 1 / \
-            (1 + (1 + settings['combatAbilityEffect'])
+            (1 + (1 + self.settings['combatAbilityEffect'])
              ** (faction1Power - faction2Power))
         faction2ProbDeath = 1 / \
-            (1 + (1 + settings['combatAbilityEffect'])
+            (1 + (1 + self.settings['combatAbilityEffect'])
              ** (faction2Power - faction1Power))
         faction2ProbInjury = 1 / \
-            (1 + (1 + settings['combatAbilityEffect'])
+            (1 + (1 + self.settings['combatAbilityEffect'])
              ** (faction1Power - faction2Power))
         faction1DeadList = []
         faction1LiveList = []
@@ -426,26 +483,30 @@ class Event(object):  # Python 2.x compatibility
 
         if not faction1DeadList and not faction2DeadList:
             desc = ' No one was killed.'
-            return desc, [], OrderedDict(), None, injuredList
+            return FightOutput(desc, [], OrderedDict(), None, injuredList, None)
         desc = ''
         deadList = faction1DeadList + faction2DeadList
         lootDict = None
+        destroyedList = None
         if len(deadList) < len(faction1) + len(faction2):
             # We have to do the looting carefully
             lootDict1 = {}
+            destroyedList1 = []
             for theDead in faction1DeadList:
                 if not faction2LiveList:  # If the entire other faction is dead, this faction gets their own dead teammate's stuff
-                    lootDict1 = Event.lootForMany(faction1LiveList, theDead)
+                    lootDict1, destroyedList1 = self.lootForMany(faction1LiveList, theDead)
                 else:
-                    lootDict1 = Event.lootForMany(faction2LiveList, theDead)
+                    lootDict1, destroyedList1 = self.lootForMany(faction2LiveList, theDead)
             lootDict2 = {}
+            destroyedList2 = []
             for theDead in faction2DeadList:
                 if not faction1LiveList:
-                    lootDict2 = Event.lootForMany(faction2LiveList, theDead)
+                    lootDict2, destroyedList2 = self.lootForMany(faction2LiveList, theDead)
                 else:
-                    lootDict2 = Event.lootForMany(faction1LiveList, theDead)
+                    lootDict2, destroyedList2 = self.lootForMany(faction1LiveList, theDead)
             # Note that this lazy approach to merging loot dicts only works because we know they cannot share keys.
             lootDict = {**lootDict1, **lootDict2}
+            destroyedList = destroyedList1 + destroyedList2
         elif not faction2LiveList and not faction1LiveList:
             desc += ' Everyone died in the fighting!'
         # decide a killer for anyone killed. This is unusual and needs to be handled here
@@ -458,7 +519,7 @@ class Event(object):  # Python 2.x compatibility
             killDict = DictToOrderedDict({x: 1.1**(relationships.friendships[str(x)][str(
                 dead)] + 2 * relationships.loveships[str(x)][str(dead)]) for x in faction1})
             allKillers[str(dead)] = str(weightedDictRandom(killDict)[0])
-        return (desc, deadList, allKillers, lootDict, injuredList)
+        return FightOutput(desc, deadList, allKillers, lootDict, injuredList, destroyedList)
 
     @staticmethod
     def getFriendlyIfPossible(namedObject):

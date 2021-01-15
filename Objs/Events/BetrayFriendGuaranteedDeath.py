@@ -14,9 +14,9 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             mainActor) + ' watched ' + Event.parseGenderObject(victims[0]) + ' die.'
         mainActor.permStatChange({'stability': -1})
     tempList = [mainActor, victims[0]]
-    lootDict = Event.lootForOne(mainActor, victims[0])
+    lootDict, destroyedList = self.lootForOne(mainActor, victims[0])
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-    return EventOutput(desc, tempList, [victims[0].name], loot_table=lootDict)
+    return EventOutput(desc, tempList, [victims[0].name], loot_table=lootDict, destroyed_loot_table=destroyedList)
 
 CLIFF_DESCRIPTIONS = [
     lambda mainActor, victim : mainActor.name + ' invited ' + str(victim) + ' up to the top of a gorge to admire the view, but betrayed ' + Event.parseGenderObject(

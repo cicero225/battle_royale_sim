@@ -29,12 +29,13 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                  victims[0].stats["survivalism"]) / 30
 
     injuries = None
+    destroyedList = None
     if random.random() < detection:
         # Participant realizes what's going on
         desc += str(victims[0]) + " caught " + \
             Event.parseGenderObject(mainActor) + " in the act and attacked!"
-        (fightDesc, fightDeadList, allKillers, lootDict, injuries) = Event.fight(
-            descList, state["allRelationships"], state["settings"])
+        (fightDesc, fightDeadList, allKillers, lootDict, injuries, destroyedList) = self.fight(
+            descList, state["allRelationships"])
         # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot. If they are already injured they just die (skip this segment).
         if len(fightDeadList) == 1 and random.random() < 0.33 and not fightDeadList[0].hasThing("Injury"):
             # revive the loser
@@ -45,7 +46,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             else:
                 desc += ' In the end, however, ' + \
                     victims[0].name + ' was injured and forced to flee.'
-            return EventOutput(desc, descList, [], loot_table=lootDict, injuries=injuries)
+            return EventOutput(desc, descList, [], loot_table=lootDict, injuries=injuries, destroyed_loot_table=destroyedList)
 
         if not fightDeadList:
             desc += ' The fight was a draw, and the two sides departed, friends no more.'
@@ -57,10 +58,10 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc += str(victims[0]) + \
             " ate the meal, blissfully unaware, before falling over dead."
         victims[0].kill()
-        lootDict = Event.lootForOne(mainActor, victims[0])
+        lootDict, destroyedList = self.lootForOne(mainActor, victims[0], chanceDestroyedOverride=0)
 
     # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
-    return EventOutput(desc, descList, [str(victims[0])], loot_table=lootDict, injuries=injuries)
+    return EventOutput(desc, descList, [str(victims[0])], loot_table=lootDict, injuries=injuries, destroyed_loot_table=destroyedList)
 
 
 Event.registerEvent("ACooksForBButPoison", func)

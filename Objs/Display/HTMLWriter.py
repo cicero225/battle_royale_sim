@@ -1,6 +1,7 @@
 """A dumb very specific html writer, because I don't want to figure out the various library options."""
 
 from Objs.Utilities.ArenaEnumsAndNamedTuples import EventOutput
+from typing import Dict, List
 import html
 import re
 
@@ -139,7 +140,7 @@ img {
         if event_output.dead:           
             if event_output.list_killers:
                 # Unfortunately, this dict is the exact reverse of the order we want this.
-                reverse_kill_dict = {}
+                reverse_kill_dict: Dict[str, List[str]] = {}
                 for killed, killer in event_output.killer_dict.items():
                     reverse_kill_dict.setdefault(killer, []).append(killed)
                 for killer, killed in reverse_kill_dict.items():
@@ -158,11 +159,17 @@ img {
             desc = ""
             for name, items in event_output.loot_table.items():
                 lootedList.extend(items)
-                # Because some items may choose not to display (e.g. Dossiers for dead people), we need to check if the resulting string is even popualted.
+                # Because some items may choose not to display (e.g. Dossiers for dead people), we need to check if the resulting string is even populated.
                 maybe_string = Event.englishList(items)
                 if maybe_string:
                     desc += name + " looted " + maybe_string + "\n"
             output_pieces.append(self.addEvent(desc, lootedList, state, preEventInjuries, output_string=True))
+        if event_output.destroyed_loot_table:
+            # Because some items may choose not to display (e.g. Dossiers for dead people), we need to check if the resulting string is even popualted.
+            maybe_string = Event.englishList(event_output.destroyed_loot_table)
+            if maybe_string:
+              desc = "Items Destroyed: " + maybe_string + "\n"
+              output_pieces.append(self.addEvent(desc, event_output.destroyed_loot_table, state, preEventInjuries, output_string=True))
         self.bodylist.append(HTMLWriter.wrap('<br/>'.join(output_pieces), "p"))
         
     def addEmptyLines(self, num_lines):

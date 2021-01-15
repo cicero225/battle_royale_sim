@@ -14,13 +14,13 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     numItems = random.randint(1, 2)
     itemsFound = [ItemInstance.takeOrMakeInstance(v) for v in random.sample(list(state['items'].values()), 2)]
     descList = eventPeople + itemsFound
-    fightDesc, fightDead, allKillers, lootDict, injuries = Event.fight(
-        eventPeople, state["allRelationships"], state['settings'], preexistingLoot=itemsFound)
+    fightDesc, fightDead, allKillers, lootDict, injuries, destroyedList = self.fight(
+        eventPeople, state["allRelationships"], preexistingLoot=itemsFound)
     if fightDesc is None:
         return None
     desc = Event.englishList(eventPeople) + " stumbled across " + Event.englishList(itemsFound) + " at the same time. A fight broke out. " + fightDesc
     
-    return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True)
+    return EventOutput(desc, descList, [x.name for x in fightDead], allKillers, loot_table=lootDict, injuries=injuries, list_killers=True, destroyed_loot_table=destroyedList)
 
 
 Event.registerEvent("FightOverItems", func)

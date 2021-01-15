@@ -116,8 +116,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         return (desc, descList, [], [], [mainActor])
 
     desc += ' After a moment, ' + contestant.name + ' attacked.'
-    (fightDesc, fightDeadList, allKillers, lootDict, injuries) = Event.fight(
-        descList, state["allRelationships"], state["settings"], deferActualKilling=True)
+    (fightDesc, fightDeadList, allKillers, lootDict, injuries, destroyedList) = self.fight(
+        descList, state["allRelationships"], deferActualKilling=True)
         
     # We need to handle special cases because we want some chance of someone being injured and running away instead.
     # If everyone dies
@@ -145,7 +145,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
                     data={"day": state["turnNumber"][0]}))
             if fightDeadList[0] not in injuries:
                 injuries.append(fightDeadList[0])
-            return EventOutput(desc, descList, [], loot_table=lootDict, injuries=injuries)
+            return EventOutput(desc, descList, [], loot_table=lootDict, injuries=injuries, destroyed_loot_table=destroyedList)
 
     # If nobody was hurt, they just give up and use the fire together.
     if not fightDeadList:
@@ -158,7 +158,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     if contestant.name not in fightDeadList:
         self.eventStore["turnRecord"][contestant.name] = state["turnNumber"][0]
     desc += fightDesc
-    return EventOutput(desc, descList, [x.name for x in fightDeadList], allKillers, loot_table=lootDict, injuries=injuries)
+    return EventOutput(desc, descList, [x.name for x in fightDeadList], allKillers, loot_table=lootDict, injuries=injuries, destroyed_loot_table=destroyedList)
 
 
 Event.registerEvent("MakeCampfire", func)
