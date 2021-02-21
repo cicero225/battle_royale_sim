@@ -78,8 +78,8 @@ img {
             return desc
         for i, entry in enumerate(stringList):
             # Massive kludge. I didn't realize this would be a problem, so a lot of the images are named the same as the characters. Then again, this whole object is a kludge :p.
-            last_entry = stringList[i - 1] if i > 0 else " "
-            next_entry = stringList[i + 1] if i < len(stringList) - 1 else " "
+            last_entry = stringList[i - 1] if i > 0 else ""
+            next_entry = stringList[i + 1] if i < len(stringList) - 1 else ""
             if last_entry and not last_entry[-1].isalnum() and last_entry[-1] not in ["/", "<"] and entry and not entry[0].isalnum() and entry[0] != ">" and not entry.lower().startswith('.jpg') and not entry.lower().startswith('.png') and not entry.lower().startswith('.gif'):
                 stringList[i] = "</" + insertString + ">" + stringList[i]
             if i < len(stringList) - 1:                
@@ -130,7 +130,7 @@ img {
             return outputString
         self.bodylist.append(HTMLWriter.wrap(outputString, "p"))
     
-    # This is canoncical output for events.
+    # This is canonical output for events.
     def addStructuredEvent(self, event_output: EventOutput, state, preEventInjuries):
         from ..Events.Event import Event  # This utility function should really be made more general...
         output_pieces = []
@@ -173,7 +173,7 @@ img {
         self.bodylist.append(HTMLWriter.wrap('<br/>'.join(output_pieces), "p"))
         
     def addEmptyLines(self, num_lines):
-        self.bodylist.append(''.join('<br/'*num_lines))
+        self.bodylist.append(''.join('<br/>'*num_lines))
 
     def finalWrite(self, filepath, state):
         with open(filepath, 'w') as target:
