@@ -7,5 +7,5 @@
                            "range": [2, 5],
                            "weight": 1,
                            "max_occurences": 1}},
- "deduplicate": ["Day", "Night"]
+ "deduplicate": ["Day", "Evening"]
 }

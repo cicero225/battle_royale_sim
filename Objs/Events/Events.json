@@ -1,24 +1,24 @@
 {"EventTemplate": 
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.0,
      "unique": false,
      "itemRequired": false
      },
 "PTSD":
-{"phase": ["Night"],
+{"phase": ["Evening"],
      "mainWeight": 0.25,
      "mainModifiers": {"stability": -1.0},
      "unique": false,
      "itemRequired": false
      },
 "Sleep": 
-    {"phase": ["Night"],
+    {"phase": ["Evening"],
      "mainWeight": 1.0,
      "unique": false,
      "itemRequired": false
      },
 "TestOneKill": 
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.0,
      "victimWeight": 1.0,
      "numVictims": 1,
@@ -46,7 +46,7 @@
      "Survivalist": {"value": -1.0}
      },
 "Dysentary":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.5,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
@@ -57,7 +57,7 @@
      "winString": "because of the Oregon Trail"
      },
 "MamiDecap":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.05,
      "unique": true,
      "uniqueUsers": ["Tomoe Mami"],
@@ -70,7 +70,7 @@
      "winString": "because Mami got ahead of herself"
      },
 "ShareStoryofLife":
-    {"phase": ["Night"],
+    {"phase": ["Evening"],
      "mainWeight": 0.75,
      "mainModifiers": {"gregariousness": 1.0,
                        "loneliness": 1.0,
@@ -106,7 +106,7 @@
                           "Pacifist": {"value": -0.5}}
      },
 "AAttacksB":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 1.5,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
@@ -129,7 +129,7 @@
      "contact": true
      },
 "AAmbushesB":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 1.5,
      "mainModifiers": {"ruthlessness": 1.0,
                     "aggression": 1.0},
@@ -152,7 +152,7 @@
      "contact": true
      },
 "QuestionsSanity": 
-    {"phase": ["Night"],
+    {"phase": ["Evening"],
      "mainWeight": 0.5,
      "mainModifiers": {"survivalism": -1.0,
                     "stability": -1.0},
@@ -175,7 +175,7 @@
      "sponsorInfluence": {"Survivalist": {"value": 1.0}}
      },
  "ThreeWayFight":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0,
      "mainModifiers": {"aggression": 1.0},
      "participantWeight": 1,
@@ -199,7 +199,7 @@
      "contact": true
      },
  "SickWithFever":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 7.5,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
@@ -208,7 +208,7 @@
      "sponsorInfluence": {"Likes Weak": {"value": 1.0}}
      },
  "RecoversFromFever":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 10,
      "mainModifiers": {"survivalism": 1.0,
                        "endurance": 1.0},
@@ -219,7 +219,7 @@
      "sponsorInfluence": {"Likes Strong": {"value": 1.0}}
      },
  "DiesFromFever":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 10,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
@@ -231,7 +231,7 @@
      "winString": "because of the Coronavirus"
      },
  "SponsorGivesItem":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.5,
      "sponsorWeight": 1,
      "numSponsors": 1,
@@ -243,7 +243,7 @@
      "sponsorHasNeededFriendLevel": {"relation": true, "value": -2}
      },
  "CraftSpear":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0,
                        "aggression": 0.5,
@@ -256,7 +256,7 @@
                           "Pacifist": {"value": -0.5}}
      },
  "ThrowSpearKill":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 3,
      "mainModifiers": {"ruthlessness": 1.0,
                        "aggression": 1.0,
@@ -283,7 +283,7 @@
      "itemDestructionModifier": 0.3
      },
    "CraftBowAndArrow":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.5,
      "mainModifiers": {"survivalism": 1.0,
                        "aggression": 0.5,
@@ -296,7 +296,7 @@
                           "Pacifist": {"value": -0.5}}
      },
    "FireArrowKill":
-     {"phase": ["Day", "Night"],
+     {"phase": ["Day", "Evening"],
      "mainWeight": 3,
      "mainModifiers": {"ruthlessness": 1.0,
                        "aggression": 1.0,
@@ -322,7 +322,7 @@
     "itemDestructionModifier": 0.3
      },
    "FireRifleKill":
-     {"phase": ["Day", "Night"],
+     {"phase": ["Day", "Evening"],
      "mainWeight": 3,
      "mainModifiers": {"ruthlessness": 1.0,
                        "aggression": 1.0,
@@ -391,7 +391,7 @@
      "winString": "because an opponent killed themselves"
      },
     "SponsorGivesTips":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.15,
      "sponsorWeight": 1,
      "numSponsors": 1,
@@ -403,7 +403,7 @@
      "sponsorHasNeededFriendLevel": {"relation": true, "value": 1}
      },
     "ShareIntimateConversation":
-    {"phase": ["Night"],
+    {"phase": ["Evening"],
     "mainWeight": 0.5,
      "mainModifiers": {"loneliness": 2.0},
      "participantWeight": 0.5,
@@ -422,7 +422,7 @@
      "contact": true
      },
      "ResolvesFeelingConfusion":
-    {"phase": ["Night"],
+    {"phase": ["Evening"],
      "mainWeight": 0,
      "numParticipants": 1,
      "participantWeight": 1,
@@ -436,7 +436,7 @@
      "contact": true
      },
      "MakeMolotovCocktail":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.25,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0,
@@ -449,7 +449,7 @@
                           "Greater Good": {"value": -1.0}}
      },
      "KillWithMolotovCocktail":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
     "mainWeight": 10.0,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0,
@@ -470,7 +470,7 @@
     "itemDestructionModifier": -1
      },
      "SponsorCheatKill":
-    {"phase": ["Night"],
+    {"phase": ["Evening"],
     "mainWeight": 0.05,
      "sponsorWeight": 1,
      "numSponsors": 1,
@@ -485,7 +485,7 @@
      "winString": "because the game is rigged"
      },
      "FriendGivesMedicine":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
     "mainWeight": 10,
      "numParticipants": 1,
      "participantWeight": 5,
@@ -505,7 +505,7 @@
      "contact": true
      },
      "AWorshipsB":
-     {"phase": ["Night"],
+     {"phase": ["Evening"],
      "mainWeight": 0.25,
      "mainModifiers": {"stability": -1.0},
      "unique": false,
@@ -513,7 +513,7 @@
      "sponsorInfluence": {"Capricious": {"value": 1.0}}
      },
      "MadokamiKillsBadWorshipper":
-     {"phase": ["Day", "Night"],
+     {"phase": ["Day", "Evening"],
      "mainWeight": 0,
      "sponsorWeight": 1,
      "numSponsors": 1,
@@ -527,7 +527,7 @@
      "sponsorHasNeededLoveLevel": {"relation": false, "value": 2}
      },
      "HomuciferKillsBadWorshipper":
-     {"phase": ["Day", "Night"],
+     {"phase": ["Day", "Evening"],
      "mainWeight": 0,
      "sponsorWeight": 1,
      "numSponsors": 1,
@@ -552,7 +552,7 @@
      "winString": "because the game is rigged"
      },
      "FriendHelpsInjury":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 10,
      "numParticipants": 1,
      "participantWeight": 10,
@@ -573,7 +573,7 @@
      "contact": true
      },
      "MakeCampfire":
-    {"phase": ["Evening"],
+    {"phase": ["Night"],
      "mainWeight": 3,
      "unique": false,
      "itemRequired": false,
@@ -582,7 +582,7 @@
      "winString": "because people fought over a damn fire"
      },
      "SponsorForceFight":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0,
      "numParticipants": 1,
      "participantWeight": 1,
@@ -594,7 +594,7 @@
      "additionalWinString": "But was it really worth it?"
      },
      "GangUpFight":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.025,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0},
@@ -655,7 +655,7 @@
                           }
      },
      "DiesFromTrap":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 0.1,
      "mainModifiers": {"cleverness": -0.2,
                        "survivalism": -0.2},
@@ -665,7 +665,7 @@
      "sponsorInfluence": {"Survivalist": {"value": -1.0}}
      },
     "BetrayFriendGuaranteedDeath":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
     "mainWeight": 1.0,
      "mainModifiers": {"stability": -0.5,
                        "ruthlessness": 2.0,
@@ -695,7 +695,7 @@
      "winString": "thanks to backstabbing"
      },
      "ACooksForB":
-    {"phase": ["Day","Night"],
+    {"phase": ["Day","Evening"],
      "mainWeight": 0.7,
      "participantWeight": 0.7,
      "numParticipants": 1,
@@ -717,7 +717,7 @@
      "contact": true
     },
     "ACooksForBButPoison":
-    {"phase": ["Day","Night"],
+    {"phase": ["Day","Evening"],
      "mainWeight": 0.4,
      "mainModifiers": {"gregariousness": 1.0,
                        "survivalism": 1.0,
@@ -814,7 +814,7 @@
                           }
     },
     "DiesFromExplosiveTrap":
-    {"phase": ["Day", "Night"],
+    {"phase": ["Day", "Evening"],
      "mainWeight": 10,
      "mainModifiers": {"cleverness": -0.2,
                        "survivalism": -0.2},
@@ -832,9 +832,9 @@
      "sponsorInfluence": {"Survivalist": {"value": -1.0}}
      },
      "StalkEnemy":
-    {"phase": ["Evening", "Night"],
+    {"phase": ["Night", "Evening"],
      "mainWeight": 1,
-     "phaseModifiers": {"Evening": 1e-3},
+     "phaseModifiers": {"Night": 1e-3},
      "mainModifiers": {"ruthlessness": 0.5,
                        "survivalism": -1.0,
                        "cleverness": 0.5},
