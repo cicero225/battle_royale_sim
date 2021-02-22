@@ -36,6 +36,7 @@ STATSDEBUG = collections.OrderedDict()
 CONFIG_FILE_PATHS = {"settings": "Settings.json",
                      "phases": "Phases.json",
                      "events": os.path.join('Objs', 'Events', 'Events.json'),
+                     "local_events": os.path.join('Objs', 'Events', 'LocalEventConfig.json'),
                      "contestants": os.path.join('Objs', 'Contestants', 'Contestants.json'),
                      "sponsors": os.path.join('Objs', 'Sponsors', 'Sponsors.json')}
 
@@ -205,12 +206,14 @@ class MegucaArena:
         # Import Settings from JSON -> going to make it a dictionarys
         with open(self.configFilePaths["settings"]) as settings_file:
             self.settings = ArenaUtils.JSONOrderedLoad(settings_file)
+        with open(self.configFilePaths["local_events"]) as local_events_file:
+            self.local_events = ArenaUtils.JSONOrderedLoad(local_events_file)
         with open(self.configFilePaths["phases"]) as phases_file:
             self.phases = ArenaUtils.JSONOrderedLoad(phases_file)
        
     def initializeEvents(self, eventClass):
         eventClass.stateStore[0] = self.state
-        self.events = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["events"], self.settings, eventClass)
+        self.events = ArenaUtils.LoadJSONIntoDictOfObjects(self.configFilePaths["events"], self.settings, eventClass, ("local_settings", self.local_events))
         # This dict allows for absolute disabling of events by setting False.
         self.eventsActive = ArenaUtils.DictToOrderedDict({x: True for x in self.events})
 

@@ -32,7 +32,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     # This will remain in place for the rest of the game
     self.eventStore[mainActor.name] = eventHandler
     potential_love = sponsors[0].hasThing("Love")
-    if random.random() < 0.8 or (potential_love and str(potential_love[0].target) == str(mainActor)):
+    if (random.random() > self.local_settings["UnknownSponsorRate"]) or (potential_love and str(potential_love[0].target) == str(mainActor)):
         desc = sponsors[0].name + \
             ' gave a map and a book of instructions to ' + mainActor.name + "."
         return (desc, [sponsors[0], mainActor], [])

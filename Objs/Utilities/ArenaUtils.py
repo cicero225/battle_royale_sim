@@ -3,6 +3,7 @@ from __future__ import division
 from Objs.Display.HTMLWriter import HTMLWriter
 from functools import partial
 from ..Utilities.ArenaEnumsAndNamedTuples import EventAnnouncement
+from typing import Tuple, Any, Dict
 
 import json
 import html
@@ -330,12 +331,15 @@ def JSONOrderedLoad(path):
     return SortListOrDict(fromFile)
 
 
-def LoadJSONIntoDictOfObjects(path, settings, objectType):
+def LoadJSONIntoDictOfObjects(path, settings, objectType, local_settings: Tuple[str, Dict[str, Any]]=None):
     # TODO: this does not properly order subdicts from the .json loaded dict that are more than one deep.
     """
     # Args: path is the path or file handle to the json
     #       settings is the settings dict, itself loaded from JSON (but not by this)
     #       objectType is the class of the object (can be passed in Python)
+    #       local_settings is a string parameter and dict of settings specific to each object created by name (e.g. for events)
+    #          If not None, any entry in the dict will be passed as a named argument by the string to the constructor; if it's not in
+    #          the dict None will be passed instead.
     #
     # Returns: dict with keys corresponding to object names and values corresponding to the objects formed. This is effectively
     # a table of these objects. (A table of contestants, sponsors, etc.)
@@ -348,7 +352,10 @@ def LoadJSONIntoDictOfObjects(path, settings, objectType):
     objectDict = collections.OrderedDict()
     for name in fromFile:
         # Constructor should take in dict and settings (also a dict)
-        objectDict[name] = objectType(name, fromFile[name], settings)
+        if local_settings is None:
+            objectDict[name] = objectType(name, fromFile[name], settings)
+            continue
+        objectDict[name] = objectType(name, fromFile[name], settings, **{local_settings[0]: local_settings[1].get(name)})
 
     return objectDict
 

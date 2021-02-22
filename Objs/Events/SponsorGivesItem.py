@@ -34,7 +34,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     state["allRelationships"].IncreaseFriendLevel(
         mainActor, sponsors[0], random.randint(1, 2))
     potential_love = sponsors[0].hasThing("Love")
-    if random.random() < 0.8 or (potential_love and str(potential_love[0].target) == str(mainActor)):
+    if (random.random() > self.local_settings["UnknownSponsorRate"]) or (potential_love and str(potential_love[0].target) == str(mainActor)):
         desc = sponsors[0].name + ' gave ' + \
             friendlyName + ' to ' + mainActor.name + "."
         return (desc, [sponsors[0], itemInstance, mainActor], [])

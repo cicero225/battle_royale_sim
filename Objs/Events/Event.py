@@ -26,7 +26,7 @@ class Event(object):  # Python 2.x compatibility
     # This allows import time access to a pointer to state, which is needed occasionally by doEvent functors. It must be supplied by main during initialization.
     stateStore = [None]
 
-    def __init__(self, name, inDict, settings):
+    def __init__(self, name, inDict, settings, local_settings=None):
         # Hey, it's the most straightforward way and basically achieves the purpose
         self.baseProps = inDict
         # Could also use setattr, but...
@@ -42,6 +42,7 @@ class Event(object):  # Python 2.x compatibility
         self.name = name
         # screw it, everyone gets a copy of what they need. Python stores by reference anyway.
         self.settings = settings
+        self.local_settings = local_settings
         # This is kind of a dumb way to do it, but being more general is a pain
         # Randomize baseWeight a little
         for multiplierType in ['main', 'participant', 'victim']:

@@ -5,7 +5,7 @@ import random
 
 def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
     mainActor.kill()
-    if random.randint(0, 1):
+    if random.random() > self.local_settings["UnknownSponsorRate"]:
         desc = sponsors[0].name + ' cheated, killing ' + \
             mainActor.name + " while no one was looking."
         tempList = [sponsors[0], mainActor]
