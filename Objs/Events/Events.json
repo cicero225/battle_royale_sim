@@ -6,14 +6,14 @@
      },
 "PTSD":
 {"phase": ["Evening"],
-     "mainWeight": 0.25,
+     "mainWeight": 1.0,
      "mainModifiers": {"stability": -1.0},
      "unique": false,
      "itemRequired": false
      },
 "Sleep": 
     {"phase": ["Evening"],
-     "mainWeight": 1.0,
+     "mainWeight": 2.0,
      "unique": false,
      "itemRequired": false
      },
@@ -38,7 +38,7 @@
      },
 "OutOfCleanWater":
     {"phase": ["Day"],
-     "mainWeight": 0.2,
+     "mainWeight": 1.0,
      "mainModifiers": {"survivalism": -1.0},
      "unique": false,
      "itemRequired": true,
@@ -47,7 +47,7 @@
      },
 "Dysentary":
     {"phase": ["Day", "Evening"],
-     "mainWeight": 0.5,
+     "mainWeight": 3.0,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
@@ -153,7 +153,7 @@
      },
 "QuestionsSanity": 
     {"phase": ["Evening"],
-     "mainWeight": 0.5,
+     "mainWeight": 2,
      "mainModifiers": {"survivalism": -1.0,
                     "stability": -1.0},
      "unique": false,
@@ -168,7 +168,7 @@
      },
 "GetsFruitFromTree": 
     {"phase": ["Day"],
-     "mainWeight": 0.5,
+     "mainWeight": 2.5,
      "mainModifiers": {"survivalism": 1.0},
      "unique": false,
      "itemRequired": false,
@@ -200,7 +200,7 @@
      },
  "SickWithFever":
     {"phase": ["Day", "Evening"],
-     "mainWeight": 7.5,
+     "mainWeight": 15,
      "mainModifiers": {"survivalism": -1.0,
                        "endurance": -1.0},
      "unique": false,
@@ -349,7 +349,7 @@
      },
    "FindDeadBody":
      {"phase": ["Day"],
-     "mainWeight": 10,
+     "mainWeight": 12,
      "mainModifiers": {"survivalism": 1.0,
                        "cleverness": 1.0},
      "unique": false,
@@ -380,7 +380,7 @@
     },
     "SelfFuneral":
      {"phase": ["Day"],
-     "mainWeight": 0.25,
+     "mainWeight": 1.5,
      "mainModifiers": {"stability": -1.5},
      "unique": false,
      "itemRequired": false,
@@ -392,7 +392,7 @@
      },
     "SponsorGivesTips":
     {"phase": ["Day", "Evening"],
-     "mainWeight": 0.15,
+     "mainWeight": 0.1,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -404,7 +404,7 @@
      },
     "ShareIntimateConversation":
     {"phase": ["Evening"],
-    "mainWeight": 0.5,
+    "mainWeight": 1.0,
      "mainModifiers": {"loneliness": 2.0},
      "participantWeight": 0.5,
      "numParticipants": 1,
@@ -423,7 +423,7 @@
      },
      "ResolvesFeelingConfusion":
     {"phase": ["Evening"],
-     "mainWeight": 0,
+     "mainWeight": 1.0,
      "numParticipants": 1,
      "participantWeight": 1,
      "friendEffectParticipant": 0,
@@ -437,7 +437,7 @@
      },
      "MakeMolotovCocktail":
     {"phase": ["Day", "Evening"],
-     "mainWeight": 0.25,
+     "mainWeight": 2.9,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0,
                        "meanness": 0.5},
@@ -471,7 +471,7 @@
      },
      "SponsorCheatKill":
     {"phase": ["Evening"],
-    "mainWeight": 0.05,
+    "mainWeight": 0.02,
      "sponsorWeight": 1,
      "numSponsors": 1,
      "unique": false,
@@ -486,7 +486,7 @@
      },
      "FriendGivesMedicine":
     {"phase": ["Day", "Evening"],
-    "mainWeight": 10,
+    "mainWeight": 20,
      "numParticipants": 1,
      "participantWeight": 5,
      "participantModifiers": {"loyalty": 1,
@@ -506,7 +506,7 @@
      },
      "AWorshipsB":
      {"phase": ["Evening"],
-     "mainWeight": 0.25,
+     "mainWeight": 0.5,
      "mainModifiers": {"stability": -1.0},
      "unique": false,
      "itemRequired": false,
@@ -542,7 +542,7 @@
      },
      "HurtsSelfPracticingCombat":
     {"phase": ["Day"],
-     "mainWeight": 0.5,
+     "mainWeight": 1.5,
      "mainModifiers": {"aggression": 1.0,
                        "survivalism": 1.0},
      "unique": false,
@@ -553,7 +553,7 @@
      },
      "FriendHelpsInjury":
     {"phase": ["Day", "Evening"],
-     "mainWeight": 10,
+     "mainWeight": 15,
      "numParticipants": 1,
      "participantWeight": 10,
      "participantModifiers": {"loyalty": 1,
@@ -595,7 +595,7 @@
      },
      "GangUpFight":
     {"phase": ["Day", "Evening"],
-     "mainWeight": 0.025,
+     "mainWeight": 0.05,
      "mainModifiers": {"aggression": 1.0,
                        "ruthlessness": 1.0},
      "participantWeight": 1,
@@ -635,7 +635,7 @@
      },
     "SetTrap":
     {"phase": ["Day"],
-     "mainWeight": 0.5,
+     "mainWeight": 5,
      "mainModifiers": {"cleverness": 0.3,
                        "stability": -0.2,
                        "meanness": 0.3,
@@ -666,7 +666,7 @@
      },
     "BetrayFriendGuaranteedDeath":
     {"phase": ["Day", "Evening"],
-    "mainWeight": 1.0,
+    "mainWeight": 0.5,
      "mainModifiers": {"stability": -0.5,
                        "ruthlessness": 2.0,
                        "loyalty": -2.0},
