@@ -39,7 +39,7 @@
     "starterItems": ["Rifle"]
     },
 "Trilicon":
-    {"imageFile": "Trilicon.png",
+    {"imageFile": "Trilicon Amazing.png",
      "gender": "M",
      "stats":
         {"gregariousness": 9,

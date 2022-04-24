@@ -4,7 +4,7 @@ from Objs.Events.Event import Event
 import random
 
 
-def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self: Event, mainActor, state=None, participants=None, victims=None, sponsors=None):
     desc = str(mainActor) + " offered to cook for " + \
         str(victims[0]) + ", who gladly accepted."
     descList = [mainActor, victims[0]]
@@ -36,6 +36,8 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
             Event.parseGenderObject(mainActor) + " in the act and attacked!"
         (fightDesc, fightDeadList, allKillers, lootDict, injuries, destroyedList) = self.fight(
             descList, state["allRelationships"])
+        if fightDeadList is None:  # Event fight failed.
+            return None
         # Special: if only one loser, 33% chance the loser escapes injured instead, losing loot. If they are already injured they just die (skip this segment).
         if len(fightDeadList) == 1 and random.random() < 0.33 and not fightDeadList[0].hasThing("Injury"):
             # revive the loser

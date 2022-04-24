@@ -10,6 +10,8 @@ from __future__ import division
 import random
 import warnings
 from collections import defaultdict, OrderedDict
+
+from Objs.Contestants.Contestant import Contestant
 from ..Utilities.ArenaEnumsAndNamedTuples import EventOutput, FightOutput
 from ..Utilities.ArenaUtils import weightedDictRandom, DictToOrderedDict, DefaultOrderedDict
 from functools import partial
@@ -24,7 +26,7 @@ class Event(object):  # Python 2.x compatibility
     # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
     inserted_callbacks: Dict[str, Callable] = OrderedDict()
     # This allows import time access to a pointer to state, which is needed occasionally by doEvent functors. It must be supplied by main during initialization.
-    stateStore = [None]
+    stateStore: List[Optional[Dict[str, Any]]] = [None]
 
     def __init__(self, name, inDict, settings, local_settings=None):
         # Hey, it's the most straightforward way and basically achieves the purpose
@@ -87,6 +89,12 @@ class Event(object):  # Python 2.x compatibility
     def eventRandomize(self, propName):
         self.baseProps[propName] = (self.baseProps[propName]
                                     * (1 + random.uniform(-1 * self.settings['eventRandomness'], self.settings['eventRandomness'])))
+
+    @staticmethod
+    def getWasConjugation(contestantObj: Contestant):
+        if contestantObj.gender == "N":
+            return "were"
+        return "was"
 
     @staticmethod
     def parseGenderSubject(contestantObj):
@@ -314,6 +322,7 @@ class Event(object):  # Python 2.x compatibility
     # the edge case where this fails to find a working result and returns None, None, None, None
     # NOTE: If everyone dies in this fight, the preexistingLoot is _not_ distributed (and will be missing from the invesntories of the dead). Distribute it yourself beforehand if this is non-desirable behavior.
     def fight(self, people, relationships, deferActualKilling=False, forceRelationshipFight=False, preexistingLoot=None)->EventOutput:
+        assert Event.stateStore[0] is not None 
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
         alreadyInjured = sorted(
             list(set(str(person) for person in people if person.hasThing("Injury"))))
@@ -417,6 +426,7 @@ class Event(object):  # Python 2.x compatibility
         return FightOutput(desc, deadList, allKillers, lootDict, injuredList, destroyedList)
 
     def factionFight(self, faction1, faction2, relationships)->FightOutput:
+        assert Event.stateStore[0] is not None 
         # Everyone who was injured to start with, so they shoulnd't be considered for being injured again.
         alreadyInjured = sorted(list(
             set(str(person) for person in faction1 + faction2 if person.hasThing("Injury"))))
