@@ -5,8 +5,44 @@ from typing import Dict, List
 import html
 import re
 
-class HTMLWriter(object):
+# Tokenizer for protection against wrapping incidents. Specific things we know should never have tags inserted will be protected by converting into
+# a unique token before finally being converted back. We'll steal a page from discord and make the Tokens !@12digitnumber!.
+# This is a singleton.
+class Tokenizer:
+    SINGLETON = None
 
+    def __new__(cls, *args, **kwargs):
+        if cls.SINGLETON is not None:
+            return cls.SINGLETON
+        cls.SINGLETON = super().__new__(cls, *args, **kwargs)
+        return cls.SINGLETON
+
+    def __init__(self):
+        self.token_dict: Dict[str, str] = {}
+        self.reverse_dict: Dict[str, str] = {}
+        self.last_token_value = -1
+
+    def make_token(self, new_string: str) -> str:
+        maybe_token = self.reverse_dict.get(new_string)
+        if maybe_token is not None:
+            return maybe_token
+        self.last_token_value += 1
+        new_token = f"!@{self.last_token_value:012}!"
+        self.token_dict[new_token] = new_string
+        self.reverse_dict[new_string] = new_token
+        return new_token
+    
+    def get_token(self, token: str) -> str:
+        return self.token_dict[token]
+
+    def detokenize(self, line: str) -> str:
+        all_match = re.findall("!@\d\d\d\d\d\d\d\d\d\d\d\d!", line)
+        for match in all_match:
+            line = line.replace(match, self.get_token(match))
+        return line
+
+
+class HTMLWriter(object):
     header = """<!DOCTYPE html>
 <html>
 <head>
@@ -52,22 +88,28 @@ img {
     def __init__(self, statuses):
         self.bodylist = []
         self.statuses = statuses
+        self.tokenizer = Tokenizer()
         self.contestant_regexes = {}
 
     def reset(self):
         self.bodylist = []
 
     @staticmethod
-    def wrap(text, wrapname, escape=False):
+    def wrap(text: str, wrapname: str, escape:bool =False):
         if escape:
             text = html.escape(text)
             wrapname = html.escape(wrapname)
         return "<" + wrapname + ">\n" + text + "\n</" + wrapname + ">\n"
 
-    def addTitle(self, title, escape=True):
+    def addTitle(self, title, escape=True, tokenize=False):
+        # If Tokenize is true, then the title will be wrapped in a token that protects it from further modification. Make sure
+        # you get any color tags, etc. in beforehand if you have it set to true!
         if escape:
             title = html.escape(title)
-        self.bodylist.insert(1, HTMLWriter.wrap(HTMLWriter.wrap(title, "banner"), "p"))
+        title = HTMLWriter.wrap(HTMLWriter.wrap(title, "banner"), "p")
+        if tokenize:
+            title = self.tokenizer.make_token(title)
+        self.bodylist.insert(1, title)
 
     @staticmethod
     def massInsertTag(desc, findString, insertString):
@@ -100,7 +142,7 @@ img {
         return desc
 
     # Adds a basic event with some formatting. Use addStructuredEvent for canonical EventOutput outputs.
-    def addEvent(self, desc, descContestants, state=None, preEventInjuries=None, escape=True, output_string=False):
+    def addEvent(self, desc, descContestants, state=None, preEventInjuries=None, escape=True, output_string: bool =False):
         if escape:
             desc = html.escape(desc)
             # Convert \n to <br/>
@@ -120,12 +162,13 @@ img {
                         if potentialRegex is None:
                             potentialRegex = re.compile(r"(?<![\w\<])(" + re.escape(html.escape(str(contestant))) + r")(?![\w\>])")
                             self.contestant_regexes[str(contestant)] = potentialRegex
-                        desc = potentialRegex.sub(html.escape(str(contestant)) + extensionString, desc)
+                        desc = potentialRegex.sub(self.tokenizer.make_token(self.wrap(html.escape(str(contestant)), "contestant") + extensionString), desc)
                 if contestant.imageFile is not None:
                     tempStringList.append("<img src='" + html.escape(contestant.imageFile) + "'>")
             tempStringList.append("<br>")
-        tempStringList.append(HTMLWriter.wrap(desc, "eventnormal"))
         outputString = '\n'.join(tempStringList)
+        outputString = self.tokenizer.make_token(outputString)
+        outputString += HTMLWriter.wrap(desc, "eventnormal")
         if output_string:
             return outputString
         self.bodylist.append(HTMLWriter.wrap(outputString, "p"))
@@ -179,10 +222,15 @@ img {
         with open(filepath, 'w') as target:
             target.write(self.header)
             for line in self.bodylist:
-                target.write(self.colorize(line, state))
+                target.write(self.tokenizer.detokenize(self.colorize(line, state)))
             target.write(self.footer)
 
-    def addBigLine(self, line, escape=True):
+    def addBigLine(self, line, escape=True, tokenize = False):
+        # If Tokenize is true, then the title will be wrapped in a token that protects it from further modification. Make sure
+        # you get any color tags, etc. in beforehand if you have it set to true!
         if escape:
             line = html.escape(line)
-        self.bodylist.append(HTMLWriter.wrap(line, "p"))
+        HTMLWriter.wrap(line, "p")
+        if tokenize:
+            line = self.tokenizer.make_token(line)
+        self.bodylist.append(line)
