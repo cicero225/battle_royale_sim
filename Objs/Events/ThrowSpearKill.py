@@ -29,7 +29,6 @@ def func(self: Event, mainActor: Contestant, state, participants: Optional[List[
             victims[0].name + ", but missed."
         # 50/50 chance the victim gets the spear, if not broken.
         if not spearBroken and random.randint(0, 1):
-            input()
             desc += " " + victims[0].name + " was able to steal the spear!"
             lootref = mainActor.removeAndGet(state["items"]["Spear"])
             victims[0].addItem(lootref)
