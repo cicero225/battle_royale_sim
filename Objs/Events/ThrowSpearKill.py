@@ -1,9 +1,12 @@
+from Objs.Contestants.Contestant import Contestant
 from Objs.Utilities.ArenaEnumsAndNamedTuples import EventOutput
 from Objs.Events.Event import Event, EventOutput
+
 import random
+from typing import List, Optional
 
 
-def func(self, mainActor, state=None, participants=None, victims=None, sponsors=None):
+def func(self: Event, mainActor: Contestant, state, participants: Optional[List[Contestant]], victims: List[Contestant], sponsors: Optional[List[Contestant]]=None):
     probKill = Event.DieOrEscapeProb1v1(mainActor, victims[0], state["settings"], defenseStat=(
         victims[0].getCombatAbility(mainActor) * 0.75 + victims[0].stats['cleverness'] * 0.25))
     spearBroken = random.randint(0, 1)
@@ -24,6 +27,13 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         deadList = []
         desc = mainActor.name + ' threw a spear at ' + \
             victims[0].name + ", but missed."
+        # 50/50 chance the victim gets the spear, if not broken.
+        if not spearBroken and random.randint(0, 1):
+            input()
+            desc += " " + victims[0].name + " was able to steal the spear!"
+            lootref = mainActor.removeAndGet(state["items"]["Spear"])
+            victims[0].addItem(lootref)
+            lootDict = {victims[0].name: [lootref]}
     if spearBroken:
         desc += " The spear was broken in the process."
         mainActor.removeItem(state["items"]["Spear"])
