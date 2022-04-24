@@ -8,6 +8,7 @@ import Objs.Utilities.ArenaUtils as ArenaUtils
 
 import random
 import collections
+from typing import List, Callable
 
 
 def contestantIndivActorCallback(actor, baseEventActorWeight, event):
@@ -59,7 +60,7 @@ def contestantIndivActorWithVictimsCallback(_, victim, baseEventVictimWeight, ev
 class Contestant(object):
 
     stateStore = [None]
-    onDeathCallbacks = []
+    onDeathCallbacks: List[Callable] = []
 
     # In this case, best to bake the stats as its own thing in the json...
     def __init__(self, name, inDict, settings):
@@ -287,7 +288,7 @@ class Contestant(object):
         if possibleItem[0].count < count:
             return None
         self.refreshEventState()
-        return item.takeOrMakeInstance(str(item), count=count, target=target, split_stackable=True)
+        return item.takeOrMakeInstance(str(item), count=count, target=item.target, split_stackable=True)
 
     def addStatus(self, status, count=1, target=None):
         possibleStatus = self.hasThing(status)
@@ -302,7 +303,7 @@ class Contestant(object):
         self.refreshEventState()
         return True
 
-    def removeStatus(self, status, count=1):
+    def removeStatus(self, status: StatusInstance, count=1):
         possibleStatus = self.hasThing(status)
         if not possibleStatus:
             return False

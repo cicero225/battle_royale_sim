@@ -2,6 +2,7 @@ import collections
 import copy
 from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS, ITEM_ON_ACQUISITION, ITEM_ON_REMOVAL, ITEM_DISPLAY_OVERRIDE, ITEM_IMAGE_DISPLAY_OVERRIDE
 
+from typing import Dict, Callable
 # stats stack, other things don't, at the moment
 
 class InstanceInsteadOfMainThing(Exception):
@@ -142,7 +143,7 @@ class ItemInstance(object):
         if hasattr(self.item, attr):
             self.item.__delattr__(attr)
         else:
-            object.__delattr__(self, attr, value)
+            object.__delattr__(self, attr)
 
     def __str__(self):  # we need another copy because __ methods completely bypass __getattribute__
         return self.name
@@ -178,7 +179,7 @@ class ItemInstance(object):
 class Item(object):
 
     # Some events need to place callbacks in main. Place here at import time. key -> callback location, value-> callback
-    inserted_callbacks = collections.OrderedDict()
+    inserted_callbacks: Dict[str, Callable] = collections.OrderedDict()
 
     def __init__(self, name, inDict, settings):
         # The item class has certain stereotyped effects on characters that can be encoded in json
