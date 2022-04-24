@@ -57,7 +57,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     hauntprob = 1/(1 + exp(3 - len(state["callbackStore"]["killCounter"][str(mainActor)]) + (mainActor.stats["stability"] - 5) * self.settings['statInfluence'] * 0.4))
     if state["callbackStore"]["killCounter"][str(mainActor)] and random.random() < hauntprob:
         haunter = state["contestants"][str(random.choice(state["callbackStore"]["killCounter"][str(mainActor)]))]
-        desc = str(mainActor) + " was haunted by the ghost of " + str(haunter) + " and unable to sleep or make a fire."
+        desc = str(mainActor) + " f{} haunted by the ghost of " + str(haunter) + " and unable to sleep or make a fire."
         descList = [mainActor, state["statuses"]["Ghost"], haunter, state["statuses"]["Hypothermia"]]
         mainActor.addStatus(state["statuses"]["Hypothermia"].makeInstance(
                 data={"day": state["turnNumber"][0]}))
@@ -67,9 +67,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     # Unless character already has clean water, 50% chance (potentially of the remaining 2/3) this becomes a clean water event
     if not mainActor.hasThing("Clean Water"):
         if random.random() > 0.5:
-            desc += ' Using it, ' + \
-                Event.parseGenderSubject(mainActor) + \
-                ' was able to boil some Clean Water.'
+            desc += f' Using it, {Event.parseGenderSubject(mainActor)} {self.getWasConjugation(mainActor)} able to boil some Clean Water.'
             mainActor.addItem(state["items"]["Clean Water"], isNew=True)
             descList = [mainActor, state["items"]["Clean Water"]]
             return (desc, descList, [])      
@@ -78,8 +76,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
     possibleFireSharers = [x for x in state["contestants"].values(
     ) if x.alive and not self.eventStore["turnRecord"][x.name] == state["turnNumber"][0] and not x.hasThing("Love")]
     if not possibleFireSharers or random.random() > 0.5:
-        desc += ' ' + Event.parseGenderSubject(mainActor).capitalize(
-        ) + ' was able to spend the night in comfort.'
+        desc += f' {Event.parseGenderSubject(mainActor).capitalize()} {self.getWasConjugation(mainActor)} able to spend the night in comfort.'
         descList = [mainActor]
         return (desc, descList, [])
 
