@@ -27,7 +27,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         mainActor.removeItem(state["items"]["MolotovCocktail"])
         lootDict, destroyedList = self.lootForOne(mainActor, victims[0])
         if victims[0].removeStatus(state["statuses"]["Hypothermia"]):
-            input()
             desc += " " + victims[0].name + " is no longer hypothermic."
         # Second entry is the contestants or items named in desc, in desired display. Third is anyone who died. This is in strings.
         return EventOutput(desc, tempList, [victims[0].name], loot_table=lootDict, destroyed_loot_table=destroyedList)

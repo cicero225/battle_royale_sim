@@ -23,7 +23,6 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         desc = mainActor.name + ' tried to make a Molotov Cocktail, but lit ' + \
             Event.parseGenderReflexive(mainActor) + ' on fire, dying horribly.'
         if mainActor.removeStatus(state["statuses"]["Hypothermia"]):
-            input()
             desc += " " + mainActor.name + " is no longer hypothermic."
         mainActor.kill()
         return (desc, [mainActor], [mainActor.name])
