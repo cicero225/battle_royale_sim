@@ -30,7 +30,7 @@ def func(self, mainActor, state=None, participants=None, victims=None, sponsors=
         descList = [mainActor, lover]
         if not mainActor.hasThing("Clean Water") or not lover.hasThing("Clean Water"):
             if random.random() > 0.5:
-                desc += ' Using it, they was able to boil some Clean Water.'
+                desc += ' Using it, they were able to boil some Clean Water.'
                 mainActor.addItem(state["items"]["Clean Water"], isNew=True)
                 lover.addItem(state["items"]["Clean Water"], isNew=True)
                 descList.append(state["items"]["Clean Water"])
