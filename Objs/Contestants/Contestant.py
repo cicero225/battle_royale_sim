@@ -68,7 +68,7 @@ class Contestant(object):
         self.gender = inDict['gender']
         self.imageFile = inDict['imageFile']
         self.stats = inDict['stats']
-        self.inventory = []
+        self.inventory: List[ItemInstance] = []
         self.statuses = []
         self.settings = settings
         if not self.settings["statNormalization"]:

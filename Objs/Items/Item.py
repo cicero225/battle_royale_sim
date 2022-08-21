@@ -2,7 +2,7 @@ import collections
 import copy
 from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS, ITEM_ON_ACQUISITION, ITEM_ON_REMOVAL, ITEM_DISPLAY_OVERRIDE, ITEM_IMAGE_DISPLAY_OVERRIDE
 
-from typing import Dict, Callable
+from typing import Dict, Callable, Union
 # stats stack, other things don't, at the moment
 
 class InstanceInsteadOfMainThing(Exception):
@@ -33,9 +33,9 @@ class ItemInstance(object):
     
     # Note that this is not same in the sense of being the same item, having the same handlers, etc., which could be done with id(item).
     # This is just a rough check that it is the "same" item in a gameplay sense.
-    def is_same_item(self, other, strict=False, ignore_count=True, ):
+    def is_same_item(self, other: Union[str, "Item"], strict=False, ignore_count=True, ):
         if strict and not isinstance(other, ItemInstance):
-            raise "Illegal strict ItemInstance comparison."
+            raise ValueError("Illegal strict ItemInstance comparison.")
         # We allow "other" to be a string for convenience. In that case the only possible meaning is a simple name check.
         if isinstance(other, str):
             return self.name == other         
