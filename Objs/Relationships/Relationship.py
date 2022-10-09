@@ -41,6 +41,66 @@ class Relationship(object):
             self.loveships[contestant2][contestant1] = self.loveships[contestant1][contestant2]
         self.backup()
 
+    def get_strongest_friendship(self):
+        max_score = 0
+        highest_pair = set()
+        for key1, sub_friendships in self.friendships.items():
+            if key1 in self.contestants and not self.contestants[key1].alive:
+                continue
+            for key2, value in sub_friendships.items():
+                if key2 in self.contestants and not self.contestants[key2].alive:
+                    continue
+                if value == max_score:
+                    highest_pair.add(tuple(sorted([key1, key2])))
+                elif value > max_score:
+                    max_score = value
+                    highest_pair = set([tuple(sorted([key1, key2]))])
+        return highest_pair, max_score
+
+    def get_strongest_loveship(self):
+        max_score = 0
+        highest_pair = set()
+        for key1, sub_loveships in self.loveships.items():
+            if key1 in self.contestants and not self.contestants[key1].alive:
+                continue
+            for key2, value in sub_loveships.items():
+                if key2 in self.contestants and not self.contestants[key2].alive:
+                    continue
+                if value == max_score:
+                    highest_pair.add(tuple(sorted([key1, key2])))
+                elif value > max_score:
+                    max_score = value
+                    highest_pair = set([tuple(sorted([key1, key2]))])
+        return highest_pair, max_score
+
+    def get_most_friendly(self):
+        max_score = 0
+        highest_friendly = []
+        for key1, sub_friendships in self.friendships.items():
+            if key1 not in self.contestants or not self.contestants[key1].alive:
+                continue
+            score = sum(v for k,v in sub_friendships.items() if k in self.contestants and self.contestants[k].alive)
+            if score == max_score:
+                highest_friendly.append(key1)
+            elif score > max_score:
+                max_score = score
+                highest_friendly = [key1]
+        return highest_friendly
+
+    def get_most_romance(self):
+        max_score = 0
+        highest_romance = []
+        for key1, sub_loveships in self.loveships.items():
+            if key1 not in self.contestants or not self.contestants[key1].alive:
+                continue
+            score = sum(v for k,v in sub_loveships.items() if k in self.contestants and self.contestants[k].alive)
+            if score == max_score:
+                highest_romance.append(key1)
+            elif score > max_score:
+                max_score = score
+                highest_romance = [key1]
+        return highest_romance
+
     # When explicitly called, stores a copy of the current relationship status for later use.
     def backup(self):
         self.backup_friendships = copy.deepcopy(self.friendships)

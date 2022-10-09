@@ -758,6 +758,46 @@ class MegucaArena:
                                 if deadThisTurn:
                                     thisWriter.addEvent(
                                         "The following names were added to the memorial wall: " + Event.Event.englishList(deadThisTurn), deadThisTurn)
+                            # Stonks
+                            max_kill_count = 0
+                            max_killer = []
+                            max_kill_count_alive = 0
+                            max_killer_alive = []
+                            for contestant_str, contestant in self.contestants.items():
+                                count = len(self.state["callbackStore"]["killCounter"][contestant_str])
+                                if count == max_kill_count:
+                                    max_killer.append(contestant_str)
+                                elif count > max_kill_count:
+                                    max_kill_count = count
+                                    max_killer = [contestant_str]
+                                if not contestant.alive:
+                                    continue
+                                if count == max_kill_count_alive:
+                                    max_killer_alive.append(contestant_str)
+                                elif count > max_kill_count_alive:
+                                    max_kill_count_alive = count
+                                    max_killer_alive = [contestant_str]
+                            thisWriter.addBigLine("STONKS")
+                            thisWriter.addEvent(f"Most Kills: {max_kill_count} ({', '.join(max_killer)})", [])
+                            thisWriter.addEvent(f"Most Kills (of alive contestants): {max_kill_count_alive} ({', '.join(max_killer_alive)})", [])
+                            max_items = 0
+                            max_owners = []
+                            for key, contestant in self.contestants.items():
+                                if not contestant.alive:
+                                    continue
+                                count = len([x for x in contestant.inventory if x.lootable])
+                                if count == max_items:
+                                    max_owners.append(key)
+                                elif count > max_items:
+                                    max_items = count
+                                    max_owners = [key]
+                            thisWriter.addEvent(f"Most Items: {max_items} ({', '.join(max_owners)})", [])
+                            highest_loveship, max_score = self.allRelationships.get_strongest_loveship()
+                            thisWriter.addEvent(f"Strongest Relationship: {max_score} ({', '.join(f'({x[0]}, {x[1]})' for x in highest_loveship)})", [])
+                            most_friendly = self.allRelationships.get_most_friendly()
+                            thisWriter.addEvent(f"Highest Friendships: {', '.join(most_friendly)}", [])
+                            most_romance = self.allRelationships.get_most_romance()
+                            thisWriter.addEvent(f"Highest Romances: {', '.join(most_romance)}", [])
                             thisWriter.finalWrite(os.path.join("Assets", str(
                                 turnNumber[0]) + " Phase " + thisPhase + ".html"), self.state)
                         break
