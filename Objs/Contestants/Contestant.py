@@ -2,6 +2,8 @@
 
 # In case of Python 2+. The Python 3 implementation is way less dumb.
 from __future__ import division
+from pathlib import Path
+from warnings import warn
 from Objs.Items.Item import ItemInstance
 from Objs.Items.Status import StatusInstance
 import Objs.Utilities.ArenaUtils as ArenaUtils
@@ -67,6 +69,19 @@ class Contestant(object):
         self.name = name
         self.gender = inDict['gender']
         self.imageFile = inDict['imageFile']
+        # To make things easier for everyone, we're not going to be very sensitive to file extension -- we look for the first file in a folder that matches and
+        # just adjust to match that. Obviously this will have strange behavior if multiple files with the same name or some
+        potential_split = self.imageFile.split(".")
+        lookup_stem = self.imageFile
+        if len(potential_split) > 1:
+            lookup_stem = '.'.join(potential_split[:-1])
+        potential_files = list(Path("Assets").glob(f"{lookup_stem}.*"))
+        if not potential_files:
+            warn(f"Could not find image matching {lookup_stem}")
+        else:
+            if len(potential_files) > 1:
+                warn(f"Multiple files matching {lookup_stem}")
+            self.imageFile = potential_files[0].name
         self.stats = inDict['stats']
         self.inventory: List[ItemInstance] = []
         self.statuses = []

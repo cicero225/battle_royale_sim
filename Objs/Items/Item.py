@@ -1,5 +1,7 @@
 import collections
 import copy
+from pathlib import Path
+from warnings import warn
 from Objs.Items.SpecialItemBehavior import ITEM_INITIALIZERS, ITEM_COMBAT_ABILITY_CHANGES, ITEM_RESTRICTIONS, ITEM_EXTRA_ARGUMENTS, ITEM_ON_ACQUISITION, ITEM_ON_REMOVAL, ITEM_DISPLAY_OVERRIDE, ITEM_IMAGE_DISPLAY_OVERRIDE
 
 from typing import Dict, Callable, Union
@@ -186,6 +188,19 @@ class Item(object):
         self.name = name
         self.friendly = inDict["friendly"] if "friendly" in inDict else self.name
         self.imageFile = inDict["imageFile"]
+        # To make things easier for everyone, we're not going to be very sensitive to file extension -- we look for the first file in a folder that matches and
+        # just adjust to match that. Obviously this will have strange behavior if multiple files with the same name or some
+        potential_split = self.imageFile.split(".")
+        lookup_stem = self.imageFile
+        if len(potential_split) > 1:
+            lookup_stem = '.'.join(potential_split[:-1])
+        potential_files = list(Path("Assets").glob(f"{lookup_stem}.*"))
+        if not potential_files:
+            warn(f"Could not find image matching {lookup_stem}")
+        else:
+            if len(potential_files) > 1:
+                warn(f"Multiple files matching {lookup_stem}")
+            self.imageFile = potential_files[0].name
         self.settings = settings
         # This dict (string:int) stores any direct additions/subtractions in stats given by the Item
         self.statChanges = inDict["statChanges"]
