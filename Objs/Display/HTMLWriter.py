@@ -230,7 +230,7 @@ img {
         # you get any color tags, etc. in beforehand if you have it set to true!
         if escape:
             line = html.escape(line)
-        HTMLWriter.wrap(line, "p")
+        line = HTMLWriter.wrap(line, "p")
         if tokenize:
             line = self.tokenizer.make_token(line)
         self.bodylist.append(line)
